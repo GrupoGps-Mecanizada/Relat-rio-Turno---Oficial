@@ -4,7 +4,7 @@ const CONFIG = {
   VERSAO_APP: '3.0',
   
   // ID da planilha Google Sheets (importante: substitua pelo seu ID real)
-  PLANILHA_ID: 'SUBSTITUA_PELO_ID_DA_SUA_PLANILHA',
+  PLANILHA_ID: '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI',
   
   // Nomes das abas da planilha
   NOME_PLANILHA_DADOS: 'Dados',
