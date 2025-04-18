@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
   <title>Sistema de Relatório de Turno</title>
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,14 +13,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <!-- CSS Personalizado -->
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Carregue a biblioteca JavaScript do Google -->
-  <script src="https://apis.google.com/js/api.js"></script>
-  
-  <!-- O mesmo conteúdo HTML da versão atual -->
   <div class="container app-container">
     <!-- Cabeçalho principal -->
     <div class="card mb-4">
@@ -35,15 +33,714 @@
       </div>
     </div>
     
-    <!-- Resto do conteúdo igual ao original -->
-    <!-- ... -->
+    <!-- Indicador de etapas -->
+    <div class="step-indicator d-none d-md-flex">
+      <div id="step1Indicator" class="step-item active">
+        <div class="step-number">1</div>
+        <div class="step-title">Informações do Turno</div>
+      </div>
+      <div id="step2Indicator" class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-title">Equipes</div>
+      </div>
+      <div id="step3Indicator" class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-title">Revisão e Finalização</div>
+      </div>
+    </div>
+    
+    <!-- ETAPA 1: Informações básicas do turno -->
+    <div id="stepTurno">
+      <div class="card">
+        <div class="card-header">
+          <h3>Etapa 1: Informações Básicas do Turno</h3>
+        </div>
+        <div class="card-body">
+          <div class="alert-section mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Complete as informações básicas do turno antes de prosseguir para o registro das equipes.
+          </div>
+          
+          <form id="formTurno" class="needs-validation" novalidate>
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="data" class="form-label">Data do turno *</label>
+                <input type="date" class="form-control" id="data" required>
+                <div class="invalid-feedback">Por favor, informe a data do turno.</div>
+              </div>
+              <div class="col-md-6">
+                <label for="horario" class="form-label">Horário do turno *</label>
+                <select class="form-select" id="horario" required>
+                  <option value="" selected disabled>Selecione o horário</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione o horário do turno.</div>
+              </div>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="letra" class="form-label">Letra do turno *</label>
+                <select class="form-select" id="letra" required>
+                  <option value="" selected disabled>Selecione a letra</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione a letra do turno.</div>
+              </div>
+              <div class="col-md-6">
+                <label for="supervisor" class="form-label">Supervisor responsável *</label>
+                <select class="form-select" id="supervisor" required>
+                  <option value="" selected disabled>Selecione o supervisor</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione o supervisor responsável.</div>
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-end mt-4">
+              <button type="button" class="btn btn-primary" onclick="avancarParaEquipes()">
+                Próximo: Adicionar Equipes <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ETAPA 2: Equipes do turno -->
+    <div id="stepEquipes" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3>Etapa 2: Equipes do Turno</h3>
+        </div>
+        <div class="card-body">
+          <div class="alert-section mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Adicione as equipes que trabalharam durante este turno. É necessário adicionar pelo menos uma equipe.
+          </div>
+          
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <button type="button" class="btn btn-primary" onclick="adicionarEquipe('Alta Pressão')">
+              <i class="bi bi-plus-circle me-2"></i> Adicionar Equipe Alta Pressão
+            </button>
+            <button type="button" class="btn btn-danger" onclick="adicionarEquipe('Auto Vácuo / Hiper Vácuo')">
+              <i class="bi bi-plus-circle me-2"></i> Adicionar Equipe Vácuo/Hiper Vácuo
+            </button>
+          </div>
+          
+          <div id="listaEquipes" class="mb-4">
+            <!-- As equipes serão adicionadas aqui dinamicamente -->
+            <div class="alert alert-info text-center" id="semEquipes">
+              <i class="bi bi-info-circle me-2"></i> Nenhuma equipe adicionada. Adicione pelo menos uma equipe para prosseguir.
+            </div>
+          </div>
+          
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-secondary" onclick="voltarParaTurno()">
+              <i class="bi bi-arrow-left me-2"></i> Voltar
+            </button>
+            <button type="button" class="btn btn-success" onclick="avancarParaRevisao()" id="btnAvancarRevisao" disabled>
+              Revisar e Finalizar <i class="bi bi-arrow-right ms-2"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ETAPA 3: Revisão e finalização -->
+    <div id="stepRevisao" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3>Etapa 3: Revisão e Finalização</h3>
+        </div>
+        <div class="card-body">
+          <div class="alert-section mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Revise todas as informações antes de salvar o relatório. Após salvar, não será possível editar o relatório.
+          </div>
+          
+          <h4 class="mb-3">Informações do Turno</h4>
+          <div class="info-grid mb-4" id="resumoTurno">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+          
+          <h4 class="mb-3">Equipes</h4>
+          <div id="resumoEquipes">
+            <!-- Será preenchido dinamicamente -->
+          </div>
+          
+          <div class="d-flex justify-content-between mt-4">
+            <button type="button" class="btn btn-secondary" onclick="voltarParaEquipes()">
+              <i class="bi bi-arrow-left me-2"></i> Voltar para Equipes
+            </button>
+            <button type="button" class="btn btn-success" onclick="salvarRelatorio()" id="btnSalvar">
+              <i class="bi bi-save me-2"></i> Salvar Relatório
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ETAPA SUCESSO: Confirmação de salvamento -->
+    <div id="stepSucesso" style="display: none;">
+      <div class="card">
+        <div class="card-header bg-success">
+          <h3>Relatório Salvo com Sucesso</h3>
+        </div>
+        <div class="card-body text-center">
+          <div class="mb-4">
+            <i class="bi bi-check-circle-fill text-success" style="font-size: 5rem;"></i>
+            <h4 class="mt-3">Relatório de Turno Salvo com Sucesso!</h4>
+            <p class="text-muted">O relatório foi registrado e armazenado com segurança.</p>
+          </div>
+          
+          <div class="alert alert-info">
+            <i class="bi bi-info-circle me-2"></i>
+            Você pode acessar o relatório em diferentes formatos:
+          </div>
+          
+          <div class="d-flex justify-content-center gap-3 flex-wrap mb-4">
+            <button type="button" class="btn btn-primary" onclick="visualizarRelatorio()">
+              <i class="bi bi-file-text me-2"></i> Visualizar Texto
+            </button>
+            <button type="button" class="btn btn-danger" onclick="gerarPDF()">
+              <i class="bi bi-file-pdf me-2"></i> Gerar PDF
+            </button>
+            <button type="button" class="btn btn-success" onclick="exportarCSV()">
+              <i class="bi bi-file-spreadsheet me-2"></i> Exportar CSV
+            </button>
+            <button type="button" class="btn btn-info" onclick="formatarWhatsApp()">
+              <i class="bi bi-whatsapp me-2"></i> Formato WhatsApp
+            </button>
+          </div>
+          
+          <button type="button" class="btn btn-secondary" onclick="novoRelatorio()">
+            <i class="bi bi-plus-circle me-2"></i> Criar Novo Relatório
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- VISUALIZAÇÃO: Relatório gerado em texto -->
+    <div id="stepRelatorio" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3>Relatório de Turno</h3>
+        </div>
+        <div class="card-body">
+          <div class="mb-4">
+            <pre id="relatorioTexto" class="relatorio-text"></pre>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" onclick="voltarParaSucesso()" id="btnVoltarRelatorio">
+              <i class="bi bi-arrow-left me-2"></i> Voltar
+            </button>
+            <button type="button" class="btn btn-primary" onclick="copiarRelatorio()">
+              <i class="bi bi-clipboard me-2"></i> Copiar Relatório
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FORMATO WHATSAPP: Visualização formatada para WhatsApp -->
+    <div id="stepWhatsApp" style="display: none;">
+      <div class="card">
+        <div class="card-header bg-info">
+          <h3><i class="bi bi-whatsapp me-2"></i> Relatório Formato WhatsApp</h3>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Este formato inclui emojis e formatações compatíveis com o WhatsApp.
+            Copie o texto abaixo e cole diretamente no WhatsApp.
+          </div>
+          
+          <div class="mb-4">
+            <pre id="whatsAppTexto" class="relatorio-text whatsapp-message"></pre>
+          </div>
+          
+          <div class="d-flex justify-content-between">
+            <button type="button" class="btn btn-secondary" onclick="voltarDoWhatsApp()" id="btnVoltarWhatsApp">
+              <i class="bi bi-arrow-left me-2"></i> Voltar
+            </button>
+            <button type="button" class="btn btn-info" onclick="copiarWhatsApp()">
+              <i class="bi bi-clipboard me-2"></i> Copiar para WhatsApp
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- PESQUISA DE RELATÓRIOS: Acesso a relatórios anteriores -->
+    <div id="stepPesquisa" style="display: none;">
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="bi bi-search me-2"></i> Pesquisar Relatórios</h3>
+        </div>
+        <div class="card-body">
+          <div class="alert-section mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            Pesquise relatórios anteriores por diferentes critérios.
+          </div>
+          
+          <form id="formPesquisa" class="mb-4">
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="tipoPesquisa" class="form-label">Tipo de pesquisa</label>
+                <select class="form-select" id="tipoPesquisa" onchange="ajustarCampoPesquisa()">
+                  <option value="geral">Pesquisa Geral</option>
+                  <option value="data">Por Data</option>
+                  <option value="mes_ano">Por Mês/Ano</option>
+                  <option value="supervisor">Por Supervisor</option>
+                  <option value="letra">Por Letra do Turno</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="termoPesquisa" class="form-label" id="labelPesquisa">Termo de pesquisa</label>
+                <input type="text" class="form-control" id="termoPesquisa">
+              </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+              <button type="button" class="btn btn-secondary me-2" onclick="voltarDaPesquisa()">
+                <i class="bi bi-arrow-left me-2"></i> Voltar
+              </button>
+              <button type="button" class="btn btn-primary" onclick="executarPesquisa()">
+                <i class="bi bi-search me-2"></i> Pesquisar
+              </button>
+            </div>
+          </form>
+          
+          <div id="resultadosPesquisa" style="display: none;">
+            <h4 class="mb-3">Resultados da Pesquisa</h4>
+            <div class="table-responsive">
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Letra</th>
+                    <th>Supervisor</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaResultados">
+                  <!-- Resultados serão adicionados aqui dinamicamente -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="alert alert-info" id="semResultados" style="display: none;">
+              <i class="bi bi-info-circle me-2"></i>
+              Nenhum resultado encontrado para sua pesquisa.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Rodapé com créditos -->
+    <footer class="text-center mt-4 mb-2 text-muted">
+      <hr class="my-3">
+      <p class="mb-0">
+        <i class="bi bi-code-slash me-1"></i>
+        <strong>Desenvolvido por Warlison Abreu</strong> 
+        <span class="mx-1">•</span> 
+        <small>v3.0</small>
+      </p>
+    </footer>
+  </div>
+  
+  <!-- MODAL: Formulário de equipe (atualizado) -->
+  <div class="modal fade" id="modalEquipe" tabindex="-1" aria-labelledby="modalEquipeLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header" id="modalEquipeHeader">
+          <h5 class="modal-title" id="modalEquipeLabel">Adicionar Equipe</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEquipe" class="needs-validation" novalidate>
+            <input type="hidden" id="equipeTipo">
+            <input type="hidden" id="equipeIndex" value="-1">
+            
+            <!-- Dados básicos da equipe -->
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="equipeNumero" class="form-label">Número Da Equipe *</label>
+                <select class="form-select" id="equipeNumero" required>
+                  <option value="" selected disabled>Selecione o número</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione o número da equipe.</div>
+              </div>
+              <div class="col-md-6">
+                <label for="equipeIntegrantes" class="form-label">Nomes dos integrantes *</label>
+                <input type="text" class="form-control" id="equipeIntegrantes" required>
+                <div class="invalid-feedback">Por favor, informe os nomes dos integrantes.</div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="equipeArea" class="form-label">Área de atendimento *</label>
+                <input type="text" class="form-control" id="equipeArea" required>
+                <div class="invalid-feedback">Por favor, informe a área de atendimento.</div>
+              </div>
+              <div class="col-md-6">
+                <label for="equipeAtividade" class="form-label">Atividade Realizada *</label>
+                <input type="text" class="form-control" id="equipeAtividade" required>
+                <div class="invalid-feedback">Por favor, informe a atividade realizada.</div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="equipeVaga" class="form-label">Vaga *</label>
+                <select class="form-select" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
+                  <option value="" selected disabled>Selecione a vaga</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione a vaga.</div>
+              </div>
+              <div class="col-md-6" id="vagaPersonalizadaContainer" style="display: none;">
+                <label for="equipeVagaPersonalizada" class="form-label">Especifique a vaga *</label>
+                <input type="text" class="form-control" id="equipeVagaPersonalizada">
+                <div class="invalid-feedback">Por favor, informe a vaga personalizada.</div>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="equipeEquipamento" class="form-label">Equipamento Utilizado *</label>
+                <select class="form-select" id="equipeEquipamento" required onchange="toggleEquipamentoPersonalizado()">
+                  <option value="" selected disabled>Selecione o equipamento</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+                <div class="invalid-feedback">Por favor, selecione o equipamento utilizado.</div>
+              </div>
+              <div class="col-md-6" id="equipamentoPersonalizadoContainer" style="display: none;">
+                <label for="equipeEquipamentoPersonalizado" class="form-label">Especifique o equipamento *</label>
+                <input type="text" class="form-control" id="equipeEquipamentoPersonalizado">
+                <div class="invalid-feedback">Por favor, informe o equipamento personalizado.</div>
+              </div>
+            </div>
+            
+            <!-- Seção de troca de equipamento -->
+            <div class="mb-3">
+              <label class="form-label">Houve trocas de equipamentos? *</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaSim" value="Sim" onchange="toggleTrocaEquipamento()">
+                <label class="form-check-label" for="equipeTrocaSim">Sim</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaNao" value="Não" checked onchange="toggleTrocaEquipamento()">
+                <label class="form-check-label" for="equipeTrocaNao">Não</label>
+              </div>
+            </div>
+            
+            <div id="trocaDetalhes" style="display: none;">
+              <hr>
+              <h5 class="mb-3">Detalhes da Troca de Equipamento</h5>
+              
+              <div class="mb-3">
+                <label class="form-label">Motivo da troca</label>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCliente" value="Solicitação Do Cliente" onchange="toggleMotivoOutro()">
+                  <label class="form-check-label" for="motivoCliente">Solicitação Do Cliente</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoDefeito" value="Defeitos Em Geral (Justificar)" onchange="toggleMotivoOutro()">
+                  <label class="form-check-label" for="motivoDefeito">Defeitos Em Geral (Justificar)</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
+                  <label class="form-check-label" for="motivoOutro">Outros Motivos (Justificar)</label>
+                </div>
+              </div>
+              
+              <div class="mb-3" id="motivoOutroContainer" style="display: none;">
+                <label for="equipeMotivoOutro" class="form-label">Especifique o motivo</label>
+                <input type="text" class="form-control" id="equipeMotivoOutro">
+              </div>
+              
+              <div class="mb-3">
+                <label for="equipeDefeito" class="form-label">Especifique o Defeito e as Medidas Tomadas</label>
+                <textarea class="form-control" id="equipeDefeito" rows="3"></textarea>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="equipePlacaNova" class="form-label">Placa do novo equipamento</label>
+                  <input type="text" class="form-control" id="equipePlacaNova">
+                </div>
+                <div class="col-md-6">
+                  <label for="equipeDataHoraTroca" class="form-label">Data/Hora da troca</label>
+                  <input type="text" class="form-control" id="equipeDataHoraTroca" placeholder="DD/MM/AAAA HH:MM">
+                </div>
+              </div>
+            </div>
+            
+            <!-- Materiais utilizados - Alta Pressão -->
+            <div id="materiaisAltaPressao">
+              <hr>
+              <h5 class="mb-3">Materiais Utilizados</h5>
+              
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Pistola</label>
+                  <select class="form-select" id="equipePistola">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Pistola - Cano Longo</label>
+                  <select class="form-select" id="equipePistolaCanoLongo">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Mangueira Torpedo/Torpedo</label>
+                  <select class="form-select" id="equipeMangueiraTorpedo">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Pedal</label>
+                  <select class="form-select" id="equipePedal">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Varetas</label>
+                  <select class="form-select" id="equipeVaretas">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label class="form-label">Rabicho</label>
+                  <select class="form-select" id="equipeRabicho">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+              </div>
+              
+              <hr>
+              <h5 class="mb-3">Quantidades</h5>
+              
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label for="equipeLancesMangueira" class="form-label">Lances De Mangueira</label>
+                  <select class="form-select" id="equipeLancesMangueira">
+                    <option value="N/A" selected>N/A</option>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label for="equipeLancesVaretas" class="form-label">Lances de Varetas</label>
+                  <select class="form-select" id="equipeLancesVaretas">
+                    <option value="N/A" selected>N/A</option>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Materiais utilizados - Vácuo -->
+            <div id="materiaisVacuo" style="display: none;">
+              <hr>
+              <h5 class="mb-3">Materiais Utilizados</h5>
+              
+              <div class="row mb-3">
+                <div class="col-md-6 mb-3 mb-md-0">
+                  <label class="form-label">Mangotes</label>
+                  <select class="form-select" id="equipeMangotes">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Reduções</label>
+                  <select class="form-select" id="equipeReducoes">
+                    <option value="Sim">Sim</option>
+                    <option value="N/A" selected>N/A</option>
+                    <option value="Em Falta">Em Falta</option>
+                  </select>
+                </div>
+              </div>
+              
+              <hr>
+              <h5 class="mb-3">Quantidades de Mangotes</h5>
+              
+              <div class="row mb-3">
+                <div class="col-md-4 mb-3 mb-md-0">
+                  <label for="equipeMangotes3Polegadas" class="form-label">3 Polegadas</label>
+                  <select class="form-select" id="equipeMangotes3Polegadas">
+                    <option value="N/A" selected>N/A</option>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
+                  </select>
+                </div>
+                <div class="col-md-4 mb-3 mb-md-0">
+                  <label for="equipeMangotes4Polegadas" class="form-label">4 Polegadas</label>
+                  <select class="form-select" id="equipeMangotes4Polegadas">
+                    <option value="N/A" selected>N/A</option>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
+                  </select>
+                </div>
+                <div class="col-md-4">
+                  <label for="equipeMangotes6Polegadas" class="form-label">6 Polegadas</label>
+                  <select class="form-select" id="equipeMangotes6Polegadas">
+                    <option value="N/A" selected>N/A</option>
+                    <!-- Será preenchido dinamicamente via JavaScript -->
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="equipeJustificativa" class="form-label">Justificativa Implementos em Falta</label>
+              <textarea class="form-control" id="equipeJustificativa" rows="2"></textarea>
+            </div>
+            
+            <hr>
+            <h5 class="mb-3">Segurança</h5>
+            
+            <div class="mb-3">
+              <label class="form-label">Utilizou caixa de bloqueio? *</label>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioSim" value="Sim">
+                <label class="form-check-label" for="caixaBloqueioSim">Sim</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioNao" value="Não" checked>
+                <label class="form-check-label" for="caixaBloqueioNao">Não</label>
+              </div>
+            </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6 mb-3 mb-md-0">
+                <label for="equipeCadeados" class="form-label">Quantidade de Cadeados</label>
+                <select class="form-select" id="equipeCadeados">
+                  <option value="N/A" selected>N/A</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="equipePlaquetas" class="form-label">Quantidade de Plaquetas</label>
+                <select class="form-select" id="equipePlaquetas">
+                  <option value="N/A" selected>N/A</option>
+                  <!-- Será preenchido dinamicamente via JavaScript -->
+                </select>
+              </div>
+            </div>
+            
+            <hr>
+            <div class="mb-3">
+              <label for="equipeObservacoes" class="form-label">Observações adicionais</label>
+              <textarea class="form-control" id="equipeObservacoes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="salvarEquipe()">Salvar Equipe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- MODAL: Ajuda -->
+  <div class="modal fade" id="modalHelp" tabindex="-1" aria-labelledby="modalHelpLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalHelpLabel"><i class="bi bi-question-circle me-2"></i>Ajuda do Sistema</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          <h5>Como utilizar o Sistema de Relatório de Turno</h5>
+          <p>Este sistema permite registrar as informações de turno e equipes de forma organizada e gerar relatórios padronizados.</p>
+          
+          <h6 class="mt-4">Etapa 1: Informações do Turno</h6>
+          <p>Preencha os dados básicos do turno como data, horário, letra e supervisor responsável.</p>
+          
+          <h6 class="mt-3">Etapa 2: Equipes</h6>
+          <p>Adicione todas as equipes que trabalharam no turno. Para cada equipe, você deverá preencher:</p>
+          <ul>
+            <li>Informações básicas da equipe (números, integrantes, área, atividade)</li>
+            <li>Vaga e equipamento utilizado</li>
+            <li>Informações sobre trocas de equipamento (se houver)</li>
+            <li>Materiais utilizados</li>
+            <li>Quantidades de lances e varetas (Alta Pressão) ou mangotes (Vácuo)</li>
+            <li>Informações de segurança</li>
+          </ul>
+          
+          <h6 class="mt-3">Etapa 3: Revisão e Finalização</h6>
+          <p>Revise todas as informações antes de salvar. Após salvar, você poderá visualizar ou exportar o relatório em diferentes formatos:</p>
+          <ul>
+            <li><i class="bi bi-file-text"></i> <strong>Texto</strong> - Formato de texto básico para visualização</li>
+            <li><i class="bi bi-file-pdf"></i> <strong>PDF</strong> - Documento formatado para impressão ou compartilhamento</li>
+            <li><i class="bi bi-file-spreadsheet"></i> <strong>CSV</strong> - Exportação para planilha</li>
+            <li><i class="bi bi-whatsapp"></i> <strong>WhatsApp</strong> - Formatação especial para envio via WhatsApp</li>
+          </ul>
+          
+          <h6 class="mt-3">Pesquisa de Relatórios</h6>
+          <p>É possível pesquisar relatórios anteriores usando o botão de pesquisa no topo da página. Você pode pesquisar por:</p>
+          <ul>
+            <li>Termo geral (busca em todos os campos)</li>
+            <li>Data específica</li>
+            <li>Mês/Ano</li>
+            <li>Supervisor</li>
+            <li>Letra do turno</li>
+          </ul>
+          
+          <div class="alert alert-info mt-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Dica:</strong> Todos os campos marcados com * são obrigatórios.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendi</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Indicador de carregamento -->
+  <div class="loading" style="display: none;">
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    <div class="loading-text mt-3">Processando, aguarde...</div>
+  </div>
+  
+  <!-- Toast para notificações -->
+  <div class="toast-notification" id="toastNotificacao">
+    <i class="bi bi-check-circle me-2"></i> <span id="toastTexto"></span>
   </div>
   
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="js/config.js"></script>
-  <script src="js/sheets-api.js"></script>
-  <script src="js/app.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="config.js"></script>
+  <script src="api.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
