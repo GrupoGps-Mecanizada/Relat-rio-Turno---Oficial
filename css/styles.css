@@ -38,8 +38,313 @@ body {
   letter-spacing: 0.5px;
 }
 
-/* Resto do CSS igual ao original */
-/* ... */
+.card-header h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.card-header h3 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+.card-body {
+  padding: 25px;
+  background-color: white;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #444;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(30, 64, 175, 0.25);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.btn-success {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+.btn-success:hover, .btn-success:focus {
+  background-color: #0e6960;
+  border-color: #0e6960;
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+  padding: 8px 20px;
+  font-weight: 500;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+  background-color: #a11035;
+  border-color: #a11035;
+}
+
+.btn-tool {
+  color: white;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  padding: 4px 10px;
+  border-radius: var(--border-radius);
+  margin-left: 8px;
+}
+
+.btn-tool:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.equipe-card {
+  border-left: 5px solid var(--primary-color);
+  margin-bottom: 15px;
+  transition: all 0.2s ease;
+}
+
+.equipe-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.equipe-vacuo {
+  border-left: 5px solid var(--danger-color);
+}
+
+.equipe-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+}
+
+.equipe-vacuo .card-header {
+  background-color: var(--danger-color);
+}
+
+.badge-equipe {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-text {
+  margin-top: 15px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.step-indicator {
+  display: flex;
+  margin-bottom: 30px;
+  justify-content: space-between;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  position: relative;
+  color: #6b7280;
+}
+
+.step-item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background-color: #e5e7eb;
+  z-index: 1;
+}
+
+.step-number {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  position: relative;
+  z-index: 2;
+  font-weight: 500;
+}
+
+.step-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.step-item.active {
+  color: var(--primary-color);
+}
+
+.step-item.active .step-number {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.step-item.completed {
+  color: var(--secondary-color);
+}
+
+.step-item.completed .step-number {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+.step-item.completed::after {
+  background-color: var(--secondary-color);
+}
+
+.alert-section {
+  padding: 12px 15px;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+  border-left: 4px solid #3b82f6;
+  background-color: #eff6ff;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.info-item {
+  background-color: #f9fafb;
+  padding: 12px;
+  border-radius: var(--border-radius);
+  border: 1px solid #e5e7eb;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.relatorio-text {
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  background-color: #f9fafb;
+  padding: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid #e5e7eb;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.custom-tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+.custom-tooltip .tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.custom-tooltip:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* WhatsApp style message */
+.whatsapp-message {
+  background-color: #DCF8C6;
+  border-radius: 10px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Toast notification */
+.toast-notification {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 12px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toast-notification.show {
+  opacity: 1;
+}
+
+/* Action buttons in search results */
+.action-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.action-buttons .btn {
+  padding: 5px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 @media (max-width: 768px) {
   .step-title {
@@ -50,6 +355,66 @@ body {
     font-size: 1.25rem;
   }
   
-  /* Resto do CSS responsivo igual ao original */
-  /* ... */
+  .btn {
+    padding: 8px 12px;
+    font-size: 0.875rem;
+  }
+  
+  .equipe-card .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .equipe-card .btn-group {
+    margin-top: 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  /* Melhorias mobile extras */
+  .btn-group-vertical {
+    width: 100%;
+  }
+  
+  .modal-body {
+    padding: 15px;
+  }
+  
+  .modal-fullscreen .modal-body {
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  
+  /* Botões maiores para facilitar o toque */
+  .btn {
+    min-height: 44px;
+  }
+  
+  /* Tabelas responsivas em resultados de pesquisa */
+  .table-responsive {
+    overflow-x: auto;
+  }
+  
+  /* Ajustar tamanho da área de texto para melhor visualização */
+  .relatorio-text {
+    max-height: 400px;
+  }
+  
+  /* Melhorar a visualização de botões em grupos */
+  .btn-group-sm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  
+  .btn-group-sm .btn {
+    flex: 1;
+    padding: 8px;
+    font-size: 1rem;
+  }
 }
