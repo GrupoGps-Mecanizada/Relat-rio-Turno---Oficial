@@ -3,18 +3,21 @@ const CONFIG = {
   // Versão do aplicativo
   VERSAO_APP: '3.0',
   
-  // ID da planilha Google Sheets (importante: substitua pelo seu ID real)
+  // URL da API do Google Apps Script (importante: substitua pela URL que você copiou)
+  API_URL: 'https://script.google.com/macros/s/SUA_URL_DO_DEPLOYMENT_AQUI/exec',
+  
+  // ID da planilha Google Sheets 
   PLANILHA_ID: '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI',
+  
+  // Configurações de APIs (será usado pelo sistema)
+  API_KEY: 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM',
   
   // Nomes das abas da planilha
   NOME_PLANILHA_DADOS: 'Dados',
   NOME_PLANILHA_EQUIPES: 'Equipes',
   NOME_PLANILHA_CONFIGURACOES: 'Configurações',
   
-  // Chave API do Google Cloud (importante: substitua pela sua chave)
-  API_KEY: 'SUBSTITUA_PELA_SUA_CHAVE_API',
-  
-  // Opções de formulário
+  // Opções padrão do formulário caso a API falhe
   OPCOES_FORMULARIO: {
     opcoesHorario: ['06:50 às 18:40', '18:40 às 06:50', 'ADM'],
     opcoesLetra: ['A', 'B', 'C', 'D'],
