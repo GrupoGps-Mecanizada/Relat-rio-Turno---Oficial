@@ -13,49 +13,41 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.ModuleLoader) { // Verificar se ModuleLoader existe
       ModuleLoader.initialize('cacheManager');
       ModuleLoader.initialize('state'); // AppState deve ser inicializado primeiro
-      
-      // Verificar se AppState foi inicializado corretamente
-      if (!window.AppState) {
-        console.error("AppState não inicializado corretamente!");
-        // Criar um AppState básico de fallback
-        window.AppState = {
-          // Estado interno
-          _state: {},
-          // Callbacks registrados
-          _subscribers: {},
-          
-          // Obter valor do estado
-          get: function(key) {
-            return this._state[key];
-          },
-          
-          // Definir valor no estado
-          update: function(key, value) {
-            this._state[key] = value;
-            // Notificar subscribers
-            if (this._subscribers[key]) {
-              this._subscribers[key].forEach(callback => {
-                try {
-                  callback(value);
-                } catch (e) {
-                  console.error(`Erro em subscriber para '${key}':`, e);
-                }
-              });
-            }
-            return value;
-          },
-          
-          // Registrar callback para mudanças
-          subscribe: function(key, callback) {
-            if (!this._subscribers[key]) {
-              this._subscribers[key] = [];
-            }
-            this._subscribers[key].push(callback);
-          }
-        };
-        console.warn("Implementado AppState básico de fallback.");
+
+      // ----- Bloco AppState.subscribe MOVIDO para cá -----
+      if (window.AppState && typeof AppState.subscribe === 'function') {
+        console.log("Configurando observadores de estado (AppState)...");
+
+        // Sincronizar equipes com estado -> UI
+        AppState.subscribe('equipes', function(novasEquipes) {
+          console.log("Estado 'equipes' atualizado:", novasEquipes);
+          // Atualiza a variável global em app.js (se ela ainda for usada)
+          if(typeof window.equipes !== 'undefined') window.equipes = novasEquipes;
+          // Chama funções de atualização da UI (definidas em app.js)
+          if (typeof atualizarListaEquipes === 'function') atualizarListaEquipes();
+          if (typeof atualizarBotaoAvancar === 'function') atualizarBotaoAvancar();
+        });
+
+        // Sincronizar dados do turno com estado
+        AppState.subscribe('dadosTurno', function(novosDadosTurno) {
+           console.log("Estado 'dadosTurno' atualizado:", novosDadosTurno);
+           // Atualiza a variável global em app.js (se ela ainda for usada)
+           if(typeof window.dadosTurno !== 'undefined') window.dadosTurno = novosDadosTurno;
+        });
+
+        // Sincronizar ID do relatório com estado
+        AppState.subscribe('ultimoRelatorioId', function(novoId) {
+           console.log("Estado 'ultimoRelatorioId' atualizado:", novoId);
+            // Atualiza a variável global em app.js (se ela ainda for usada)
+           if(typeof window.ultimoRelatorioId !== 'undefined') window.ultimoRelatorioId = novoId;
+        });
+
+      } else {
+          console.warn("AppState não encontrado ou não possui o método subscribe após inicialização. A sincronização de estado pode não funcionar.");
       }
-      
+      // ----- Fim do bloco movido -----
+
+
       ModuleLoader.initialize('performanceMonitor');
 
       // Carregar módulos de interface
@@ -73,6 +65,10 @@ document.addEventListener('DOMContentLoaded', function() {
          // Se autenticação não for necessária, talvez inicializar o dashboard imediatamente?
          // ModuleLoader.initialize('dashboard'); // Descomentar se necessário
          console.log("Autenticação não configurada ou não requerida.");
+         // Se auth não for necessária, inicializar o dashboard aqui se ele não depender do login
+         if (!window.CONFIG?.AUTH_REQUIRED) {
+             ModuleLoader.initialize('dashboard');
+         }
       }
 
       // Carregar dashboard após autenticação (se necessário e se googleAuth foi carregado)
@@ -82,16 +78,65 @@ document.addEventListener('DOMContentLoaded', function() {
          ModuleLoader.initialize('dashboard');
       });
 
+      // Configurar botões da barra superior que chamam funções globais/módulos
+      const btnPesquisar = document.getElementById('btnPesquisar');
+      if(btnPesquisar && typeof abrirPesquisa === 'function') {
+          btnPesquisar.addEventListener('click', abrirPesquisa);
+      }
+
+      const btnAjuda = document.getElementById('btnAjuda');
+      if(btnAjuda && typeof mostrarHelp === 'function') {
+          btnAjuda.addEventListener('click', mostrarHelp);
+      }
+
+      const btnTema = document.getElementById('btnTema');
+      if(btnTema && ModuleLoader.isAvailable('themeManager')) {
+          btnTema.addEventListener('click', () => {
+              const themeManager = ModuleLoader.get('themeManager');
+              if(themeManager && typeof themeManager.toggleTheme === 'function') {
+                  const isDark = themeManager.toggleTheme();
+                   // Atualizar ícone e texto do botão
+                  btnTema.innerHTML = isDark
+                    ? '<i class="bi bi-sun"></i> <span class="d-none d-sm-inline">Modo Claro</span>'
+                    : '<i class="bi bi-moon"></i> <span class="d-none d-sm-inline">Modo Escuro</span>';
+              }
+          });
+          // Atualizar estado inicial do botão de tema
+          const themeManager = ModuleLoader.get('themeManager');
+           if (themeManager && typeof themeManager.isDark === 'function') {
+                const isDark = themeManager.isDark();
+                btnTema.innerHTML = isDark
+                    ? '<i class="bi bi-sun"></i> <span class="d-none d-sm-inline">Modo Claro</span>'
+                    : '<i class="bi bi-moon"></i> <span class="d-none d-sm-inline">Modo Escuro</span>';
+           }
+      }
+
+       const dashboardTab = document.getElementById('dashboardTab');
+       if(dashboardTab && ModuleLoader.isAvailable('dashboard')) {
+           dashboardTab.addEventListener('click', () => {
+               const dashboard = ModuleLoader.get('dashboard');
+               if(dashboard && typeof dashboard.mostrarDashboard === 'function') {
+                   dashboard.mostrarDashboard();
+               }
+           });
+       }
+
+       // Configurar botão de avançar etapa 1
+       const btnAvancarEquipes = document.getElementById('btnAvancarEquipes');
+       if(btnAvancarEquipes && typeof avancarParaEquipes === 'function') {
+           btnAvancarEquipes.addEventListener('click', avancarParaEquipes);
+       }
+
+
     } else {
       console.error("ModuleLoader não está definido! Verifique a ordem de carregamento dos scripts no HTML.");
-      // Opcional: Mostrar um erro para o usuário
       alert("Erro crítico: Falha ao carregar o inicializador de módulos. A aplicação pode não funcionar.");
       return; // Interromper inicialização se o loader falhar
     }
 
     // Inicializar formulário principal (chama a função definida em app.js)
     if (typeof inicializarFormulario === 'function') {
-        inicializarFormulario();
+        inicializarFormulario(); // Esta função agora é chamada depois da configuração dos subscribes
     } else {
         console.error("Função inicializarFormulario não definida! Verifique se app.js foi carregado corretamente.");
     }
@@ -110,64 +155,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+     // Atualizar versão no footer e ajuda
+     const appVersion = window.CONFIG?.VERSAO_APP || '3.0';
+     const versionSpan = document.getElementById('appVersion');
+     const helpVersionSpan = document.getElementById('helpAppVersion');
+     if (versionSpan) versionSpan.textContent = appVersion;
+     if (helpVersionSpan) helpVersionSpan.textContent = appVersion;
+
+
     console.log('Processo de inicialização concluído!');
 
   } catch (error) {
       console.error("Erro fatal durante a inicialização do sistema:", error);
-      // Opcional: Mostrar mensagem de erro mais visível para o usuário
       alert("Ocorreu um erro grave ao iniciar a aplicação. Por favor, recarregue a página ou contate o suporte.\n\nDetalhes: " + error.message);
   }
 });
 
 // Variáveis globais para retrocompatibilidade - REMOVIDAS
-// As variáveis equipes, dadosTurno, etc., devem ser gerenciadas pelo app.js ou AppState.
 // let equipes = []; // Removido
 // let dadosTurno = {}; // Removido
 // let ultimoRelatorioId = null; // Removido
 // let modalEquipe = null; // Removido - inicializado em app.js
 // let modalHelp = null; // Removido - inicializado em app.js
 
-/**
- * Observadores de estado para conectar AppState com funções legadas (se necessário)
- * Esta parte assume que app.js define as funções globais e AppState existe.
- */
-if (window.AppState && typeof AppState.subscribe === 'function') {
-  console.log("Configurando observadores de estado (AppState)...");
 
-  // Sincronizar equipes com estado -> UI
-  AppState.subscribe('equipes', function(novasEquipes) {
-    console.log("Estado 'equipes' atualizado:", novasEquipes);
-    // Atualiza a variável global em app.js (se ela ainda for usada)
-    if(typeof window.equipes !== 'undefined') window.equipes = novasEquipes;
-    // Chama funções de atualização da UI (definidas em app.js)
-    if (typeof atualizarListaEquipes === 'function') atualizarListaEquipes();
-    if (typeof atualizarBotaoAvancar === 'function') atualizarBotaoAvancar();
-  });
+// Bloco AppState.subscribe FOI MOVIDO para dentro do DOMContentLoaded acima
 
-  // Sincronizar dados do turno com estado
-  AppState.subscribe('dadosTurno', function(novosDadosTurno) {
-     console.log("Estado 'dadosTurno' atualizado:", novosDadosTurno);
-     // Atualiza a variável global em app.js (se ela ainda for usada)
-     if(typeof window.dadosTurno !== 'undefined') window.dadosTurno = novosDadosTurno;
-  });
-
-  // Sincronizar ID do relatório com estado
-  AppState.subscribe('ultimoRelatorioId', function(novoId) {
-     console.log("Estado 'ultimoRelatorioId' atualizado:", novoId);
-      // Atualiza a variável global em app.js (se ela ainda for usada)
-     if(typeof window.ultimoRelatorioId !== 'undefined') window.ultimoRelatorioId = novoId;
-  });
-
-} else {
-    console.warn("AppState não encontrado ou não possui o método subscribe. A sincronização de estado pode não funcionar.");
-}
-
-/**
- * Inicializar modais do Bootstrap - REMOVIDO
- * Assumindo que app.js cuida disso no seu DOMContentLoaded.
- */
-// function initializeModals() { ... } // Removido
-// window.initializeModals = initializeModals; // Removido
 
 /**
  * Melhorias/Wrappers nas funções de UI existentes (mantido)
@@ -182,10 +195,19 @@ if (typeof window.mostrarNotificacao === 'function') { // Só sobrescreve se a o
       // Usar novo sistema de notificações se disponível
       if (window.Notifications && typeof window.Notifications[tipo] === 'function') {
         window.Notifications[tipo](mensagem);
-      } else {
+      } else if (window.ModuleLoader && ModuleLoader.isInitialized('notifications')) {
+          // Tenta obter o módulo se a global não existir (mais robusto)
+          const NotificationsModule = ModuleLoader.get('notifications');
+          if (NotificationsModule && typeof NotificationsModule[tipo] === 'function') {
+              NotificationsModule[tipo](mensagem);
+          } else {
+              originalMostrarNotificacao(mensagem); // Fallback final
+              console.warn("Módulo Notifications não disponível/funcional, usando notificação original.");
+          }
+      }
+      else {
          // Fallback para o sistema original (passando apenas a mensagem)
          originalMostrarNotificacao(mensagem);
-         // Opcional: Simular tipos no fallback (ex: mudar cor do toast antigo)
          console.warn("Módulo Notifications não disponível, usando notificação original.");
       }
     };
@@ -198,11 +220,21 @@ if (typeof window.mostrarLoading === 'function') { // Só sobrescreve se a origi
     window.mostrarLoading = function(mensagem = 'Processando...') { // Default message
       // Iniciar medição de performance
       if (window.PerformanceMonitor && typeof PerformanceMonitor.startMeasure === 'function') {
-        try {
+          try {
             // Remover caracteres inválidos para nome da medição
             const measureName = 'loading_' + String(mensagem).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
             window.currentOperation = PerformanceMonitor.startMeasure(measureName);
         } catch(e) { console.error("Erro ao iniciar medição de performance:", e); }
+
+      } else if (window.ModuleLoader && ModuleLoader.isInitialized('performanceMonitor')) {
+          // Tenta obter o módulo se a global não existir
+          const perfMonitor = ModuleLoader.get('performanceMonitor');
+           if(perfMonitor && typeof perfMonitor.startMeasure === 'function') {
+                 try {
+                    const measureName = 'loading_' + String(mensagem).replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
+                    window.currentOperation = perfMonitor.startMeasure(measureName);
+                } catch(e) { console.error("Erro ao iniciar medição de performance:", e); }
+           }
       }
       // Chamar função original
       originalMostrarLoading(mensagem);
@@ -214,9 +246,16 @@ if (typeof window.ocultarLoading === 'function') { // Só sobrescreve se a origi
     const originalOcultarLoading = window.ocultarLoading;
     window.ocultarLoading = function() {
       // Finalizar medição de performance
-      if (window.PerformanceMonitor && typeof PerformanceMonitor.endMeasure === 'function' && window.currentOperation) {
+      let perfMonitorInstance = null;
+      if (window.PerformanceMonitor && typeof PerformanceMonitor.endMeasure === 'function') {
+          perfMonitorInstance = PerformanceMonitor;
+      } else if (window.ModuleLoader && ModuleLoader.isInitialized('performanceMonitor')) {
+           perfMonitorInstance = ModuleLoader.get('performanceMonitor');
+      }
+
+      if (perfMonitorInstance && typeof perfMonitorInstance.endMeasure === 'function' && window.currentOperation) {
          try {
-             PerformanceMonitor.endMeasure(window.currentOperation);
+             perfMonitorInstance.endMeasure(window.currentOperation);
          } catch(e) { console.error("Erro ao finalizar medição de performance:", e); }
          window.currentOperation = null; // Limpar operação atual
       }
