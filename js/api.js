@@ -1,3 +1,6 @@
+// Log de depuração adicionado
+console.log('DEBUG: api.js iniciando. window.CONFIG é:', window.CONFIG);
+
 /**
  * Faz uma requisição para a API (Versão Atualizada com Timeout e Melhor Error Handling)
  * @param {String} action - Ação a ser executada no servidor
@@ -5,6 +8,9 @@
  * @returns {Promise<Object>} - Promise com o resultado da requisição (objeto com 'success' e 'message' ou dados)
  */
 async function callAPI(action, params = {}) {
+  // Log de depuração adicionado
+  console.log('DEBUG: Dentro de callAPI. Verificando CONFIG:', window.CONFIG, 'e CONFIG.API_URL:', window.CONFIG?.API_URL);
+
   // Garantir que a URL base está configurada
   if (!window.CONFIG || !CONFIG.API_URL) {
       console.error("CONFIG.API_URL não está definida!", window.CONFIG);
