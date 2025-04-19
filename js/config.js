@@ -13,7 +13,7 @@ const CONFIG = {
   API_KEY: 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM',
   
   // Google Auth
-  AUTH_REQUIRED: true, // Defina como true se quiser tornar a autenticação obrigatória
+  AUTH_REQUIRED: false, // Defina como true se quiser tornar a autenticação obrigatória
   GOOGLE_CLIENT_ID: '', // Preencha com seu ID do cliente OAuth
   
   // Nomes das abas da planilha
