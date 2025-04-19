@@ -12,7 +12,50 @@ document.addEventListener('DOMContentLoaded', function() {
     // Inicializar módulos básicos (Dependem de ModuleLoader.js ter sido carregado antes)
     if (window.ModuleLoader) { // Verificar se ModuleLoader existe
       ModuleLoader.initialize('cacheManager');
-      ModuleLoader.initialize('state'); // AppState deve ser inicializado aqui
+      ModuleLoader.initialize('state'); // AppState deve ser inicializado primeiro
+      
+      // Verificar se AppState foi inicializado corretamente
+      if (!window.AppState) {
+        console.error("AppState não inicializado corretamente!");
+        // Criar um AppState básico de fallback
+        window.AppState = {
+          // Estado interno
+          _state: {},
+          // Callbacks registrados
+          _subscribers: {},
+          
+          // Obter valor do estado
+          get: function(key) {
+            return this._state[key];
+          },
+          
+          // Definir valor no estado
+          update: function(key, value) {
+            this._state[key] = value;
+            // Notificar subscribers
+            if (this._subscribers[key]) {
+              this._subscribers[key].forEach(callback => {
+                try {
+                  callback(value);
+                } catch (e) {
+                  console.error(`Erro em subscriber para '${key}':`, e);
+                }
+              });
+            }
+            return value;
+          },
+          
+          // Registrar callback para mudanças
+          subscribe: function(key, callback) {
+            if (!this._subscribers[key]) {
+              this._subscribers[key] = [];
+            }
+            this._subscribers[key].push(callback);
+          }
+        };
+        console.warn("Implementado AppState básico de fallback.");
+      }
+      
       ModuleLoader.initialize('performanceMonitor');
 
       // Carregar módulos de interface
