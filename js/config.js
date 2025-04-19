@@ -3,7 +3,7 @@ const CONFIG = {
   // Versão do aplicativo
   VERSAO_APP: '3.0',
   
-  // URL da API do Google Apps Script (importante: substitua pela URL que você copiou)
+  // URL da API do Google Apps Script (CORRIGIDO: Verifique se este é o URL correto do seu deploy)
   API_URL: 'https://script.google.com/macros/s/AKfycbw4LsriwJzmSwhljn9FSxLGvRIYo5FnOJIpJImlhLYbIg-MuVI2QQN4F6vdQ2BlEMgM/exec',
   
   // ID da planilha Google Sheets 
