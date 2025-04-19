@@ -81,7 +81,7 @@ async function carregarDadosFormulario() {
   try {
     // Tentar buscar da API
     // !! IMPORTANTE: Substitua 'getFormOptions' pelo nome da ação que seu backend espera !!
-    const result = await callAPI('getFormOptions'); // <<< CORREÇÃO APLICADA AQUI
+    const result = await callAPI('obterDadosFormulario'); // <<< CORRIGIDO
 
     if (result && result.success) {
       dadosFormulario = result.dados || result; // Adaptar conforme a estrutura de resposta da API
