@@ -11,12 +11,9 @@ async function callAPI(action, params = {}) {
   // Log de depuração adicionado
   console.log('DEBUG: Dentro de callAPI. Verificando CONFIG:', window.CONFIG, 'e CONFIG.API_URL:', window.CONFIG?.API_URL);
 
-  // Garantir que a URL base está configurada
-  if (!window.CONFIG || !CONFIG.API_URL) {
-      console.error("CONFIG.API_URL não está definida!", window.CONFIG);
-      mostrarNotificacao("Erro de configuração: URL da API não definida.", "danger");
-      return { success: false, message: "Erro de configuração interna." };
-  }
+  // Usar URL da API com fallback seguro
+  const apiUrl = window.CONFIG?.API_URL || 
+                 'https://script.google.com/macros/s/AKfycbx_ZPbyc5MY9VzVahWUgGU1i3VJgn9BnLYF7--23g4iQKeMGoBhwuODXxWgZwf0qpy-/exec';
 
   // Garantir que a ação sempre seja especificada
   if (!action) {
@@ -30,8 +27,7 @@ async function callAPI(action, params = {}) {
     mostrarLoading('Comunicando com servidor...');
 
     // Construir URL com parâmetros
-    let url = new URL(CONFIG.API_URL);
-    url.searchParams.append('action', action);
+    let url = new URL(apiUrl); // Usar apiUrl em vez de CONFIG.API_URL
 
     // Adicionar outros parâmetros
     for (const key in params) {
