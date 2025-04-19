@@ -1,5 +1,5 @@
 // Configurações do sistema
-const CONFIG = {
+window.CONFIG = {
   // Versão do aplicativo
   VERSAO_APP: '3.0',
 
