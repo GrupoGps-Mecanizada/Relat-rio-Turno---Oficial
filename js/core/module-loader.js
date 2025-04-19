@@ -16,6 +16,7 @@ const ModuleLoader = (function() {
     }
     
     modules[name] = initializer;
+    console.log(`Módulo '${name}' registrado com sucesso.`);
     return true;
   }
   
@@ -23,6 +24,7 @@ const ModuleLoader = (function() {
   function initialize(name) {
     // Verificar se o módulo já está inicializado
     if (instances[name]) {
+      console.log(`Módulo '${name}' já está inicializado.`);
       return instances[name];
     }
     
@@ -33,6 +35,7 @@ const ModuleLoader = (function() {
     }
     
     try {
+      console.log(`Inicializando módulo '${name}'...`);
       // Inicializar o módulo
       const instance = modules[name]();
       
@@ -44,6 +47,7 @@ const ModuleLoader = (function() {
         instance.init();
       }
       
+      console.log(`Módulo '${name}' inicializado com sucesso.`);
       return instance;
     } catch (error) {
       console.error(`Erro ao inicializar módulo '${name}':`, error);
