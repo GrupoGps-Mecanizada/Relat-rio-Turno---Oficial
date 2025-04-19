@@ -5,45 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
-  <!-- Meta tag para Content Security Policy -->
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://fonts.googleapis.com https://apis.google.com https://*.googleusercontent.com https://script.google.com https://sheets.googleapis.com 'unsafe-inline' 'unsafe-eval'; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdn.jsdelivr.net; img-src 'self' data: https://*.googleusercontent.com">
   <title>Sistema de Relatório de Turno v3.0</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
-  <style>
-    /* Estilos inline para corrigir a cor da barra superior */
-    .barra-superior {
-      background-color: #0d47a1 !important; /* Azul escuro */
-      color: white !important;
-    }
-    
-    .botoes-direita {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    
-    .card-titulo {
-      background-color: #0d47a1 !important; /* Azul escuro - mesma cor da barra */
-      color: white !important;
-    }
-    
-    /* Estilo para botões no header */
-    .barra-superior .btn-outline-light {
-      border-color: rgba(255, 255, 255, 0.5);
-      color: white;
-    }
-    
-    .barra-superior .btn-outline-light:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-  </style>
-</head>
+  </head>
 <body>
   <div class="container app-container">
-    <!-- BARRA SUPERIOR - CORRIGIDA -->
     <div class="card mb-4 shadow-sm">
       <div class="card-header d-flex justify-content-between align-items-center barra-superior">
         <h2 class="h5 mb-0"><i class="bi bi-clipboard-check-fill me-2"></i>Sistema de Relatório de Turno</h2>
@@ -64,7 +34,6 @@
       </div>
     </div>
 
-    <!-- INDICADORES DE ETAPA -->
     <div class="step-indicator d-none d-md-flex mb-4">
       <div id="step1Indicator" class="step-item active">
         <div class="step-number">1</div>
@@ -80,7 +49,6 @@
       </div>
     </div>
 
-    <!-- ETAPA 1: TURNO -->
     <div id="stepTurno" class="content-step" style="display: block;">
       <div class="card shadow-sm">
         <div class="card-header card-titulo">
@@ -103,8 +71,7 @@
                 <label for="horario" class="form-label">Horário do turno <span class="text-danger">*</span></label>
                 <select class="form-select" id="horario" required>
                   <option value="" selected disabled>Selecione o horário</option>
-                  <!-- Opções serão preenchidas via JavaScript -->
-                </select>
+                  </select>
                 <div class="invalid-feedback">Por favor, selecione o horário do turno.</div>
               </div>
             </div>
@@ -114,22 +81,20 @@
                 <label for="letra" class="form-label">Letra do turno <span class="text-danger">*</span></label>
                 <select class="form-select" id="letra" required>
                   <option value="" selected disabled>Selecione a letra</option>
-                  <!-- Opções serão preenchidas via JavaScript -->
-                </select>
+                  </select>
                 <div class="invalid-feedback">Por favor, selecione a letra do turno.</div>
               </div>
               <div class="col-md-6">
                 <label for="supervisor" class="form-label">Supervisor responsável <span class="text-danger">*</span></label>
                 <select class="form-select" id="supervisor" required>
                   <option value="" selected disabled>Selecione o supervisor</option>
-                  <!-- Opções serão preenchidas via JavaScript -->
-                </select>
+                  </select>
                 <div class="invalid-feedback">Por favor, selecione o supervisor responsável.</div>
               </div>
             </div>
 
             <div class="d-flex justify-content-end mt-4">
-              <button type="button" class="btn btn-primary" id="btnAvancarEquipes">
+               <button type="button" class="btn btn-primary" id="btnAvancarEquipes">
                 Próximo: Adicionar Equipes <i class="bi bi-arrow-right ms-2"></i>
               </button>
             </div>
@@ -138,33 +103,235 @@
       </div>
     </div>
 
-    <!-- Outras etapas omitidas para brevidade -->
     <div id="stepEquipes" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+       <div class="card shadow-sm">
+         <div class="card-header card-titulo d-flex justify-content-between align-items-center">
+             <h3 class="h5 mb-0">Etapa 2: Adicionar Equipes</h3>
+             <div>
+                <button type="button" class="btn btn-sm btn-success" onclick="adicionarEquipe('Alta Pressão')">
+                   <i class="bi bi-plus-circle-fill me-1"></i> Alta Pressão
+                </button>
+                <button type="button" class="btn btn-sm btn-danger ms-2" onclick="adicionarEquipe('Auto Vácuo / Hiper Vácuo')">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Vácuo/Hiper
+                </button>
+             </div>
+         </div>
+         <div class="card-body">
+            <div class="alert alert-primary alert-section mb-4" role="alert">
+                <i class="bi bi-people-fill me-2"></i>
+                Adicione as equipes que participaram do turno. Use os botões acima para selecionar o tipo.
+            </div>
+            <div id="listaEquipes">
+                <div id="semEquipes" class="alert alert-secondary text-center">
+                    Nenhuma equipe adicionada ainda.
+                </div>
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="voltarParaTurno()">
+                    <i class="bi bi-arrow-left me-2"></i> Voltar
+                </button>
+                <button type="button" class="btn btn-primary" id="btnAvancarRevisao" disabled onclick="avancarParaRevisao()">
+                    Próximo: Revisar <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+            </div>
+         </div>
+       </div>
     </div>
 
     <div id="stepRevisao" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+      <div class="card shadow-sm">
+        <div class="card-header card-titulo">
+            <h3 class="h5 mb-0">Etapa 3: Revisão e Finalização</h3>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-warning alert-section mb-4" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Confira todas as informações antes de salvar o relatório.
+            </div>
+
+            <h4 class="mb-3">Resumo do Turno</h4>
+            <div id="resumoTurno" class="info-grid mb-4">
+                </div>
+
+            <hr>
+
+            <h4 class="mb-3">Resumo das Equipes</h4>
+            <div id="resumoEquipes">
+                </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary" onclick="voltarParaEquipes()">
+                    <i class="bi bi-arrow-left me-2"></i> Voltar e Editar
+                </button>
+                <button type="button" class="btn btn-success" onclick="salvarRelatorioComFallback()"> <i class="bi bi-check-lg me-2"></i> Salvar Relatório
+                </button>
+            </div>
+        </div>
+      </div>
     </div>
 
     <div id="stepSucesso" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-5">
+                <i class="bi bi-check-circle-fill text-success mb-3" style="font-size: 4rem;"></i>
+                <h3 class="mb-3">Relatório Salvo!</h3>
+                <p id="mensagemSucessoStatus" class="lead text-muted mb-4">Seu relatório foi registrado com sucesso.</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="visualizarRelatorio()">
+                        <i class="bi bi-eye-fill me-2"></i> Visualizar Relatório
+                    </button>
+                    <button type="button" class="btn btn-info btn-lg px-4 text-white" onclick="formatarWhatsApp()">
+                        <i class="bi bi-whatsapp me-2"></i> Formatar WhatsApp
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-lg px-4" onclick="novoRelatorio()">
+                        <i class="bi bi-plus-circle me-2"></i> Novo Relatório
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="stepRelatorio" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+        <div class="card shadow-sm">
+            <div class="card-header card-titulo d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">Relatório Gerado</h3>
+                 <button type="button" class="btn btn-sm btn-light" onclick="copiarRelatorio()" title="Copiar Relatório">
+                    <i class="bi bi-clipboard"></i> Copiar
+                </button>
+            </div>
+            <div class="card-body">
+                <pre id="relatorioTexto" class="relatorio-text bg-light p-3 border rounded"></pre>
+                <div class="d-flex justify-content-start mt-4">
+                    <button type="button" class="btn btn-outline-secondary" id="btnVoltarRelatorio">
+                        <i class="bi bi-arrow-left me-2"></i> Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="stepWhatsApp" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+        <div class="card shadow-sm">
+             <div class="card-header card-titulo d-flex justify-content-between align-items-center">
+                <h3 class="h5 mb-0">Formato WhatsApp</h3>
+                 <button type="button" class="btn btn-sm btn-light" onclick="copiarWhatsApp()" title="Copiar Texto">
+                    <i class="bi bi-clipboard"></i> Copiar
+                </button>
+            </div>
+            <div class="card-body">
+                 <div class="alert alert-success alert-section mb-3">
+                    <i class="bi bi-whatsapp me-2"></i> Copie o texto abaixo e cole no WhatsApp.
+                </div>
+                <pre id="whatsAppTexto" class="relatorio-text bg-light p-3 border rounded whatsapp-message"></pre>
+                <div class="d-flex justify-content-start mt-4">
+                     <button type="button" class="btn btn-outline-secondary" id="btnVoltarWhatsApp">
+                        <i class="bi bi-arrow-left me-2"></i> Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="stepPesquisa" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+       <div class="card shadow-sm">
+            <div class="card-header card-titulo">
+                <h3 class="h5 mb-0">Pesquisar Relatórios</h3>
+            </div>
+            <div class="card-body">
+                <form id="formPesquisa">
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-3">
+                            <label for="tipoPesquisa" class="form-label">Pesquisar por:</label>
+                            <select class="form-select" id="tipoPesquisa" onchange="ajustarCampoPesquisa()">
+                                <option value="geral" selected>Termo Geral</option>
+                                <option value="data">Data Específica</option>
+                                <option value="mes_ano">Mês/Ano</option>
+                                <option value="supervisor">Supervisor</option>
+                                <option value="letra">Letra do Turno</option>
+                                <option value="local">Relatórios Locais</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="termoPesquisa" class="form-label" id="labelPesquisa">Termo de Pesquisa</label>
+                            <input type="text" class="form-control" id="termoPesquisa" placeholder="Digite o termo de pesquisa">
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <button type="button" class="btn btn-primary w-100" onclick="executarPesquisa()">
+                                <i class="bi bi-search me-1"></i> Pesquisar
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div id="resultadosPesquisa" style="display: none;">
+                    <h4 class="mb-3">Resultados</h4>
+                    <div id="semResultados" class="alert alert-warning" style="display: none;">
+                        Nenhum relatório encontrado para os critérios informados.
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Origem</th>
+                                    <th>Data</th>
+                                    <th>Horário</th>
+                                    <th>Letra</th>
+                                    <th>Supervisor</th>
+                                    <th class="text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaResultados">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+                 <div class="d-flex justify-content-start mt-4">
+                     <button type="button" class="btn btn-outline-secondary" onclick="voltarDaPesquisa()">
+                        <i class="bi bi-arrow-left me-2"></i> Voltar ao Início
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div id="dashboard" class="content-step" style="display: none;">
-      <!-- Conteúdo omitido -->
+      <div class="card shadow-sm">
+        <div class="card-header card-titulo d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0"><i class="bi bi-graph-up me-2"></i>Dashboard</h3>
+            <button type="button" class="btn btn-sm btn-outline-light" onclick="voltarDoDashboard()" title="Voltar">
+                 <i class="bi bi-arrow-left"></i> Voltar
+             </button>
+        </div>
+        <div class="card-body">
+            <div id="estatisticasGerais" class="mb-4">
+                <div class="text-center p-4 text-muted">Carregando estatísticas...</div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="card">
+                        <div class="card-body">
+                            <canvas id="graficoEquipamentos"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                     <div class="card">
+                        <div class="card-body">
+                            <canvas id="graficoAreas"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="mb-3">Últimos Relatórios</h4>
+            <div id="ultimosRelatorios">
+                <div class="text-center p-4 text-muted">Carregando últimos relatórios...</div>
+            </div>
+        </div>
+      </div>
     </div>
 
     <footer class="text-center mt-4 mb-3 text-muted small">
@@ -173,12 +340,9 @@
         <i class="bi bi-code-slash me-1"></i>
         Desenvolvido por Warlison Abreu
         <span class="mx-1">•</span>
-        v3.0
-      </p>
+        v<span id="appVersion">3.0</span> </p>
     </footer>
   </div>
-
-  <!-- Modais e outros componentes omitidos por brevidade -->
 
   <div class="loading" style="display: none;">
     <div class="loading-content">
@@ -200,123 +364,319 @@
     </div>
   </div>
 
-  <!-- Container para notificações -->
+  <div class="modal fade" id="modalEquipe" tabindex="-1" aria-labelledby="modalEquipeLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl"> <div class="modal-content">
+          <div class="modal-header" id="modalEquipeHeader"> <h5 class="modal-title" id="modalEquipeLabel">Adicionar/Editar Equipe</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="formEquipe" class="needs-validation" novalidate>
+               <input type="hidden" id="equipeIndex" value="-1">
+               <input type="hidden" id="equipeTipo" value="">
+
+               <div class="row">
+                 <div class="col-md-4 mb-3">
+                   <label for="equipeNumero" class="form-label">Número da Equipe <span class="text-danger">*</span></label>
+                   <select class="form-select" id="equipeNumero" required>
+                      <option value="" selected disabled>Selecione...</option>
+                      </select>
+                   <div class="invalid-feedback">Selecione o número da equipe.</div>
+                 </div>
+                 <div class="col-md-8 mb-3">
+                   <label for="equipeIntegrantes" class="form-label">Integrantes <span class="text-danger">*</span></label>
+                   <input type="text" class="form-control" id="equipeIntegrantes" placeholder="Nomes dos integrantes" required>
+                   <div class="invalid-feedback">Informe os nomes dos integrantes.</div>
+                 </div>
+               </div>
+
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="equipeArea" class="form-label">Área de Atuação <span class="text-danger">*</span></label>
+                   <input type="text" class="form-control" id="equipeArea" placeholder="Ex: Area 1, Setor X" required>
+                   <div class="invalid-feedback">Informe a área de atuação.</div>
+                 </div>
+                  <div class="col-md-6 mb-3">
+                   <label for="equipeAtividade" class="form-label">Atividade Principal <span class="text-danger">*</span></label>
+                   <input type="text" class="form-control" id="equipeAtividade" placeholder="Ex: Limpeza de linha, Desobstrução" required>
+                   <div class="invalid-feedback">Informe a atividade principal.</div>
+                 </div>
+               </div>
+
+               <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="equipeVaga" class="form-label">Vaga <span class="text-danger">*</span></label>
+                   <select class="form-select" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
+                     <option value="" selected disabled>Selecione...</option>
+                     <option value="OUTRA VAGA">Outra Vaga (Especificar)</option>
+                   </select>
+                   <div class="invalid-feedback">Selecione a vaga.</div>
+                 </div>
+                 <div class="col-md-6 mb-3" id="vagaPersonalizadaContainer" style="display: none;">
+                    <label for="equipeVagaPersonalizada" class="form-label">Especifique a Vaga <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="equipeVagaPersonalizada">
+                    <div class="invalid-feedback">Especifique a outra vaga.</div>
+                 </div>
+               </div>
+
+                <div class="row">
+                 <div class="col-md-6 mb-3">
+                   <label for="equipeEquipamento" class="form-label">Equipamento <span class="text-danger">*</span></label>
+                   <select class="form-select" id="equipeEquipamento" required onchange="toggleEquipamentoPersonalizado()">
+                      <option value="" selected disabled>Selecione...</option>
+                      <option value="OUTRO EQUIPAMENTO">Outro Equipamento (Especificar)</option>
+                   </select>
+                   <div class="invalid-feedback">Selecione o equipamento.</div>
+                 </div>
+                 <div class="col-md-6 mb-3" id="equipamentoPersonalizadoContainer" style="display: none;">
+                    <label for="equipeEquipamentoPersonalizado" class="form-label">Especifique o Equipamento <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="equipeEquipamentoPersonalizado">
+                    <div class="invalid-feedback">Especifique o outro equipamento.</div>
+                 </div>
+               </div>
+
+               <hr class="my-4">
+
+               <div class="mb-3">
+                  <label class="form-label d-block">Houve troca de equipamento? <span class="text-danger">*</span></label>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaSim" value="Sim" onchange="toggleTrocaEquipamento()" required>
+                    <label class="form-check-label" for="equipeTrocaSim">Sim</label>
+                  </div>
+                  <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaNao" value="Não" onchange="toggleTrocaEquipamento()" required checked>
+                    <label class="form-check-label" for="equipeTrocaNao">Não</label>
+                  </div>
+               </div>
+
+               <div id="trocaDetalhes" style="display: none;" class="border p-3 rounded mb-4 bg-light">
+                  <h5 class="mb-3">Detalhes da Troca</h5>
+                   <div class="mb-3">
+                     <label class="form-label d-block">Motivo da Troca <span class="text-danger">*</span></label>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoQuebra" value="Quebra" onchange="toggleMotivoOutro()">
+                        <label class="form-check-label" for="motivoQuebra">Quebra</label>
+                     </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoManutencao" value="Manutenção Preventiva/Corretiva" onchange="toggleMotivoOutro()">
+                        <label class="form-check-label" for="motivoManutencao">Manutenção Preventiva/Corretiva</label>
+                     </div>
+                     <div class="form-check">
+                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoAbastecimento" value="Abastecimento" onchange="toggleMotivoOutro()">
+                        <label class="form-check-label" for="motivoAbastecimento">Abastecimento</label>
+                     </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
+                        <label class="form-check-label" for="motivoOutro">Outros Motivos (Justificar)</label>
+                     </div>
+                     <div class="invalid-feedback" id="motivoTrocaFeedback" style="display: none;">Selecione um motivo.</div>
+                   </div>
+
+                   <div class="mb-3" id="motivoOutroContainer" style="display: none;">
+                       <label for="equipeMotivoOutro" class="form-label">Especifique o Motivo <span class="text-danger">*</span></label>
+                       <textarea class="form-control" id="equipeMotivoOutro" rows="2"></textarea>
+                       <div class="invalid-feedback">Especifique o outro motivo.</div>
+                   </div>
+
+                   <div class="mb-3">
+                       <label for="equipeDefeito" class="form-label">Defeito Apresentado / Medidas Tomadas <span class="text-danger">*</span></label>
+                       <textarea class="form-control" id="equipeDefeito" rows="3"></textarea>
+                       <div class="invalid-feedback">Descreva o defeito e as medidas tomadas.</div>
+                   </div>
+
+                   <div class="row">
+                      <div class="col-md-6 mb-3">
+                         <label for="equipePlacaNova" class="form-label">Placa do Novo Equipamento (Opcional)</label>
+                         <input type="text" class="form-control" id="equipePlacaNova" placeholder="AAA-0000 ou AAA0A00">
+                         </div>
+                      <div class="col-md-6 mb-3">
+                         <label for="equipeDataHoraTroca" class="form-label">Data/Hora da Troca (Opcional)</label>
+                         <input type="text" class="form-control" id="equipeDataHoraTroca" placeholder="DD/MM/AAAA HH:MM">
+                         </div>
+                   </div>
+               </div>
+
+               <hr class="my-4">
+
+               <div id="materiaisAltaPressao" style="display: none;">
+                  <h5 class="mb-3">Materiais - Alta Pressão</h5>
+                  <div class="row">
+                     <div class="col-md-4 mb-3">
+                        <label for="equipePistola" class="form-label">Pistola</label>
+                        <select class="form-select" id="equipePistola"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-4 mb-3">
+                        <label for="equipePistolaCanoLongo" class="form-label">Pistola Cano Longo</label>
+                        <select class="form-select" id="equipePistolaCanoLongo"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="equipeMangueiraTorpedo" class="form-label">Mang. Torpedo</label>
+                        <select class="form-select" id="equipeMangueiraTorpedo"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="equipePedal" class="form-label">Pedal</label>
+                        <select class="form-select" id="equipePedal"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-4 mb-3">
+                        <label for="equipeVaretas" class="form-label">Varetas</label>
+                        <select class="form-select" id="equipeVaretas"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-4 mb-3">
+                        <label for="equipeRabicho" class="form-label">Rabicho</label>
+                        <select class="form-select" id="equipeRabicho"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-6 mb-3">
+                         <label for="equipeLancesMangueira" class="form-label">Lances de Mangueira (Qtde)</label>
+                         <select class="form-select" id="equipeLancesMangueira">
+                             <option value="N/A" selected>N/A</option>
+                             </select>
+                     </div>
+                      <div class="col-md-6 mb-3">
+                         <label for="equipeLancesVaretas" class="form-label">Lances de Varetas (Qtde)</label>
+                         <select class="form-select" id="equipeLancesVaretas">
+                              <option value="N/A" selected>N/A</option>
+                             </select>
+                     </div>
+                  </div>
+               </div>
+
+               <div id="materiaisVacuo" style="display: none;">
+                  <h5 class="mb-3">Materiais - Auto Vácuo / Hiper Vácuo</h5>
+                   <div class="row">
+                     <div class="col-md-6 mb-3">
+                        <label for="equipeMangotes" class="form-label">Mangotes</label>
+                        <select class="form-select" id="equipeMangotes"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-6 mb-3">
+                        <label for="equipeReducoes" class="form-label">Reduções</label>
+                        <select class="form-select" id="equipeReducoes"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select>
+                     </div>
+                     <div class="col-md-4 mb-3">
+                        <label for="equipeMangotes3Polegadas" class="form-label">Mangotes 3" (Metros)</label>
+                        <select class="form-select" id="equipeMangotes3Polegadas">
+                             <option value="N/A" selected>N/A</option>
+                             </select>
+                     </div>
+                     <div class="col-md-4 mb-3">
+                        <label for="equipeMangotes4Polegadas" class="form-label">Mangotes 4" (Metros)</label>
+                        <select class="form-select" id="equipeMangotes4Polegadas">
+                             <option value="N/A" selected>N/A</option>
+                            </select>
+                     </div>
+                      <div class="col-md-4 mb-3">
+                        <label for="equipeMangotes6Polegadas" class="form-label">Mangotes 6" (Metros)</label>
+                        <select class="form-select" id="equipeMangotes6Polegadas">
+                             <option value="N/A" selected>N/A</option>
+                             </select>
+                     </div>
+                   </div>
+               </div>
+
+               <div class="mb-3">
+                  <label for="equipeJustificativa" class="form-label">Justificativa (se houver falta de material)</label>
+                  <textarea class="form-control" id="equipeJustificativa" rows="2"></textarea>
+               </div>
+
+               <hr class="my-4">
+               <h5 class="mb-3">Segurança</h5>
+               <div class="row">
+                  <div class="col-md-4 mb-3">
+                      <label class="form-label d-block">Caixa de Bloqueio</label>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioSim" value="Sim" checked>
+                        <label class="form-check-label" for="caixaBloqueioSim">Sim</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioNao" value="Não">
+                        <label class="form-check-label" for="caixaBloqueioNao">Não</label>
+                      </div>
+                  </div>
+                   <div class="col-md-4 mb-3">
+                      <label for="equipeCadeados" class="form-label">Cadeados (Qtde)</label>
+                      <select class="form-select" id="equipeCadeados">
+                           <option value="N/A" selected>N/A</option>
+                           </select>
+                  </div>
+                   <div class="col-md-4 mb-3">
+                      <label for="equipePlaquetas" class="form-label">Plaquetas (Qtde)</label>
+                      <select class="form-select" id="equipePlaquetas">
+                           <option value="N/A" selected>N/A</option>
+                           </select>
+                  </div>
+               </div>
+
+               <hr class="my-4">
+                <div class="mb-3">
+                  <label for="equipeObservacoes" class="form-label">Observações Adicionais</label>
+                  <textarea class="form-control" id="equipeObservacoes" rows="3"></textarea>
+               </div>
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary" form="formEquipe">Salvar Equipe</button>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="modalHelp" tabindex="-1" aria-labelledby="modalHelpLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg"> <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalHelpLabel"><i class="bi bi-question-circle-fill me-2"></i>Ajuda - Sistema de Relatório</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Como usar:</h6>
+                    <ol>
+                        <li><strong>Informações do Turno:</strong> Preencha a data, horário, letra e supervisor. Clique em "Próximo".</li>
+                        <li><strong>Equipes:</strong> Clique em "Alta Pressão" ou "Vácuo/Hiper" para adicionar uma equipe. Preencha os detalhes no formulário que aparece e clique em "Salvar Equipe". Repita para todas as equipes. Edite ou remova equipes usando os botões nos cards. Clique em "Próximo: Revisar" quando terminar.</li>
+                        <li><strong>Revisão:</strong> Verifique todas as informações do turno e das equipes. Se algo estiver errado, clique em "Voltar e Editar". Se tudo estiver correto, clique em "Salvar Relatório".</li>
+                        <li><strong>Salvo:</strong> Após salvar, você pode:
+                            <ul>
+                                <li>Visualizar o relatório completo.</li>
+                                <li>Formatar para copiar e colar no WhatsApp.</li>
+                                <li>Criar um novo relatório.</li>
+                            </ul>
+                        </li>
+                    </ol>
+                     <h6>Pesquisa:</h6>
+                    <p>Use o botão <i class="bi bi-search"></i> Pesquisar na barra superior para encontrar relatórios antigos por data, supervisor, letra, etc. Você também pode pesquisar relatórios salvos apenas no seu dispositivo ("Relatórios Locais").</p>
+                     <h6>Modo Escuro:</h6>
+                    <p>Clique no botão <i class="bi bi-moon"></i> / <i class="bi bi-sun"></i> na barra superior para alternar entre o tema claro e escuro.</p>
+                    <h6>Suporte:</h6>
+                    <p>Em caso de dúvidas ou problemas, entre em contato com Warlison Abreu.</p>
+                     <p class="small text-muted">Versão: <span id="helpAppVersion">3.0</span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
   <div id="notifications-container" class="notifications-container"></div>
 
-<!-- Bibliotecas externas -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- Scripts da aplicação na ordem correta -->
-<!-- Carregar config.js primeiro -->
-<script src="js/config.js"></script>
-<!-- Depois os outros módulos principais -->
-<script src="js/core/module-loader.js"></script>
-<script src="js/core/state.js"></script>
-<script src="js/core/cache-manager.js"></script>
-<script src="js/core/performance-monitor.js"></script>
-<script src="js/core/security.js"></script>
-<script src="js/ui/theme-manager.js"></script>
-<script src="js/ui/responsive-enhancements.js"></script>
-<script src="js/features/notifications.js"></script>
-<script src="js/features/dashboard.js"></script>
-<script src="js/auth/google-auth.js"></script>
-<script src="js/api.js"></script>
-<script src="js/app.js"></script>
-<script src="js/main.js"></script>
-  
-  <!-- Script para corrigir os erros e configurar os event listeners -->
-  <script>
-    // Script para corrigir os problemas no carregamento
-    document.addEventListener('DOMContentLoaded', function() {
-      // 1. Definir URL da API se não estiver configurada
-      if (!window.CONFIG || !CONFIG.API_URL) {
-        console.warn("API_URL não configurada, definindo URL padrão");
-        window.CONFIG = window.CONFIG || {};
-        window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbw4LsriwJzmSwhljn9FSxLGvRIYo5FnOJIpJImlhLYbIg-MuVI2QQN4F6vdQ2BlEMgM/exec';
-      }
-      
-      // 2. Configurar eventos para os botões em vez de usar onClick inline
-      document.getElementById('btnPesquisar').addEventListener('click', function() {
-        if (typeof abrirPesquisa === 'function') abrirPesquisa();
-      });
-      
-      document.getElementById('btnAjuda').addEventListener('click', function() {
-        if (typeof mostrarHelp === 'function') mostrarHelp();
-      });
-      
-      document.getElementById('btnTema').addEventListener('click', function() {
-        if (window.ModuleLoader && ModuleLoader.isInitialized('themeManager')) {
-          const ThemeManager = ModuleLoader.get('themeManager');
-          ThemeManager.toggleTheme();
-          
-          // Atualizar ícone e texto do botão
-          const isDark = ThemeManager.isDark();
-          this.innerHTML = isDark 
-            ? '<i class="bi bi-sun"></i> <span class="d-none d-sm-inline">Modo Claro</span>'
-            : '<i class="bi bi-moon"></i> <span class="d-none d-sm-inline">Modo Escuro</span>';
-        }
-      });
-      
-      document.getElementById('btnAvancarEquipes').addEventListener('click', function() {
-        if (typeof avancarParaEquipes === 'function') avancarParaEquipes();
-      });
-      
-      // 3. Configurar AppState caso não exista
-      if (!window.AppState) {
-        console.warn("AppState não encontrado, criando objeto básico de estado");
-        window.AppState = {
-          data: {},
-          listeners: {},
-          subscribe: function(key, callback) {
-            if (!this.listeners[key]) this.listeners[key] = [];
-            this.listeners[key].push(callback);
-            return function() {
-              this.listeners[key] = this.listeners[key].filter(cb => cb !== callback);
-            }.bind(this);
-          },
-          update: function(key, value) {
-            this.data[key] = value;
-            if (this.listeners[key]) {
-              this.listeners[key].forEach(callback => callback(value));
-            }
-          },
-          get: function(key) {
-            return this.data[key];
-          }
-        };
-      }
-      
-      // 4. Definir opções padrão para dropdowns caso a API falhe
-      const opcoesHorario = ['06:50 às 18:40', '18:40 às 06:50', 'ADM'];
-      const opcoesLetra = ['A', 'B', 'C', 'D'];
-      const opcoesSupervisor = ['Israel', 'Ozias', 'Wellison', 'Matozalém'];
-      
-      function popularSelect(elementId, opcoes) {
-        const select = document.getElementById(elementId);
-        if (!select) return;
-        
-        // Limpar opções existentes, mantendo a primeira (placeholder)
-        while (select.options.length > 1) {
-          select.remove(1);
-        }
-        
-        // Adicionar novas opções
-        opcoes.forEach(opcao => {
-          const option = document.createElement('option');
-          option.value = opcao;
-          option.textContent = opcao;
-          select.appendChild(option);
-        });
-      }
-      
-      // Preencher os selects com as opções padrão
-      popularSelect('horario', opcoesHorario);
-      popularSelect('letra', opcoesLetra);
-      popularSelect('supervisor', opcoesSupervisor);
-    });
-  </script>
-</body>
+  <script src="js/config.js"></script>
+  <script src="js/core/module-loader.js"></script>
+  <script src="js/core/state.js"></script>
+  <script src="js/core/cache-manager.js"></script>
+  <script src="js/core/performance-monitor.js"></script>
+  <script src="js/core/security.js"></script>
+  <script src="js/ui/theme-manager.js"></script>
+  <script src="js/ui/responsive-enhancements.js"></script>
+  <script src="js/features/notifications.js"></script>
+  <script src="js/features/dashboard.js"></script>
+  <script src="js/auth/google-auth.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/main.js"></script>
+
+  </body>
 </html>
