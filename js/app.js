@@ -22,8 +22,20 @@ async function inicializarFormulario() {
   
   try {
     // Inicializar modais Bootstrap
-    modalEquipe = new bootstrap.Modal(document.getElementById('modalEquipe'));
-    modalHelp = new bootstrap.Modal(document.getElementById('modalHelp'));
+const modalEquipeElement = document.getElementById('modalEquipe');
+const modalHelpElement = document.getElementById('modalHelp');
+
+if (modalEquipeElement) {
+  modalEquipe = new bootstrap.Modal(modalEquipeElement);
+} else {
+  console.warn('Elemento modalEquipe não encontrado no DOM');
+}
+
+if (modalHelpElement) {
+  modalHelp = new bootstrap.Modal(modalHelpElement);
+} else {
+  console.warn('Elemento modalHelp não encontrado no DOM');
+}
     
     // Inicializar toast (notificação)
     const toastElement = document.getElementById('toastNotificacao');
