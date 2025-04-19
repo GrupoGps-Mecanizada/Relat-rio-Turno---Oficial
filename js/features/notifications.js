@@ -10,6 +10,8 @@ ModuleLoader.register('notifications', function() {
   
   // Inicializar sistema de notificações
   function init() {
+    console.log('Inicializando módulo Notifications...');
+    
     // Adicionar o container de notificações se não existir
     if (!document.getElementById('notifications-container')) {
       const container = document.createElement('div');
@@ -75,7 +77,7 @@ ModuleLoader.register('notifications', function() {
             color: #ef6c00;
           }
           
-          .notification-error {
+          .notification-error, .notification-danger {
             background-color: #ffebee;
             border-left: 4px solid #f44336;
             color: #c62828;
@@ -95,12 +97,27 @@ ModuleLoader.register('notifications', function() {
         document.head.appendChild(style);
       }
     }
+    
+    // Exportar globalmente para compatibilidade com códigos antigos
+    window.Notifications = {
+      show: show,
+      info: info,
+      success: success,
+      warning: warning,
+      error: error,
+      danger: error // Alias para error
+    };
+    
+    console.log('Módulo Notifications inicializado com sucesso.');
   }
   
   // Mostrar uma notificação
   function show(message, type = 'info', duration = NOTIFICATION_DURATION) {
     const container = document.getElementById('notifications-container');
-    if (!container) return;
+    if (!container) {
+      console.warn('Container de notificações não encontrado.');
+      return null;
+    }
     
     // Criar elemento de notificação
     const notification = document.createElement('div');
@@ -116,6 +133,7 @@ ModuleLoader.register('notifications', function() {
         icon = '<i class="bi bi-exclamation-triangle-fill"></i>';
         break;
       case 'error':
+      case 'danger':
         icon = '<i class="bi bi-x-circle-fill"></i>';
         break;
       default:
