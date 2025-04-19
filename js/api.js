@@ -1,6 +1,3 @@
-// Log de depuração adicionado
-console.log('DEBUG: api.js iniciando. window.CONFIG é:', window.CONFIG);
-
 /**
  * Faz uma requisição para a API (Versão Atualizada com Timeout e Melhor Error Handling)
  * @param {String} action - Ação a ser executada no servidor
@@ -11,67 +8,104 @@ async function callAPI(action, params = {}) {
   // Log de depuração adicionado
   console.log('DEBUG: Dentro de callAPI. Verificando CONFIG:', window.CONFIG, 'e CONFIG.API_URL:', window.CONFIG?.API_URL);
 
-  // Usar URL da API com fallback seguro
-  const apiUrl = window.CONFIG?.API_URL || 
-                 'https://script.google.com/macros/s/AKfycbx_ZPbyc5MY9VzVahWUgGU1i3VJgn9BnLYF7--23g4iQKeMGoBhwuODXxWgZwf0qpy-/exec';
+  // Garantir que a URL base está configurada
+  if (!window.CONFIG || !CONFIG.API_URL) {
+      console.error("CONFIG.API_URL não está definida!", window.CONFIG);
+      mostrarNotificacao("Erro de configuração: URL da API não definida.", "danger");
+      return { success: false, message: "Erro de configuração interna." };
+  }
 
   // Garantir que a ação sempre seja especificada
   if (!action) {
     throw new Error("Parâmetro 'action' obrigatório não foi fornecido.");
   }
 
-  let timeoutId = null; // Definir fora do try para ser acessível no finally
-  const controller = new AbortController(); // Definir fora do try
+  // Criar URL alternativa usando proxy CORS
+  const useCorsBypass = true; // Definir como true para usar o contorno de CORS
+  let url;
+  
+  if (useCorsBypass) {
+    // Usar um serviço de proxy para contornar CORS
+    // Opção 1: CORS Anywhere (versão pública limitada)
+    // const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+    
+    // Opção 2: AllOrigins (serviço mais confiável para contornar CORS)
+    const corsProxy = 'https://api.allorigins.win/raw?url=';
+    
+    // Construir URL original
+    let originalUrl = new URL(CONFIG.API_URL);
+    originalUrl.searchParams.append('action', action);
+    
+    // Adicionar outros parâmetros
+    for (const key in params) {
+      if (Object.hasOwnProperty.call(params, key)) {
+        if (typeof params[key] === 'object' && params[key] !== null) {
+          try {
+            originalUrl.searchParams.append(key, JSON.stringify(params[key]));
+          } catch (e) {
+            console.error(`Erro ao converter parâmetro '${key}' para JSON:`, params[key], e);
+          }
+        } else if (params[key] !== undefined && params[key] !== null) {
+          originalUrl.searchParams.append(key, params[key]);
+        }
+      }
+    }
+    
+    // Codificar URL original para o proxy
+    url = corsProxy + encodeURIComponent(originalUrl.toString());
+  } else {
+    // Comportamento original
+    url = new URL(CONFIG.API_URL);
+    url.searchParams.append('action', action);
+    
+    for (const key in params) {
+      if (!Object.hasOwnProperty.call(params, key)) continue;
+      
+      if (typeof params[key] === 'object' && params[key] !== null) {
+        try {
+          url.searchParams.append(key, JSON.stringify(params[key]));
+        } catch (e) {
+          console.error(`Erro ao converter parâmetro '${key}' para JSON:`, params[key], e);
+        }
+      } else if (params[key] !== undefined && params[key] !== null) {
+        url.searchParams.append(key, params[key]);
+      }
+    }
+  }
+
+  let timeoutId = null;
+  const controller = new AbortController();
 
   try {
     mostrarLoading('Comunicando com servidor...');
 
-    // Construir URL com parâmetros
-    let url = new URL(apiUrl); // Usar apiUrl em vez de CONFIG.API_URL
-
-    // Adicionar outros parâmetros
-    for (const key in params) {
-        // Pular propriedades herdadas
-        if (!Object.hasOwnProperty.call(params, key)) continue;
-
-        // Para objetos/arrays complexos, converter para JSON
-        if (typeof params[key] === 'object' && params[key] !== null) {
-            try {
-                url.searchParams.append(key, JSON.stringify(params[key]));
-            } catch (e) {
-                console.error(`Erro ao converter parâmetro '${key}' para JSON:`, params[key], e);
-                // Opcional: Pular este parâmetro ou lançar erro
-            }
-        } else if (params[key] !== undefined && params[key] !== null) { // Evitar "undefined" ou "null" como string
-            url.searchParams.append(key, params[key]);
-        }
-    }
-
     console.log('Chamando API:', url.toString()); // Log para debug
 
-    // Fazer a requisição com timeout
+    // Configurar timeout
     timeoutId = setTimeout(() => {
         console.warn(`API Call (${action}) aborted due to timeout.`);
         controller.abort();
     }, 30000); // 30 segundos de timeout
 
-    const response = await fetch(url, {
-      method: 'GET', // API parece usar GET para tudo, passando dados via URL
+    // Opções de fetch ajustadas para o proxy CORS
+    const fetchOptions = {
+      method: 'GET',
       headers: {
-        // Content-Type não é relevante para GET sem corpo, mas Accept é útil
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest' // Alguns proxies CORS precisam deste cabeçalho
       },
-      redirect: 'follow', // Seguir redirecionamentos
-      mode: 'cors',       // Esperado para APIs em domínios diferentes
-      signal: controller.signal, // Associar o AbortController
-      cache: 'no-cache'   // Não usar cache para garantir dados atualizados
-    });
+      redirect: 'follow',
+      mode: useCorsBypass ? 'cors' : 'cors', // Se usar proxy, 'cors' funciona melhor
+      signal: controller.signal,
+      cache: 'no-cache'
+    };
 
-    clearTimeout(timeoutId); // Limpar o timeout se a resposta chegar a tempo
-    timeoutId = null; // Resetar ID
+    const response = await fetch(url, fetchOptions);
+
+    clearTimeout(timeoutId);
+    timeoutId = null;
 
     if (!response.ok) {
-        // Tentar ler corpo do erro, se houver
         let errorBody = await response.text();
         console.error(`Erro HTTP ${response.status} - ${response.statusText}. Body: ${errorBody}`);
         throw new Error(`Erro do servidor: ${response.status} - ${response.statusText}`);
@@ -86,36 +120,38 @@ async function callAPI(action, params = {}) {
         throw new Error("Resposta inválida do servidor.");
     }
 
-    ocultarLoading(); // Ocultar loading apenas em sucesso total
-    return data; // Retorna os dados parseados (espera-se { success: true, ... } ou { success: false, ... })
+    ocultarLoading();
+    return data;
 
   } catch (error) {
-    // Limpar timeout se ainda estiver ativo (ex: erro antes do fetch ou durante)
     if (timeoutId) {
         clearTimeout(timeoutId);
     }
-    ocultarLoading(); // Garantir que o loading seja ocultado em caso de erro
+    ocultarLoading();
     console.error(`Erro na chamada da API (${action}):`, error);
 
-    // Melhorar mensagem de erro retornada
-    let mensagemErro = error.message; // Mensagem padrão
+    let mensagemErro = error.message;
 
     if (error.name === 'AbortError') {
       mensagemErro = 'Tempo limite excedido ao comunicar com o servidor (30s). Verifique sua conexão ou tente novamente.';
     } else if (error.message.includes('Failed to fetch')) {
-      // Isso pode ser CORS, DNS, rede offline, etc.
-      mensagemErro = 'Erro de comunicação. Verifique sua conexão com a internet ou se o servidor está acessível.';
-      // Adicionar dica sobre CORS para desenvolvedores
-       console.warn("Dica: Erro 'Failed to fetch' pode ser causado por problemas de CORS no servidor.");
+      // Informação específica para o problema de CORS
+      mensagemErro = 'Erro de comunicação com o servidor. Possível problema de CORS ou CSP.';
+      console.warn("Dica: Erro 'Failed to fetch' pode ser causado por problemas de CORS no servidor.");
+      
+      // Se o uso de proxy falhou, sugerir soluções
+      if (useCorsBypass) {
+        console.error("O proxy CORS também falhou. Recomendações:");
+        console.error("1. Verifique se o serviço de proxy está disponível");
+        console.error("2. Considere usar outro serviço de proxy CORS");
+        console.error("3. Configure o servidor Google Apps Script para permitir CORS");
+      }
     } else if (error.message.includes('servidor') || error.message.includes('invalid')) {
-         // Usa a mensagem já tratada (Erro do servidor, Resposta inválida)
-         mensagemErro = error.message;
+      mensagemErro = error.message;
     } else {
-        // Erro genérico
-        mensagemErro = "Ocorreu um erro inesperado na comunicação com o servidor.";
+      mensagemErro = "Ocorreu um erro inesperado na comunicação com o servidor.";
     }
 
-    // Retornar objeto de erro padronizado
     return {
       success: false,
       message: mensagemErro
