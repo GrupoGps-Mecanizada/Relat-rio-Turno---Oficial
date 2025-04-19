@@ -1,41 +1,27 @@
-// Configurações do sistema
-window.CONFIG = {
-  // Versão do aplicativo
-  VERSAO_APP: '3.0',
-
-  // URL da API do Google Apps Script (CORRIGIDO)
-  API_URL: 'https://script.google.com/macros/s/AKfycbx_ZPbyc5MY9VzVahWUgGU1i3VJgn9BnLYF7--23g4iQKeMGoBhwuODXxWgZwf0qpy-/exec',
-
-  // ID da planilha Google Sheets
-  PLANILHA_ID: '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI',
-
-  // Configurações de APIs (será usado pelo sistema)
-  API_KEY: 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM',
-
-  // Google Auth
-  AUTH_REQUIRED: false, // Defina como true se quiser tornar a autenticação obrigatória
-  GOOGLE_CLIENT_ID: '', // Preencha com seu ID do cliente OAuth
-
-  // Nomes das abas da planilha
-  NOME_PLANILHA_DADOS: 'Dados',
-  NOME_PLANILHA_EQUIPES: 'Equipes',
-  NOME_PLANILHA_CONFIGURACOES: 'Configurações',
-
-  // Configurações de cache
-  CACHE_DURATION: 30, // Duração padrão do cache em minutos
-
-  // Configurações de tema
-  DEFAULT_THEME: 'light', // Tema padrão (light ou dark)
-
-  // Opções padrão do formulário caso a API falhe
-  OPCOES_FORMULARIO: {
+// Configurações do sistema - Versão melhorada usando IIFE
+(function() {
+  // Inicializar window.CONFIG se ainda não existir
+  window.CONFIG = window.CONFIG || {};
+  
+  // Definir propriedades individualmente para melhor controle
+  window.CONFIG.VERSAO_APP = '3.0';
+  window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbx_ZPbyc5MY9VzVahWUgGU1i3VJgn9BnLYF7--23g4iQKeMGoBhwuODXxWgZwf0qpy-/exec';
+  window.CONFIG.PLANILHA_ID = '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI';
+  window.CONFIG.API_KEY = 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM';
+  window.CONFIG.AUTH_REQUIRED = false;
+  window.CONFIG.GOOGLE_CLIENT_ID = '';
+  window.CONFIG.NOME_PLANILHA_DADOS = 'Dados';
+  window.CONFIG.NOME_PLANILHA_EQUIPES = 'Equipes';
+  window.CONFIG.NOME_PLANILHA_CONFIGURACOES = 'Configurações';
+  window.CONFIG.CACHE_DURATION = 30;
+  window.CONFIG.DEFAULT_THEME = 'light';
+  
+  // Certificar que todas as opções do formulário estão definidas
+  window.CONFIG.OPCOES_FORMULARIO = {
     opcoesHorario: ['06:50 às 18:40', '18:40 às 06:50', 'ADM'],
     opcoesLetra: ['A', 'B', 'C', 'D'],
     opcoesSupervisor: ['Israel', 'Ozias', 'Wellison', 'Matozalém'],
-
-    // Gerar opções de números de equipe (1 a 15)
     opcoesNumeroEquipe: Array.from({length: 15}, (_, i) => `Equipe ${i + 1}`),
-
     vagasAltaPressao: [
       'CAMINHÃO ALTA PRESSÃO - GPS - 01 - 24 HS',
       'CAMINHÃO ALTA PRESSÃO - GPS - 02',
@@ -51,7 +37,6 @@ window.CONFIG = {
       'CAMINHÃO ALTA PRESSÃO - GPS - 12',
       'OUTRA VAGA'
     ],
-
     equipamentosAltaPressao: [
       'PUB-2G02', 'LUX-3201', 'FLX7617', 'EZS-8765', 'EZS-8764',
       'EVK-0291', 'EOF-5C06', 'EOF-5208', 'EGC-2989', 'EGC-2985',
@@ -59,7 +44,6 @@ window.CONFIG = {
       'EAM-3253', 'EAM-3010', 'DSY-6475', 'DSY-6474', 'DSY-6472',
       'CZC-0453', 'OUTRO EQUIPAMENTO'
     ],
-
     vagasVacuo: [
       'CAMINHÃO AUTO VÁCUO - GPS - 01 - 16 HS',
       'CAMINHÃO AUTO VÁCUO - GPS - 02 - 16 HS',
@@ -75,21 +59,14 @@ window.CONFIG = {
       'CAMINHÃO HIPER VÁCUO - GPS - 2',
       'OUTRA VAGA'
     ],
-
     equipamentosVacuo: [
       'PUB-2F80', 'NFF-0235', 'HJS-1097', 'FSA-3D71', 'EGC-2993',
       'EGC-2979', 'EAM-3257', 'EAM-3251', 'DYB-7210', 'DSY-6577',
       'DSY-6473', 'CUB-0763', 'ANF-2676', 'FTW-4D99', 'FTD-6368',
       'FMD-2200', 'FHD-9264', 'EZS-9753', 'OUTRO EQUIPAMENTO'
     ],
-
-    // Gerar opções de quantidade para lances (1 a 15)
     opcoesLances: ['N/A', ...Array.from({length: 15}, (_, i) => `${i + 1}`), 'Mais de 15'],
-
-    // Gerar opções para cadeados e plaquetas (1 a 30)
     opcoesCadeadosPlaquetas: ['N/A', 'Em Falta', ...Array.from({length: 30}, (_, i) => `${i + 1}`), 'Mais de 30'],
-
-    // Gerar opções para mangotes em metros
     opcoesMangotes: [
       'N/A',
       '10 metros',
@@ -104,9 +81,12 @@ window.CONFIG = {
       '100 metros',
       'Mais de 100 metros'
     ]
-  }
-};
-
-// Log de depuração adicionado
-console.log('DEBUG: config.js executado. window.CONFIG é:', window.CONFIG);
-console.log('DEBUG: config.js executado. API_URL é:', window.CONFIG?.API_URL);
+  };
+  
+  // Log de depuração
+  console.log('DEBUG: config.js executado. window.CONFIG é:', window.CONFIG);
+  console.log('DEBUG: config.js executado. API_URL é:', window.CONFIG.API_URL);
+  
+  // Exportar CONFIG para compatibilidade com scripts que usam CONFIG diretamente
+  window.CONFIG = window.CONFIG;
+})();
