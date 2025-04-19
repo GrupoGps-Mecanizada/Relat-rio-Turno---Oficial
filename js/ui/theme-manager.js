@@ -12,14 +12,18 @@ ModuleLoader.register('themeManager', function() {
   
   // Inicialização
   function init() {
+    console.log('Inicializando ThemeManager...');
+    
     // Aplicar tema salvo
     applyTheme();
     
     // Adicionar toggle de tema
-    addThemeToggle();
+    setTimeout(addThemeToggle, 500); // Atraso para garantir que o DOM esteja pronto
     
     // Observar preferências do sistema
     watchSystemPreference();
+    
+    console.log('ThemeManager inicializado com sucesso.');
   }
   
   // Aplicar o tema atual
@@ -45,6 +49,8 @@ ModuleLoader.register('themeManager', function() {
     // Mostrar notificação se o sistema de notificações estiver disponível
     if (window.Notifications) {
       Notifications.info(`Modo ${isDarkMode ? 'escuro' : 'claro'} ativado`);
+    } else {
+      console.log(`Modo ${isDarkMode ? 'escuro' : 'claro'} ativado`);
     }
     
     return isDarkMode;
@@ -52,27 +58,49 @@ ModuleLoader.register('themeManager', function() {
   
   // Adicionar toggle de tema na interface
   function addThemeToggle() {
-    // Buscar elemento para o botão
-    const headerActions = document.querySelector('.card-header .btn-tool').parentNode;
+    // Buscar elemento para o botão - CORRIGIDO para evitar o erro "Cannot read properties of null"
+    const headerActions = document.querySelector('.card-header .btn-tool');
     
-    if (headerActions) {
-      // Criar botão de toggle
-      const themeButton = document.createElement('button');
-      themeButton.className = 'btn btn-tool ms-2';
-      themeButton.id = 'theme-toggle';
-      themeButton.innerHTML = isDarkMode 
-        ? '<i class="bi bi-sun"></i> Modo Claro'
-        : '<i class="bi bi-moon"></i> Modo Escuro';
-      
-      themeButton.addEventListener('click', function() {
-        const newMode = toggleTheme();
-        this.innerHTML = newMode 
+    if (!headerActions || !headerActions.parentNode) {
+      console.warn("Elemento para botão de tema não encontrado. Tentando alternativa...");
+      // Tentar encontrar outro local
+      const alternativeLocation = document.querySelector('.card-header');
+      if (alternativeLocation) {
+        const themeButton = document.createElement('button');
+        themeButton.className = 'btn btn-outline-secondary ms-2 float-end';
+        themeButton.id = 'theme-toggle';
+        themeButton.innerHTML = isDarkMode 
           ? '<i class="bi bi-sun"></i> Modo Claro'
           : '<i class="bi bi-moon"></i> Modo Escuro';
-      });
-      
-      headerActions.appendChild(themeButton);
+        
+        themeButton.addEventListener('click', function() {
+          const newMode = toggleTheme();
+          this.innerHTML = newMode 
+            ? '<i class="bi bi-sun"></i> Modo Claro'
+            : '<i class="bi bi-moon"></i> Modo Escuro';
+        });
+        
+        alternativeLocation.appendChild(themeButton);
+      }
+      return;
     }
+    
+    // Criar botão de toggle
+    const themeButton = document.createElement('button');
+    themeButton.className = 'btn btn-tool ms-2';
+    themeButton.id = 'theme-toggle';
+    themeButton.innerHTML = isDarkMode 
+      ? '<i class="bi bi-sun"></i> Modo Claro'
+      : '<i class="bi bi-moon"></i> Modo Escuro';
+    
+    themeButton.addEventListener('click', function() {
+      const newMode = toggleTheme();
+      this.innerHTML = newMode 
+        ? '<i class="bi bi-sun"></i> Modo Claro'
+        : '<i class="bi bi-moon"></i> Modo Escuro';
+    });
+    
+    headerActions.parentNode.appendChild(themeButton);
     
     // Adicionar estilos para modo escuro se não existirem
     if (!document.getElementById('dark-mode-styles')) {
@@ -160,14 +188,25 @@ ModuleLoader.register('themeManager', function() {
       }
       
       // Listener para mudanças de preferência
-      prefersDarkMode.addEventListener('change', event => {
-        // Só atualizar se não tiver preferência salva
-        if (!localStorage.getItem(THEME_KEY)) {
-          isDarkMode = event.matches;
-          applyTheme();
-          updateToggleButton();
-        }
-      });
+      try {
+        prefersDarkMode.addEventListener('change', event => {
+          // Só atualizar se não tiver preferência salva
+          if (!localStorage.getItem(THEME_KEY)) {
+            isDarkMode = event.matches;
+            applyTheme();
+            updateToggleButton();
+          }
+        });
+      } catch (e) {
+        // Fallback para browsers mais antigos
+        prefersDarkMode.addListener(event => {
+          if (!localStorage.getItem(THEME_KEY)) {
+            isDarkMode = event.matches;
+            applyTheme();
+            updateToggleButton();
+          }
+        });
+      }
     }
   }
   
