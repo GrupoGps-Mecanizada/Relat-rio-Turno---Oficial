@@ -11,7 +11,7 @@
 async function callAPI(action, params = {}) {
   // Garantir que a URL base está configurada
   if (!window.CONFIG || !CONFIG.API_URL) {
-      console.error("CONFIG.API_URL não está definida!");
+      console.error("CONFIG.API_URL não está definida!", window.CONFIG);
       mostrarNotificacao("Erro de configuração: URL da API não definida.", "danger");
       return { success: false, message: "Erro de configuração interna." };
   }
@@ -57,11 +57,11 @@ async function callAPI(action, params = {}) {
       headers: {
         // Content-Type não é relevante para GET sem corpo, mas Accept é útil
         'Accept': 'application/json'
-        // 'Content-Type': 'application/json', // Não necessário para GET
       },
       redirect: 'follow', // Seguir redirecionamentos
       mode: 'cors',       // Esperado para APIs em domínios diferentes
-      signal: controller.signal // Associar o AbortController
+      signal: controller.signal, // Associar o AbortController
+      cache: 'no-cache'   // Não usar cache para garantir dados atualizados
     });
 
     clearTimeout(timeoutId); // Limpar o timeout se a resposta chegar a tempo
@@ -126,7 +126,16 @@ async function callAPI(action, params = {}) {
  */
 async function obterDadosFormularioAPI() {
   try {
+    // Verificar se a URL da API foi configurada
+    if (!window.CONFIG || !CONFIG.API_URL) {
+        console.error("CONFIG.API_URL não está definida!");
+        mostrarNotificacao("Erro de configuração: URL da API não definida.", "danger");
+        // Usar dados locais em caso de erro
+        return { success: true, ...CONFIG.OPCOES_FORMULARIO };
+    }
+
     const resultado = await callAPI('obterDadosFormulario');
+    
     // Verificar se a chamada à API foi bem-sucedida internamente
     if (resultado && resultado.success) {
         return resultado; // Retorna o objeto completo { success: true, ...dados }
@@ -354,6 +363,7 @@ async function gerarPDF(dadosTurno = null, equipes = null, relatorioId = null) {
  */
 async function exportarCSV(dadosTurno = null, equipes = null, relatorioId = null) {
   mostrarLoading('Gerando CSV...');
+  
   try {
     // Se não receber dados, tenta buscar pelo ID
     if (!dadosTurno || !equipes) {
