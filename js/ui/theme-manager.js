@@ -58,13 +58,13 @@ ModuleLoader.register('themeManager', function() {
   
   // Adicionar toggle de tema na interface
   function addThemeToggle() {
-    // Buscar elemento para o botão - CORRIGIDO para evitar o erro "Cannot read properties of null"
-    const headerActions = document.querySelector('.card-header .btn-tool');
+    // Use um seletor mais confiável
+    const headerActions = document.querySelector('.botoes-direita');
     
-    if (!headerActions || !headerActions.parentNode) {
+    if (!headerActions) {
       console.warn("Elemento para botão de tema não encontrado. Tentando alternativa...");
-      // Tentar encontrar outro local
-      const alternativeLocation = document.querySelector('.card-header');
+      // Tente um seletor mais geral e confiável
+      const alternativeLocation = document.querySelector('.barra-superior') || document.querySelector('.card-header');
       if (alternativeLocation) {
         const themeButton = document.createElement('button');
         themeButton.className = 'btn btn-outline-secondary ms-2 float-end';
@@ -100,7 +100,7 @@ ModuleLoader.register('themeManager', function() {
         : '<i class="bi bi-moon"></i> Modo Escuro';
     });
     
-    headerActions.parentNode.appendChild(themeButton);
+    headerActions.appendChild(themeButton);
     
     // Adicionar estilos para modo escuro se não existirem
     if (!document.getElementById('dark-mode-styles')) {
