@@ -4,7 +4,7 @@ const CONFIG = {
   VERSAO_APP: '3.0',
   
   // URL da API do Google Apps Script (CORRIGIDO)
-  API_URL: 'https://script.google.com/macros/s/AKfycbw4LsriwJzmSwhljn9FSxLGvRIYo5FnOJIpJImlhLYbIg-MuVI2QQN4F6vdQ2BlEMgM/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbx_ZPbyc5MY9VzVahWUgGU1i3VJgn9BnLYF7--23g4iQKeMGoBhwuODXxWgZwf0qpy-/exec',
   
   // ID da planilha Google Sheets 
   PLANILHA_ID: '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI',
