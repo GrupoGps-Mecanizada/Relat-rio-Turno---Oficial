@@ -26,9 +26,8 @@ async function callAPI(action, params = {}) {
   try {
     mostrarLoading('Comunicando com servidor...');
 
-    // Construir URL com parâmetros - FIXADO PARA INCLUIR ACTION PRIMEIRO
+    // Construir URL com parâmetros - GARANTIR que action seja o PRIMEIRO parâmetro
     let url = new URL(CONFIG.API_URL);
-    // *** CORREÇÃO: Garantir que action seja o PRIMEIRO parâmetro ***
     url.searchParams.append('action', action);
 
     // Adicionar outros parâmetros
