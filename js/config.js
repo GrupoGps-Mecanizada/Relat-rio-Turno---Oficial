@@ -4,7 +4,7 @@
   window.CONFIG = window.CONFIG || {};
   
   // Definir propriedades individualmente para melhor controle
-  window.CONFIG.VERSAO_APP = '3.0';
+  window.CONFIG.VERSAO_APP = '3.1'; // Alterado de 3.0 para 3.1
   window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbyt-7Ht_FXXzP5xwuoVktX7f5bCMo4wIh4rqT-seuTRwPAGzyfOuHAwYp9dlsyBWkdG/exec';
   window.CONFIG.PLANILHA_ID = '1AyDfxSAFCmAqw512xSMCwXrIMj2JDryhjoySFGmkLvI';
   window.CONFIG.API_KEY = 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM';
@@ -83,7 +83,6 @@
     ]
   };
   
-  // Log de depuração
   console.log('DEBUG: config.js executado. window.CONFIG é:', window.CONFIG);
   console.log('DEBUG: config.js executado. API_URL é:', window.CONFIG.API_URL);
   
