@@ -143,12 +143,12 @@ function usarDadosFormularioFallback() {
 function popularSelectOpcoes(elementId, opcoes) {
   const select = document.getElementById(elementId);
   if (!select) {
-      console.warn(`Elemento select com ID '${elementId}' não encontrado.`);
-      return;
+    console.warn(`Elemento select com ID '${elementId}' não encontrado.`);
+    return;
   }
   if (!Array.isArray(opcoes)) {
-       console.warn(`Opções para '${elementId}' não são um array.`);
-       opcoes = []; // Evitar erro, deixar vazio
+    console.warn(`Opções para '${elementId}' não são um array.`);
+    opcoes = []; // Evitar erro, deixar vazio
   }
 
   // Guardar valor atual se existir e for válido
@@ -160,23 +160,35 @@ function popularSelectOpcoes(elementId, opcoes) {
     select.remove(1);
   }
 
-  // Adicionar novas opções
+  // Criar conjunto para verificar duplicatas
+  const valoresJaAdicionados = new Set();
+  if (select.options.length > 0) {
+    valoresJaAdicionados.add(select.options[0].value);
+  }
+
+  // Adicionar novas opções, verificando duplicatas
   opcoes.forEach(opcao => {
     if (opcao === null || typeof opcao === 'undefined') return; // Pular opções nulas/indefinidas
-    const option = document.createElement('option');
+    
     const valorOpcao = typeof opcao === 'object' ? opcao.value : opcao; // Se for objeto {value, text}
     const textoOpcao = typeof opcao === 'object' ? opcao.text : opcao;
-    option.value = valorOpcao;
-    option.textContent = textoOpcao;
-    select.appendChild(option);
+    
+    // Verificar duplicatas
+    if (!valoresJaAdicionados.has(valorOpcao)) {
+      valoresJaAdicionados.add(valorOpcao);
+      const option = document.createElement('option');
+      option.value = valorOpcao;
+      option.textContent = textoOpcao;
+      select.appendChild(option);
+    }
   });
 
   // Restaurar valor se existia e ainda é uma opção válida
   if (manterValor && select.querySelector(`option[value="${valorAtual}"]`)) {
     select.value = valorAtual;
   } else {
-      // Se o valor antigo não existe mais, resetar para o placeholder (primeira opção)
-      select.selectedIndex = 0;
+    // Se o valor antigo não existe mais, resetar para o placeholder (primeira opção)
+    select.selectedIndex = 0;
   }
 }
 
@@ -1346,6 +1358,13 @@ function salvarRelatorioLocal() {
  * Salvar relatório com fallback (tentativa API, depois local)
  */
 async function salvarRelatorioComFallback() {
+  // Evitar submissões múltiplas
+  if (salvandoRelatorio) {
+    console.log("Operação de salvamento já em andamento, ignorando requisição duplicada");
+    return;
+  }
+  
+  salvandoRelatorio = true;
   mostrarLoading('Salvando relatório...');
 
   try {
@@ -1415,6 +1434,9 @@ async function salvarRelatorioComFallback() {
     return false;
   } finally {
     ocultarLoading();
+    setTimeout(() => {
+      salvandoRelatorio = false;
+    }, 500); // Reset após delay para garantir
   }
 }
 
@@ -2187,6 +2209,22 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
     const lineHeight = 5; // Espaçamento entre linhas em mm
     const smallLineHeight = 4;
 
+    // Função para adicionar texto com quebra de linha
+    const addWrappedText = (label, value, indent = 5) => {
+      if (!value) value = 'N/A';
+      const fullText = `${label}: ${value}`;
+      const lines = doc.splitTextToSize(fullText, contentWidth - indent - 5); // Reduzir margem
+      
+      // Verificar se precisa adicionar nova página
+      if (y + (lines.length * lineHeight) > pageHeight - 20) { // Aumentar margem de segurança
+        doc.addPage();
+        y = margin;
+      }
+      
+      doc.text(lines, margin + indent, y);
+      y += lines.length * lineHeight;
+    };
+
     function checkAddPage(alturaNecessaria = 20) {
         if (y + alturaNecessaria > pageHeight - margin) {
             doc.addPage();
@@ -2253,16 +2291,6 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
             const motivoTrocaDisplay = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca;
             const isAltaPressao = equipe.tipo === 'Alta Pressão';
 
-            // Função para adicionar texto com quebra de linha
-            const addWrappedText = (label, value, indent = 5) => {
-                if (!value) value = 'N/A';
-                const fullText = `${label}: ${value}`;
-                const lines = doc.splitTextToSize(fullText, contentWidth - indent);
-                checkAddPage(lines.length * lineHeight);
-                doc.text(lines, margin + indent, y);
-                y += lines.length * lineHeight;
-            };
-
             addWrappedText('Motorista', equipe.motorista);
             addWrappedText('Operador(es)', equipe.operadores);
             addWrappedText('Área', equipe.area);
@@ -2328,7 +2356,10 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
 
 
     // --- Salvar PDF ---
-    doc.save(`Relatorio_Turno_${dadosTurnoPDF.data}_ID_${relatorioId}.pdf`);
+    const supervisor = dadosTurnoPDF.supervisor || 'Supervisor';
+    const letra = dadosTurnoPDF.letra || 'X';
+    const dataFormatada = formatarData(dadosTurnoPDF.data).replace(/\//g, '-');
+    doc.save(`${supervisor}_${letra}_${dataFormatada}.pdf`);
     mostrarNotificacao('PDF gerado com sucesso!', 'success');
 }
 
@@ -2473,7 +2504,7 @@ function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
                 texto += `  Lances Mang.: ${lancesMangueira}` + nl;
               if(lancesVaretas && lancesVaretas !== 'N/A') 
                 texto += `  Lances Varetas: ${lancesVaretas}` + nl;
-          } else { // Vácuo / Hiper Vácuo
+          } else if (tipo.includes('Vácuo') || tipo.includes('Hiper')) { // Vácuo / Hiper Vácuo
               const mangotes3 = getField('mangotes3Polegadas', 'Mangotes_3_Polegadas');
               const mangotes4 = getField('mangotes4Polegadas', 'Mangotes_4_Polegadas');
               const mangotes6 = getField('mangotes6Polegadas', 'Mangotes_6_Polegadas');
@@ -2716,3 +2747,4 @@ window.mostrarHelp = mostrarHelp;
 
 // Flag para evitar múltiplos salvamentos
 let salvandoEquipe = false;
+let salvandoRelatorio = false;
