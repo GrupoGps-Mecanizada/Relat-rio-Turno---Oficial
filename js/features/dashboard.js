@@ -46,24 +46,40 @@ ModuleLoader.register('dashboard', function() {
       
       if (!dashboardData) {
         try {
-          // Tentar obter dados da API - usar pesquisarRelatorios que já existe
-          console.log("Dashboard tentando buscar dados via API alternativa");
-          const result = await callAPI('pesquisarRelatorios', { tipo: 'recentes', limite: 10 });
+          // Usar a API obterDadosDashboard diretamente
+          const result = await callAPI('obterDadosDashboard');
           
           if (result && result.success) {
-            // Transformar os dados da pesquisa em estatísticas
-            dashboardData = transformarDadosParaDashboard(result);
+            dashboardData = {
+              estatisticasGerais: result.estatisticasGerais || {},
+              equipamentos: result.equipamentos || [],
+              areas: result.areas || [],
+              ultimosRelatorios: result.ultimosRelatorios || []
+            };
             // Guardar em cache por 10 minutos
             AppState.cacheData('dashboardData', dashboardData, 10);
           } else {
-            console.log("API não retornou dados, usando dados simulados");
-            dashboardData = gerarDadosSimulados();
-            AppState.cacheData('dashboardData', dashboardData, 10);
+            console.log("API não retornou dados de dashboard, tentando alternativa");
+            // Tentar API alternativa apenas se a API principal falhar
+            const altResult = await callAPI('pesquisarRelatorios', { tipo: 'recentes', limite: 10 });
+            if (altResult && altResult.success) {
+              dashboardData = transformarDadosParaDashboard(altResult);
+              // Guardar em cache por 5 minutos (cache mais curto para dados transformados)
+              AppState.cacheData('dashboardData', dashboardData, 5);
+            } else {
+              // Usar dados simulados APENAS como último recurso
+              console.log("Todas as APIs falharam, usando dados simulados temporariamente");
+              dashboardData = gerarDadosSimulados();
+              // Cache ainda mais curto para dados simulados
+              AppState.cacheData('dashboardData', dashboardData, 2);
+            }
           }
         } catch (error) {
-          console.warn("Erro ao buscar dados do dashboard, usando dados simulados:", error);
+          console.warn("Erro ao buscar dados do dashboard:", error);
+          // Usar dados simulados apenas em caso de falha total
           dashboardData = gerarDadosSimulados();
-          AppState.cacheData('dashboardData', dashboardData, 10);
+          // Cache muito curto para dados de erro (2 minutos)
+          AppState.cacheData('dashboardData', dashboardData, 2);
         }
       }
       
@@ -155,6 +171,8 @@ ModuleLoader.register('dashboard', function() {
   
   // Função para gerar dados simulados quando a API falhar
   function gerarDadosSimulados() {
+    // Use IDs únicos para evitar o erro de visualização do relatório
+    const idBase = new Date().getTime();
     return {
       estatisticasGerais: {
         totalRelatorios: Math.floor(Math.random() * 100) + 50,
@@ -178,28 +196,28 @@ ModuleLoader.register('dashboard', function() {
       ],
       ultimosRelatorios: [
         {
-          id: "simulado-1",
+          id: "gerado_temporariamente_" + (idBase + 1),
           data: "19/04/2025",
           horario: "06:50 às 18:40",
           letra: "A",
           supervisor: "Israel",
           totalEquipes: 2,
-          origem: "servidor"
+          origem: "temporário"
         },
         {
-          id: "simulado-2",
+          id: "gerado_temporariamente_" + (idBase + 2),
           data: "18/04/2025",
           horario: "18:40 às 06:50",
           letra: "B",
           supervisor: "Ozias",
           totalEquipes: 3,
-          origem: "servidor"
+          origem: "temporário"
         }
       ]
     };
   }
   
-  // Renderizar estatísticas gerais - código inalterado
+  // Renderizar estatísticas gerais
   function renderizarEstatisticasGerais(dados) {
     const container = document.getElementById('estatisticasGerais');
     if (!container) return;
@@ -242,7 +260,7 @@ ModuleLoader.register('dashboard', function() {
     `;
   }
   
-  // Renderizar gráfico de equipamentos - código inalterado
+  // Renderizar gráfico de equipamentos
   function renderizarGraficoEquipamentos(dados) {
     const canvas = document.getElementById('graficoEquipamentos');
     if (!canvas) return;
@@ -297,7 +315,7 @@ ModuleLoader.register('dashboard', function() {
     });
   }
   
-  // Renderizar gráfico de áreas - código inalterado
+  // Renderizar gráfico de áreas
   function renderizarGraficoAreas(dados) {
     const canvas = document.getElementById('graficoAreas');
     if (!canvas) return;
@@ -343,7 +361,7 @@ ModuleLoader.register('dashboard', function() {
     });
   }
   
-  // Renderizar lista de últimos relatórios - código inalterado
+  // Renderizar lista de últimos relatórios
   function renderizarUltimosRelatorios(relatorios) {
     const container = document.getElementById('ultimosRelatorios');
     if (!container) return;
@@ -353,35 +371,42 @@ ModuleLoader.register('dashboard', function() {
       return;
     }
     
-    let html = '<div class="table-responsive"><table class="table table-striped table-hover">';
+    let html = '<div class="table-responsive"><table class="table table-striped table-hover table-sm">';
     html += `
       <thead>
         <tr>
+          <th>Origem</th>
           <th>Data</th>
           <th>Horário</th>
           <th>Letra</th>
           <th>Supervisor</th>
           <th>Equipes</th>
-          <th>Ações</th>
+          <th class="text-center">Ações</th>
         </tr>
       </thead>
       <tbody>
     `;
     
     relatorios.forEach(relatorio => {
+      const badgeClass = relatorio.origem === 'local' ? 'bg-secondary' : 
+                         (relatorio.origem === 'temporário' ? 'bg-warning text-dark' : 'bg-info');
+      // Não permite visualizar ou gerar PDF para relatórios temporários (simulados)
+      const desabilitarAcoes = relatorio.origem === 'temporário';
+      
       html += `
         <tr>
+          <td><span class="badge ${badgeClass}">${relatorio.origem}</span></td>
           <td>${relatorio.data}</td>
           <td>${relatorio.horario}</td>
           <td>${relatorio.letra}</td>
           <td>${relatorio.supervisor}</td>
           <td><span class="badge bg-primary">${relatorio.totalEquipes}</span></td>
-          <td>
+          <td class="text-center">
             <div class="btn-group btn-group-sm">
-              <button type="button" class="btn btn-primary" onclick="visualizarRelatorioExistente('${relatorio.id}', '${relatorio.origem}', 'gerarRelatorioTexto')">
+              <button type="button" class="btn btn-primary" onclick="visualizarRelatorioExistente('${relatorio.id}', '${relatorio.origem}', 'gerarRelatorioTexto')" title="Visualizar" ${desabilitarAcoes ? 'disabled' : ''}>
                 <i class="bi bi-eye"></i>
               </button>
-              <button type="button" class="btn btn-info text-white" onclick="formatarWhatsAppExistente('${relatorio.id}', '${relatorio.origem}', 'formatarWhatsApp')">
+              <button type="button" class="btn btn-info text-white" onclick="formatarWhatsAppExistente('${relatorio.id}', '${relatorio.origem}', 'formatarWhatsApp')" title="Formatar WhatsApp" ${desabilitarAcoes ? 'disabled' : ''}>
                 <i class="bi bi-whatsapp"></i>
               </button>
             </div>
