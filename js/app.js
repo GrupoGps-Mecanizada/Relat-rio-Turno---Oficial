@@ -1,5 +1,5 @@
 /**
- * Sistema de Relatório de Turno v3.0
+ * Sistema de Relatório de Turno v3.1
  * Arquivo principal de lógica da aplicação (app.js)
  */
 
@@ -9,7 +9,7 @@ let dadosTurno = {};
 let ultimoRelatorioId = null;
 let modalEquipe = null; // Instância do Modal Bootstrap
 let modalHelp = null; // Instância do Modal Bootstrap
-// toastNotificacao não é mais necessário se usarmos o módulo Notifications
+let origemNavegacao = 'stepTurno'; // Armazena a origem da navegação
 
 // Dados do formulário carregados da API ou fallback
 let dadosFormulario = null;
@@ -46,12 +46,6 @@ async function inicializarFormulario() {
       console.warn('Elemento modalHelp não encontrado no DOM');
     }
 
-    // Inicializar toast (notificação) - Removido, usar Notifications module
-    // const toastElement = document.getElementById('toastNotificacao');
-    // if (toastElement) {
-    //   toastNotificacao = new bootstrap.Toast(toastElement);
-    // }
-
     // Carregar dados do formulário
     await carregarDadosFormulario();
 
@@ -61,9 +55,6 @@ async function inicializarFormulario() {
     // Configurar listeners de eventos (já feito em main.js para botões principais)
     setupEventListeners(); // Mover listeners específicos de formulários para cá
 
-    // Sincronizar com AppState se disponível (agora configurado em main.js)
-    // syncWithAppState();
-
     console.log('Formulário inicializado com sucesso!');
   } catch (error) {
     console.error('Erro ao inicializar formulário:', error);
@@ -71,8 +62,6 @@ async function inicializarFormulario() {
     mostrarNotificacao('Erro ao inicializar o formulário. Tente recarregar a página.', 'danger');
   }
 }
-
-// Em app.js
 
 /**
  * Carregar dados do formulário
@@ -83,7 +72,6 @@ async function carregarDadosFormulario() {
   try {
     const result = await callAPI('obterDadosFormulario');
 
-    // ---- MODIFICAÇÃO AQUI ----
     // Verifica se a resposta foi bem-sucedida e se contém a chave OPCOES_FORMULARIO
     if (result && result.success && result.OPCOES_FORMULARIO) {
       dadosFormulario = result.OPCOES_FORMULARIO; // Pega os dados de dentro da chave
@@ -108,11 +96,10 @@ async function carregarDadosFormulario() {
            popularSelectOpcoes('equipeCadeados', dadosFormulario.opcoesCadeadosPlaquetas);
            popularSelectOpcoes('equipePlaquetas', dadosFormulario.opcoesCadeadosPlaquetas);
        }
-       // Os selects de Vaga/Equipamento específicos são populados ao abrir o modal
 
       console.log('Dados do formulário carregados com sucesso via API');
     } else {
-      console.warn('Falha ao carregar dados da API ou estrutura inesperada. Usando fallback.', result); // Loga o resultado para depuração
+      console.warn('Falha ao carregar dados da API ou estrutura inesperada. Usando fallback.', result);
       usarDadosFormularioFallback();
     }
   } catch (error) {
@@ -124,9 +111,6 @@ async function carregarDadosFormulario() {
   }
 }
 
-// ---- FIM DA MODIFICAÇÃO ----
-
-// Certifique-se que a função usarDadosFormularioFallback também acessa CONFIG.OPCOES_FORMULARIO
 function usarDadosFormularioFallback() {
     if (window.CONFIG && CONFIG.OPCOES_FORMULARIO) {
       dadosFormulario = CONFIG.OPCOES_FORMULARIO; // Usar dados do config como fonte
@@ -226,7 +210,6 @@ function configureFormValidation() {
          salvarEquipe();
       } else {
           // A mensagem de erro específica já é mostrada por validarCamposCondicionaisEquipe ou pela validação padrão
-          // mostrarNotificacao('Por favor, preencha todos os campos obrigatórios da equipe.', 'warning');
       }
       this.classList.add('was-validated');
     });
@@ -284,8 +267,8 @@ function validarCamposCondicionaisEquipe() {
              if (motivoTrocaFeedback) motivoTrocaFeedback.style.display = 'none';
         }
 
-        if (motivoTroca === 'Outros Motivos (Justificar)' && motivoOutroInput && !motivoOutroInput.value.trim()) {
-            mostrarNotificacao('Por favor, especifique o "Outro Motivo" da troca.', 'warning');
+        if ((motivoTroca === 'Outros Motivos (Justificar)' || motivoTroca === 'Defeitos Em Geral (Justificar)') && motivoOutroInput && !motivoOutroInput.value.trim()) {
+            mostrarNotificacao('Por favor, especifique o "Motivo" da troca.', 'warning');
             motivoOutroInput.classList.add('is-invalid');
              if(isValid) motivoOutroInput.focus();
             isValid = false;
@@ -337,36 +320,25 @@ function setupEventListeners() {
       radioTrocaNao.addEventListener('change', toggleTrocaEquipamento);
   }
 
-   // Listener para radio "Outros Motivos"
+   // Listener para radio "Outros Motivos" e "Defeitos Em Geral"
    const motivoOutroRadio = document.getElementById('motivoOutro');
+   const motivoDefeitosRadio = document.getElementById('motivoDefeitos');
    if (motivoOutroRadio) {
        motivoOutroRadio.removeEventListener('change', toggleMotivoOutro);
        motivoOutroRadio.addEventListener('change', toggleMotivoOutro);
    }
+   if (motivoDefeitosRadio) {
+       motivoDefeitosRadio.removeEventListener('change', toggleMotivoOutro);
+       motivoDefeitosRadio.addEventListener('change', toggleMotivoOutro);
+   }
+   
    // Adicionar listeners para os outros radios de motivo para garantir que o campo "outro" seja escondido
-   const outrosRadiosMotivo = document.querySelectorAll('input[name="equipeMotivoTroca"]:not(#motivoOutro)');
+   const outrosRadiosMotivo = document.querySelectorAll('input[name="equipeMotivoTroca"]:not(#motivoOutro):not(#motivoDefeitos)');
    outrosRadiosMotivo.forEach(radio => {
        radio.removeEventListener('change', toggleMotivoOutro); // Passar a mesma função
        radio.addEventListener('change', toggleMotivoOutro);
    });
-
 }
-
-
-/**
- * Sincronizar com AppState se disponível
- * AGORA CONFIGURADO EM main.js
- */
-/*
-function syncWithAppState() {
-  if (window.AppState) {
-    // Inicializar estado (ou ler estado existente se persistido)
-    AppState.update('equipes', equipes);
-    AppState.update('dadosTurno', dadosTurno);
-    AppState.update('ultimoRelatorioId', ultimoRelatorioId);
-  }
-}
-*/
 
 /**
  * Mostrar notificação (agora usa wrapper em main.js que chama o módulo Notifications)
@@ -598,7 +570,7 @@ function preencherResumosRevisao() {
           const bgClass = isAltaPressao ? 'bg-primary' : 'bg-danger';
           const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
           const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-          const motivoTrocaDisplay = equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
+          const motivoTrocaDisplay = equipe.motivoTroca === 'Defeitos Em Geral (Justificar)' || equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
 
           html += `
             <div class="card mb-3 equipe-card ${borderClass}">
@@ -608,15 +580,19 @@ function preencherResumosRevisao() {
               </div>
               <div class="card-body">
                 <div class="row mb-2">
-                  <div class="col-md-6"><strong>Integrantes:</strong> ${equipe.integrantes || 'N/A'}</div>
-                  <div class="col-md-6"><strong>Área:</strong> ${equipe.area || 'N/A'}</div>
+                  <div class="col-md-6"><strong>Motorista:</strong> ${equipe.motorista || 'N/A'}</div>
+                  <div class="col-md-6"><strong>Operador(es):</strong> ${equipe.operadores || 'N/A'}</div>
                 </div>
                 <div class="row mb-2">
+                  <div class="col-md-6"><strong>Área:</strong> ${equipe.area || 'N/A'}</div>
                   <div class="col-md-6"><strong>Atividade:</strong> ${equipe.atividade || 'N/A'}</div>
-                  <div class="col-md-6"><strong>Vaga:</strong> ${vagaDisplay || 'N/A'}</div>
                 </div>
-                 <div class="row mb-3">
+                <div class="row mb-2">
+                  <div class="col-md-6"><strong>Vaga:</strong> ${vagaDisplay || 'N/A'}</div>
                   <div class="col-md-6"><strong>Equipamento:</strong> ${equipDisplay || 'N/A'}</div>
+                </div>
+                <div class="row mb-3">
+                  <div class="col-md-6"><strong>ID Usiminas:</strong> ${equipe.identificacaoUsiminas || 'N/A'}</div>
                   <div class="col-md-6"><strong>Troca Equip.:</strong> ${equipe.trocaEquipamento || 'N/A'}</div>
                 </div>
 
@@ -632,12 +608,12 @@ function preencherResumosRevisao() {
                 </div>
                 ` : ''}
 
-                <h6 class="mt-3">Materiais e Segurança</h6>
+                <h6 class="mt-3">Implementos e Segurança</h6>
                 <div class="row">
                     <div class="col-md-6">
                        <div class="alert alert-light p-2">
                           <small>
-                            <strong>Materiais:</strong><br>
+                            <strong>Implementos:</strong><br>
                             ${isAltaPressao ? `
                               Pistola: ${equipe.materiais?.pistola ?? 'N/A'}<br>
                               Pistola C.L.: ${equipe.materiais?.pistolaCanoLongo ?? 'N/A'}<br>
@@ -648,8 +624,8 @@ function preencherResumosRevisao() {
                               Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}<br>
                               Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}
                             ` : `
-                              Mangotes Check: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}<br>
-                              Reduções Check: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}<br>
+                              Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}<br>
+                              Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}<br>
                               Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}<br>
                               Mangotes 4": ${equipe.mangotes4Polegadas ?? 'N/A'}<br>
                               Mangotes 6": ${equipe.mangotes6Polegadas ?? 'N/A'}
@@ -758,6 +734,53 @@ function adicionarEquipe(tipo) {
       popularSelectOpcoes('equipeCadeados', ['N/A', 'Em Falta']); popularSelectOpcoes('equipePlaquetas', ['N/A', 'Em Falta']);
   }
 
+  // Definir automaticamente o próximo número de equipe disponível
+  const equipesAtuais = window.AppState?.get('equipes') || equipes;
+  let proximoNumero = "Equipe 1"; // Valor padrão
+  
+  if (equipesAtuais.length > 0) {
+    // Mapear números de equipe para formato numérico
+    const numerosAtivos = equipesAtuais
+      .map(eq => {
+        const match = eq.numero?.match(/Equipe (\d+)/);
+        return match ? parseInt(match[1]) : 0;
+      })
+      .filter(num => num > 0)
+      .sort((a, b) => a - b);
+    
+    // Encontrar o próximo número disponível (primeiro espaço vago)
+    let proximo = 1;
+    for (const num of numerosAtivos) {
+      if (num > proximo) break;
+      proximo = num + 1;
+    }
+    
+    proximoNumero = `Equipe ${proximo}`;
+  }
+  
+  // Selecionar automaticamente o próximo número disponível
+  const equipeNumeroSelect = document.getElementById('equipeNumero');
+  if (equipeNumeroSelect) {
+    // Adicionar opção se não existir
+    if (!Array.from(equipeNumeroSelect.options).some(opt => opt.value === proximoNumero)) {
+      const option = new Option(proximoNumero, proximoNumero);
+      equipeNumeroSelect.add(option);
+    }
+    equipeNumeroSelect.value = proximoNumero;
+  }
+
+  // Definir valores padrão para todos os campos de implementos como N/A
+  document.querySelectorAll('#materiaisAltaPressao select, #materiaisVacuo select').forEach(select => {
+    if (select.options.length > 0 && select.options[0].value !== 'N/A') {
+      // Garantir que N/A seja a primeira opção e selecionada
+      const noneOption = document.createElement('option');
+      noneOption.value = 'N/A';
+      noneOption.text = 'N/A';
+      select.prepend(noneOption);
+    }
+    select.selectedIndex = 0; // Selecionar a primeira opção (N/A)
+  });
+
   // Garantir que listeners específicos do modal estejam ativos
   setupEventListeners();
 
@@ -862,9 +885,11 @@ function editarEquipe(index) {
     function setRadioValue(name, value) { const radio = document.querySelector(`input[name="${name}"][value="${value}"]`); if (radio) radio.checked = true; else { const firstRadio = document.querySelector(`input[name="${name}"]`); if(firstRadio) firstRadio.checked = true; } } // Seleciona o primeiro se valor não encontrado
 
     setSelectValue('equipeNumero', equipe.numero);
-    setFieldValue('equipeIntegrantes', equipe.integrantes);
+    setFieldValue('equipeMotorista', equipe.motorista);
+    setFieldValue('equipeOperadores', equipe.operadores);
     setFieldValue('equipeArea', equipe.area);
     setFieldValue('equipeAtividade', equipe.atividade);
+    setFieldValue('equipeIdentificacaoUsiminas', equipe.identificacaoUsiminas);
 
     // Vaga e Equipamento (considerando "Outra")
     setSelectValue('equipeVaga', equipe.vaga);
@@ -880,7 +905,9 @@ function editarEquipe(index) {
     if (equipe.trocaEquipamento === 'Sim') {
         setRadioValue('equipeMotivoTroca', equipe.motivoTroca);
         toggleMotivoOutro(); // Atualiza visibilidade do campo "outro motivo"
-        if (equipe.motivoTroca === 'Outros Motivos (Justificar)') { setFieldValue('equipeMotivoOutro', equipe.motivoOutro); }
+        if (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') { 
+            setFieldValue('equipeMotivoOutro', equipe.motivoOutro); 
+        }
         setFieldValue('equipeDefeito', equipe.defeito);
         setFieldValue('equipePlacaNova', equipe.placaNova);
         setFieldValue('equipeDataHoraTroca', equipe.dataHoraTroca);
@@ -888,11 +915,20 @@ function editarEquipe(index) {
 
     // Materiais
     if (isAltaPressao && equipe.materiais) {
-        setSelectValue('equipePistola', equipe.materiais.pistola); setSelectValue('equipePistolaCanoLongo', equipe.materiais.pistolaCanoLongo); setSelectValue('equipeMangueiraTorpedo', equipe.materiais.mangueiraTorpedo); setSelectValue('equipePedal', equipe.materiais.pedal); setSelectValue('equipeVaretas', equipe.materiais.varetas); setSelectValue('equipeRabicho', equipe.materiais.rabicho);
-        setSelectValue('equipeLancesMangueira', equipe.lancesMangueira); setSelectValue('equipeLancesVaretas', equipe.lancesVaretas);
+        setSelectValue('equipePistola', equipe.materiais.pistola); 
+        setSelectValue('equipePistolaCanoLongo', equipe.materiais.pistolaCanoLongo); 
+        setSelectValue('equipeMangueiraTorpedo', equipe.materiais.mangueiraTorpedo); 
+        setSelectValue('equipePedal', equipe.materiais.pedal);
+        setSelectValue('equipeVaretas', equipe.materiais.varetas); 
+        setSelectValue('equipeRabicho', equipe.materiais.rabicho);
+        setSelectValue('equipeLancesMangueira', equipe.lancesMangueira); 
+        setSelectValue('equipeLancesVaretas', equipe.lancesVaretas);
     } else if (!isAltaPressao && equipe.materiaisVacuo) {
-        setSelectValue('equipeMangotes', equipe.materiaisVacuo.mangotes); setSelectValue('equipeReducoes', equipe.materiaisVacuo.reducoes);
-        setSelectValue('equipeMangotes3Polegadas', equipe.mangotes3Polegadas); setSelectValue('equipeMangotes4Polegadas', equipe.mangotes4Polegadas); setSelectValue('equipeMangotes6Polegadas', equipe.mangotes6Polegadas);
+        setSelectValue('equipeMangotes', equipe.materiaisVacuo.mangotes); 
+        setSelectValue('equipeReducoes', equipe.materiaisVacuo.reducoes);
+        setSelectValue('equipeMangotes3Polegadas', equipe.mangotes3Polegadas); 
+        setSelectValue('equipeMangotes4Polegadas', equipe.mangotes4Polegadas); 
+        setSelectValue('equipeMangotes6Polegadas', equipe.mangotes6Polegadas);
     }
 
     // Outros campos
@@ -978,13 +1014,15 @@ function salvarEquipe() {
   const novaEquipe = {
     tipo: tipo,
     numero: getFieldValue('equipeNumero'),
-    integrantes: getFieldValue('equipeIntegrantes'),
+    motorista: getFieldValue('equipeMotorista'),
+    operadores: getFieldValue('equipeOperadores'),
     area: getFieldValue('equipeArea'),
     atividade: getFieldValue('equipeAtividade'),
     vaga: getFieldValue('equipeVaga'),
     vagaPersonalizada: getFieldValue('equipeVaga') === 'OUTRA VAGA' ? getFieldValue('equipeVagaPersonalizada') : '',
     equipamento: getFieldValue('equipeEquipamento'),
     equipamentoPersonalizado: getFieldValue('equipeEquipamento') === 'OUTRO EQUIPAMENTO' ? getFieldValue('equipeEquipamentoPersonalizado') : '',
+    identificacaoUsiminas: getFieldValue('equipeIdentificacaoUsiminas'),
     trocaEquipamento: getRadioValue('equipeTroca'),
     caixaBloqueio: getRadioValue('equipeCaixaBloqueio'),
     justificativa: getFieldValue('equipeJustificativa'),
@@ -1009,7 +1047,7 @@ function salvarEquipe() {
   // Adicionar detalhes da troca se aplicável
   if (novaEquipe.trocaEquipamento === 'Sim') {
     novaEquipe.motivoTroca = getRadioValue('equipeMotivoTroca'); // Já validado
-    if (novaEquipe.motivoTroca === 'Outros Motivos (Justificar)') {
+    if (novaEquipe.motivoTroca === 'Outros Motivos (Justificar)' || novaEquipe.motivoTroca === 'Defeitos Em Geral (Justificar)') {
       novaEquipe.motivoOutro = getFieldValue('equipeMotivoOutro');
     }
     novaEquipe.defeito = getFieldValue('equipeDefeito'); // Já validado
@@ -1114,7 +1152,9 @@ function atualizarListaEquipes() {
           </button>
         </div>
       </div>
-      <div class="card-body p-2"> <small> <strong>Integrantes:</strong> ${equipe.integrantes || 'N/A'}<br>
+      <div class="card-body p-2"> <small>
+            <strong>Motorista:</strong> ${equipe.motorista || 'N/A'}<br>
+            <strong>Operador(es):</strong> ${equipe.operadores || 'N/A'}<br>
             <strong>Área:</strong> ${equipe.area || 'N/A'}<br>
             <strong>Atividade:</strong> ${equipe.atividade || 'N/A'}<br>
             <strong>Troca Equip.:</strong> ${equipe.trocaEquipamento || 'N/A'}
@@ -1211,22 +1251,27 @@ function toggleTrocaEquipamento() {
  */
 function toggleMotivoOutro() {
   const motivoOutroRadio = document.getElementById('motivoOutro');
+  const motivoDefeitosRadio = document.getElementById('motivoDefeitos');
   const container = document.getElementById('motivoOutroContainer');
   const input = document.getElementById('equipeMotivoOutro');
   const motivoFeedback = document.getElementById('motivoTrocaFeedback'); // Feedback geral dos motivos
 
   // Esconder feedback geral ao selecionar qualquer motivo válido
-   if (motivoFeedback && document.querySelector('input[name="equipeMotivoTroca"]:checked')) {
+  if (motivoFeedback && document.querySelector('input[name="equipeMotivoTroca"]:checked')) {
     motivoFeedback.style.display = 'none';
   }
 
-  if (motivoOutroRadio && container && input) {
-    const show = motivoOutroRadio.checked;
+  if (container && input) {
+    // Mostrar campo para "Outros Motivos" ou "Defeitos Em Geral"
+    const show = (motivoOutroRadio && motivoOutroRadio.checked) || 
+                 (motivoDefeitosRadio && motivoDefeitosRadio.checked);
+    
     container.style.display = show ? 'block' : 'none';
     input.required = show;
-     if (!show) {
-        input.value = '';
-        input.classList.remove('is-invalid');
+    
+    if (!show) {
+      input.value = '';
+      input.classList.remove('is-invalid');
     }
   }
 }
@@ -1461,9 +1506,45 @@ function novoRelatorio() {
 }
 
 /**
+ * Função auxiliar para gerenciar a navegação
+ */
+function setOrigemNavegacao(origem) {
+  if (window.AppState) {
+    AppState.update('origemNavegacao', origem);
+  } else {
+    window.origemNavegacao = origem;
+  }
+}
+
+/**
+ * Função para obter origem da navegação
+ */
+function getOrigemNavegacao() {
+  return window.AppState ? AppState.get('origemNavegacao') : window.origemNavegacao;
+}
+
+/**
+ * Função que determina para onde voltar
+ */
+function voltarParaTelaOrigem() {
+  const origem = getOrigemNavegacao();
+  if (origem === 'stepSucesso') {
+    voltarParaSucesso();
+  } else if (origem === 'stepPesquisa') {
+    voltarDaVisualizacaoParaPesquisa();
+  } else {
+    // Fallback para sucesso
+    voltarParaSucesso();
+  }
+}
+
+/**
  * Visualizar relatório (usa ID salvo no estado)
  */
 async function visualizarRelatorio() {
+  // Salvar origem antes de navegar
+  setOrigemNavegacao('stepSucesso');
+  
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
   if (!idAtual) {
       mostrarNotificacao("ID do relatório não encontrado para visualização.", "warning");
@@ -1479,6 +1560,9 @@ async function visualizarRelatorio() {
  * Formatar relatório para WhatsApp (usa ID salvo no estado)
  */
 async function formatarWhatsApp() {
+  // Salvar origem antes de navegar
+  setOrigemNavegacao('stepSucesso');
+  
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
    if (!idAtual) {
       mostrarNotificacao("ID do relatório não encontrado para formatação.", "warning");
@@ -1499,11 +1583,14 @@ function voltarParaSucesso() {
 }
 
 /**
- * Voltar do WhatsApp (pode ir para Sucesso ou Pesquisa dependendo do fluxo)
- * Atualmente está igual a voltarParaSucesso
+ * Voltar da visualização do relatório ou WhatsApp para a tela de origem
  */
 function voltarDoWhatsApp() {
-    voltarParaSucesso(); // Ou poderia voltar para a tela de pesquisa se veio de lá
+    voltarParaTelaOrigem();
+}
+
+function voltarDoRelatorio() {
+    voltarParaTelaOrigem();
 }
 
 
@@ -1722,34 +1809,35 @@ function pesquisarRelatoriosLocais(termo) {
     if (!dadosTurno) return false;
 
     // Função auxiliar para busca case-insensitive
-    const checkMatch = (valor) => valor && String(valor).toLowerCase().includes(termoLower);
+const checkMatch = (valor) => valor && String(valor).toLowerCase().includes(termoLower);
 
-    // Checar ID
-    if (checkMatch(id)) return true;
-    // Checar dados do turno
-    if (checkMatch(dadosTurno.letra)) return true;
-    if (checkMatch(dadosTurno.supervisor)) return true;
-    if (checkMatch(dadosTurno.data)) return true; // Checa YYYY-MM-DD
-    if (checkMatch(formatarData(dadosTurno.data))) return true; // Checa DD/MM/YYYY
-    if (checkMatch(dadosTurno.horario)) return true;
+// Checar ID
+if (checkMatch(id)) return true;
+// Checar dados do turno
+if (checkMatch(dadosTurno.letra)) return true;
+if (checkMatch(dadosTurno.supervisor)) return true;
+if (checkMatch(dadosTurno.data)) return true; // Checa YYYY-MM-DD
+if (checkMatch(formatarData(dadosTurno.data))) return true; // Checa DD/MM/YYYY
+if (checkMatch(dadosTurno.horario)) return true;
 
-    // Checar dados das equipes (ex: número, integrantes, equipamento)
-    return equipes.some(eq =>
-      checkMatch(eq.numero) || checkMatch(eq.integrantes) || checkMatch(eq.equipamento) ||
-      checkMatch(eq.equipamentoPersonalizado) || checkMatch(eq.area) || checkMatch(eq.atividade)
-    );
-  }).map(relatorio => ({ // Formatar para exibição na tabela
-    id: relatorio.id,
-    data: formatarData(relatorio.dadosTurno.data),
-    horario: relatorio.dadosTurno.horario || 'N/A',
-    letra: relatorio.dadosTurno.letra || 'N/A',
-    supervisor: relatorio.dadosTurno.supervisor || 'N/A',
-    origem: 'local'
-  })).sort((a, b) => { // Ordenar por data desc (mais recente primeiro)
-      const dateA = a.data.split('/').reverse().join('');
-      const dateB = b.data.split('/').reverse().join('');
-      return dateB.localeCompare(dateA);
-  });
+// Checar motorista/operadores nos dados das equipes
+return equipes.some(eq =>
+  checkMatch(eq.numero) || checkMatch(eq.motorista) || checkMatch(eq.operadores) || 
+  checkMatch(eq.equipamento) || checkMatch(eq.equipamentoPersonalizado) || 
+  checkMatch(eq.area) || checkMatch(eq.atividade) || checkMatch(eq.identificacaoUsiminas)
+);
+}).map(relatorio => ({ // Formatar para exibição na tabela
+  id: relatorio.id,
+  data: formatarData(relatorio.dadosTurno.data),
+  horario: relatorio.dadosTurno.horario || 'N/A',
+  letra: relatorio.dadosTurno.letra || 'N/A',
+  supervisor: relatorio.dadosTurno.supervisor || 'N/A',
+  origem: 'local'
+})).sort((a, b) => { // Ordenar por data desc (mais recente primeiro)
+  const dateA = a.data.split('/').reverse().join('');
+  const dateB = b.data.split('/').reverse().join('');
+  return dateB.localeCompare(dateA);
+});
 }
 
 
@@ -1813,6 +1901,10 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
       mostrarNotificacao("ID inválido para visualização.", "danger");
       return;
   }
+  
+  // Salvar origem para navegação de retorno
+  setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepSucesso');
+  
   mostrarLoading('Carregando relatório...');
 
   try {
@@ -1847,12 +1939,10 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
       relatorioTextoElement.textContent = textoRelatorio;
     }
 
-    // Configurar botão voltar para ir para a pesquisa (ou outra tela)
+    // Configurar botão voltar para usar a função correta
     const btnVoltarRelatorio = document.getElementById('btnVoltarRelatorio');
     if (btnVoltarRelatorio) {
-      // Define para onde voltar baseado no estado anterior ou padrão para pesquisa
-      const origemVolta = window.AppState?.get('currentStep') === 'stepSucesso' ? voltarParaSucesso : voltarDaVisualizacaoParaPesquisa;
-      btnVoltarRelatorio.onclick = origemVolta;
+      btnVoltarRelatorio.onclick = voltarDoRelatorio;
     }
   } catch (error) {
     console.error('Erro ao visualizar relatório existente:', error);
@@ -1927,16 +2017,18 @@ function gerarTextoRelatorioLocal(relatorio) {
     equipesDoTipo.forEach((equipe, index) => {
       const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
       const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-      const motivoTrocaDisplay = equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
+      const motivoTrocaDisplay = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca;
       const isAltaPressao = tipo === 'Alta Pressão';
 
       texto += `EQUIPE ${index + 1} | ${equipe.numero || 'N/A'}\n`;
       texto += subLinha;
-      texto += `Integrantes: ${equipe.integrantes || 'N/A'}\n`;
+      texto += `Motorista: ${equipe.motorista || 'N/A'}\n`;
+      texto += `Operador(es): ${equipe.operadores || 'N/A'}\n`;
       texto += `Área: ${equipe.area || 'N/A'}\n`;
       texto += `Atividade: ${equipe.atividade || 'N/A'}\n`;
       texto += `Vaga: ${vagaDisplay || 'N/A'}\n`;
       texto += `Equipamento: ${equipDisplay || 'N/A'}\n`;
+      if (equipe.identificacaoUsiminas) texto += `Identificação Usiminas: ${equipe.identificacaoUsiminas}\n`;
 
       // Detalhes da Troca
       texto += '\n> Status Equipamento:\n';
@@ -1948,8 +2040,8 @@ function gerarTextoRelatorioLocal(relatorio) {
         if (equipe.dataHoraTroca) texto += `  - Data/Hora Troca: ${formatarDataHora(equipe.dataHoraTroca)}\n`; // Formata aqui também
       }
 
-      // Materiais
-      texto += '\n> Materiais Utilizados:\n';
+      // Implementos
+      texto += '\n> Implementos:\n';
       if (isAltaPressao) {
          texto += `  - Pistola: ${equipe.materiais?.pistola ?? 'N/A'}\n`;
          texto += `  - Pistola C.L.: ${equipe.materiais?.pistolaCanoLongo ?? 'N/A'}\n`;
@@ -1960,15 +2052,15 @@ function gerarTextoRelatorioLocal(relatorio) {
          texto += `  - Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}\n`;
          texto += `  - Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}\n`;
       } else { // Vácuo / Hiper Vácuo
-         texto += `  - Mangotes Check: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
-         texto += `  - Reduções Check: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
+         texto += `  - Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
+         texto += `  - Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
          texto += `  - Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}\n`;
          texto += `  - Mangotes 4": ${equipe.mangotes4Polegadas ?? 'N/A'}\n`;
          texto += `  - Mangotes 6": ${equipe.mangotes6Polegadas ?? 'N/A'}\n`;
       }
 
       if (equipe.justificativa) {
-        texto += `\n> Justificativa Materiais Falta:\n  ${equipe.justificativa}\n`;
+        texto += `\n> Justificativa Implementos Falta:\n  ${equipe.justificativa}\n`;
       }
 
       // Segurança
@@ -1987,7 +2079,7 @@ function gerarTextoRelatorioLocal(relatorio) {
 
   // Rodapé
   texto += linhaSeparadora;
-  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.0'} (Relatório Local)\n`;
+  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.1'} (Relatório Local)\n`;
   texto += linhaSeparadora;
 
   return texto;
@@ -2017,7 +2109,7 @@ async function gerarPDFExistente(id, origem = 'servidor') {
          // Mapear chaves do Apps Script (ex: 'Tipo_Equipe') para as esperadas pelo gerarPDF (ex: 'tipo')
          dadosParaPDF.dadosTurno = mapearChavesObjeto(result.dadosTurno, { 'ID': 'id', 'Data': 'data', 'Horário': 'horario', 'Letra': 'letra', 'Supervisor': 'supervisor', 'Timestamp': 'timestamp', 'Status': 'status', 'UltimaModificacao': 'ultimaModificacao' });
          dadosParaPDF.equipes = result.equipes.map(eq => mapearChavesObjeto(eq, {
-              'Turno_ID': 'turnoId', 'Tipo_Equipe': 'tipo', 'Numero_Equipe': 'numero', 'Integrantes': 'integrantes', 'Area': 'area', 'Atividade': 'atividade', 'Vaga': 'vaga', 'Vaga_Personalizada': 'vagaPersonalizada', 'Equipamento': 'equipamento', 'Equipamento_Personalizada': 'equipamentoPersonalizado', 'Troca_Equipamento': 'trocaEquipamento', 'Motivo_Troca': 'motivoTroca', 'Motivo_Outro': 'motivoOutro', 'Defeito': 'defeito', 'Placa_Nova': 'placaNova', 'Data_Hora_Troca': 'dataHoraTroca',
+              'Turno_ID': 'turnoId', 'Tipo_Equipe': 'tipo', 'Numero_Equipe': 'numero', 'Integrantes': 'integrantes', 'Motorista': 'motorista', 'Operadores': 'operadores', 'Area': 'area', 'Atividade': 'atividade', 'Vaga': 'vaga', 'Vaga_Personalizada': 'vagaPersonalizada', 'Equipamento': 'equipamento', 'Equipamento_Personalizada': 'equipamentoPersonalizado', 'Identificacao_Usiminas': 'identificacaoUsiminas', 'Troca_Equipamento': 'trocaEquipamento', 'Motivo_Troca': 'motivoTroca', 'Motivo_Outro': 'motivoOutro', 'Defeito': 'defeito', 'Placa_Nova': 'placaNova', 'Data_Hora_Troca': 'dataHoraTroca',
               'Pistola': 'pistola', 'Pistola_Cano_Longo': 'pistolaCanoLongo', 'Mangueira_Torpedo': 'mangueiraTorpedo', 'Pedal': 'pedal', 'Varetas': 'varetas', 'Rabicho': 'rabicho', 'Lances_Mangueira': 'lancesMangueira', 'Lances_Varetas': 'lancesVaretas',
               'Mangotes': 'mangotes', 'Reducoes': 'reducoes', 'Mangotes_3_Polegadas': 'mangotes3Polegadas', 'Mangotes_4_Polegadas': 'mangotes4Polegadas', 'Mangotes_6_Polegadas': 'mangotes6Polegadas',
               'Justificativa': 'justificativa', 'Caixa_Bloqueio': 'caixaBloqueio', 'Cadeados': 'cadeados', 'Plaquetas': 'plaquetas', 'Observacoes': 'observacoes'
@@ -2156,10 +2248,10 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
 
             doc.setFontSize(9);
             doc.setFont(undefined, 'normal');
-             const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-             const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-             const motivoTrocaDisplay = equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
-             const isAltaPressao = equipe.tipo === 'Alta Pressão';
+            const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
+            const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
+            const motivoTrocaDisplay = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca;
+            const isAltaPressao = equipe.tipo === 'Alta Pressão';
 
             // Função para adicionar texto com quebra de linha
             const addWrappedText = (label, value, indent = 5) => {
@@ -2171,65 +2263,68 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
                 y += lines.length * lineHeight;
             };
 
-            addWrappedText('Integrantes', equipe.integrantes);
+            addWrappedText('Motorista', equipe.motorista);
+            addWrappedText('Operador(es)', equipe.operadores);
             addWrappedText('Área', equipe.area);
             addWrappedText('Atividade', equipe.atividade);
             addWrappedText('Vaga', vagaDisplay);
             addWrappedText('Equipamento', equipDisplay);
+            if (equipe.identificacaoUsiminas) {
+                addWrappedText('ID Usiminas', equipe.identificacaoUsiminas);
+            }
 
-             // Troca
-             checkAddPage(10);
-             doc.setFont(undefined, 'bold'); doc.text(`Troca Equipamento:`, margin + 5, y);
-             doc.setFont(undefined, 'normal'); doc.text(`${equipe.trocaEquipamento || 'Não'}`, margin + 45, y); y += lineHeight;
-             if (equipe.trocaEquipamento === 'Sim') {
+            // Troca
+            checkAddPage(10);
+            doc.setFont(undefined, 'bold'); doc.text(`Troca Equipamento:`, margin + 5, y);
+            doc.setFont(undefined, 'normal'); doc.text(`${equipe.trocaEquipamento || 'Não'}`, margin + 45, y); y += lineHeight;
+            if (equipe.trocaEquipamento === 'Sim') {
                 addWrappedText('- Motivo', motivoTrocaDisplay || 'N/A', 10);
                 addWrappedText('- Defeito/Medidas', equipe.defeito || 'N/A', 10);
                 if (equipe.placaNova) { addWrappedText('- Placa Nova', equipe.placaNova, 10); }
                 if (equipe.dataHoraTroca) { addWrappedText('- Data/Hora', formatarDataHora(equipe.dataHoraTroca), 10); } // Formatar
-             }
-
-             // Materiais
-             checkAddPage(30);
-             doc.setFont(undefined, 'bold'); doc.text(`Materiais:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
-             if (isAltaPressao) {
-                 addWrappedText('- Pistola', equipe.materiais?.pistola ?? 'N/A', 10); addWrappedText('- Pistola C.L.', equipe.materiais?.pistolaCanoLongo ?? 'N/A', 10); addWrappedText('- Mang. Torpedo', equipe.materiais?.mangueiraTorpedo ?? 'N/A', 10); addWrappedText('- Pedal', equipe.materiais?.pedal ?? 'N/A', 10); addWrappedText('- Varetas', equipe.materiais?.varetas ?? 'N/A', 10); addWrappedText('- Rabicho', equipe.materiais?.rabicho ?? 'N/A', 10); addWrappedText('- Lances Mang.', equipe.lancesMangueira ?? 'N/A', 10); addWrappedText('- Lances Var.', equipe.lancesVaretas ?? 'N/A', 10);
-            } else {
-                 addWrappedText('- Mangotes Check', equipe.materiaisVacuo?.mangotes ?? 'N/A', 10); addWrappedText('- Reduções Check', equipe.materiaisVacuo?.reducoes ?? 'N/A', 10); addWrappedText('- Mangotes 3"', equipe.mangotes3Polegadas ?? 'N/A', 10); addWrappedText('- Mangotes 4"', equipe.mangotes4Polegadas ?? 'N/A', 10); addWrappedText('- Mangotes 6"', equipe.mangotes6Polegadas ?? 'N/A', 10);
             }
-             if (equipe.justificativa) { addWrappedText('Justificativa Falta', equipe.justificativa, 10); }
 
-             // Segurança
-             checkAddPage(15);
-             doc.setFont(undefined, 'bold'); doc.text(`Segurança:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
-             addWrappedText('- Caixa Bloqueio', equipe.caixaBloqueio ?? 'N/A', 10); addWrappedText('- Cadeados', equipe.cadeados ?? 'N/A', 10); addWrappedText('- Plaquetas', equipe.plaquetas ?? 'N/A', 10);
+            // Implementos
+            checkAddPage(30);
+            doc.setFont(undefined, 'bold'); doc.text(`Implementos:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
+            if (isAltaPressao) {
+                addWrappedText('- Pistola', equipe.materiais?.pistola ?? 'N/A', 10); addWrappedText('- Pistola C.L.', equipe.materiais?.pistolaCanoLongo ?? 'N/A', 10); addWrappedText('- Mang. Torpedo', equipe.materiais?.mangueiraTorpedo ?? 'N/A', 10); addWrappedText('- Pedal', equipe.materiais?.pedal ?? 'N/A', 10); addWrappedText('- Varetas', equipe.materiais?.varetas ?? 'N/A', 10); addWrappedText('- Rabicho', equipe.materiais?.rabicho ?? 'N/A', 10); addWrappedText('- Lances Mang.', equipe.lancesMangueira ?? 'N/A', 10); addWrappedText('- Lances Var.', equipe.lancesVaretas ?? 'N/A', 10);
+            } else {
+                addWrappedText('- Mangotes', equipe.materiaisVacuo?.mangotes ?? 'N/A', 10); addWrappedText('- Reduções', equipe.materiaisVacuo?.reducoes ?? 'N/A', 10); addWrappedText('- Mangotes 3"', equipe.mangotes3Polegadas ?? 'N/A', 10); addWrappedText('- Mangotes 4"', equipe.mangotes4Polegadas ?? 'N/A', 10); addWrappedText('- Mangotes 6"', equipe.mangotes6Polegadas ?? 'N/A', 10);
+            }
+            if (equipe.justificativa) { addWrappedText('Justificativa Falta', equipe.justificativa, 10); }
+
+            // Segurança
+            checkAddPage(15);
+            doc.setFont(undefined, 'bold'); doc.text(`Segurança:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
+            addWrappedText('- Caixa Bloqueio', equipe.caixaBloqueio ?? 'N/A', 10); addWrappedText('- Cadeados', equipe.cadeados ?? 'N/A', 10); addWrappedText('- Plaquetas', equipe.plaquetas ?? 'N/A', 10);
 
             // Observações
             if (equipe.observacoes) {
-                 checkAddPage(15);
-                 doc.setFont(undefined, 'bold'); doc.text(`Observações:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
-                 addWrappedText('', equipe.observacoes, 10); // Sem label adicional
+                checkAddPage(15);
+                doc.setFont(undefined, 'bold'); doc.text(`Observações:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
+                addWrappedText('', equipe.observacoes, 10); // Sem label adicional
             }
-             y += lineHeight * 0.5; // Espaço extra entre equipes
-             doc.setLineWidth(0.1); // Linha fina entre equipes
-             doc.line(margin, y, pageWidth - margin, y);
-             y += lineHeight * 1.5;
-
+            y += lineHeight * 0.5; // Espaço extra entre equipes
+            doc.setLineWidth(0.1); // Linha fina entre equipes
+            doc.line(margin, y, pageWidth - margin, y);
+            y += lineHeight * 1.5;
         });
-     }
+    }
 
 
     // --- Rodapé (na última página) ---
-     const pageCount = doc.internal.getNumberOfPages();
-     for (let i = 1; i <= pageCount; i++) {
-         doc.setPage(i);
-         let footerY = pageHeight - margin;
-         doc.setLineWidth(0.2);
-         doc.line(margin, footerY - smallLineHeight * 1.5, pageWidth - margin, footerY - smallLineHeight * 1.5); // Linha acima do rodapé
-         doc.setFontSize(8);
-         doc.setFont(undefined, 'italic');
-         doc.text(`Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.0'}`, margin, footerY);
-         doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, footerY, { align: 'right' });
-     }
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        let footerY = pageHeight - margin;
+        doc.setLineWidth(0.2);
+        doc.line(margin, footerY - smallLineHeight * 1.5, pageWidth - margin, footerY - smallLineHeight * 1.5); // Linha acima do rodapé
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'italic');
+        doc.text(`Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.1'}`, margin, footerY);
+        doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, footerY, { align: 'right' });
+    }
 
 
     // --- Salvar PDF ---
@@ -2248,11 +2343,15 @@ async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'f
       mostrarNotificacao("ID inválido para formatar.", "danger");
       return;
   }
+  
+  // Salvar origem para navegação de retorno
+  setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepSucesso');
+  
   mostrarLoading('Formatando para WhatsApp...');
 
   try {
     let textoWhatsApp = '';
-     let relatorioCompleto = null;
+    let relatorioCompleto = null;
 
     if (origem === 'local') {
       relatorioCompleto = obterRelatorioLocal(id);
@@ -2270,7 +2369,7 @@ async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'f
       }
     }
 
-     // Atualizar estado com o ID visualizado
+    // Atualizar estado com o ID visualizado
     if(window.AppState) AppState.update('ultimoRelatorioId', id);
     else ultimoRelatorioId = id;
 
@@ -2284,9 +2383,7 @@ async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'f
     // Configurar botão voltar para ir para a pesquisa (ou outra tela)
     const btnVoltarWhatsApp = document.getElementById('btnVoltarWhatsApp');
     if (btnVoltarWhatsApp) {
-       // Define para onde voltar baseado no estado anterior ou padrão para pesquisa
-       const origemVolta = window.AppState?.get('currentStep') === 'stepSucesso' ? voltarParaSucesso : voltarDaVisualizacaoParaPesquisa;
-       btnVoltarWhatsApp.onclick = origemVolta;
+       btnVoltarWhatsApp.onclick = voltarDoWhatsApp;
     }
   } catch (error) {
     console.error('Erro ao formatar WhatsApp para relatório existente:', error);
@@ -2304,75 +2401,123 @@ function gerarTextoWhatsAppLocal(relatorio) {
     return 'Erro: Dados do relatório local inválidos ou ausentes.';
   }
 
-  const { dadosTurno, equipes } = relatorio;
-  let texto = '';
-  const nl = '\n'; // Nova linha
+  return formatarRelatorioParaCompartilhamentoFormal(relatorio.dadosTurno, relatorio.equipes);
+}
 
-  texto += "*RELATÓRIO DE TURNO*" + nl;
-  texto += "====================================" + nl + nl;
-  texto += `*Data:* ${formatarData(dadosTurno.data)}` + nl;
-  texto += `*Horário:* ${dadosTurno.horario || 'N/A'}` + nl;
-  texto += `*Letra:* ${dadosTurno.letra || 'N/A'}` + nl;
-  texto += `*Supervisor:* ${dadosTurno.supervisor || 'N/A'}` + nl + nl;
+/**
+ * Formatar o relatório para compartilhamento (WhatsApp) - Versão Formal sem Emojis
+ */
+function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
+  var texto = "";
+  const nl = "\n"; // Nova linha
+  const separadorPrincipal = "====================================" + nl;
+  const separadorSecao = "------------------------------------" + nl;
 
-  // Separar equipes por tipo
-  const equipesPorTipo = equipes.reduce((acc, equipe) => {
-    const tipo = equipe.tipo || 'Outro'; 
-    if (!acc[tipo]) acc[tipo] = []; 
-    acc[tipo].push(equipe); 
-    return acc;
-  }, {});
-
-  // Processar cada tipo
-  for (const tipo in equipesPorTipo) {
-    const equipesDoTipo = equipesPorTipo[tipo];
-    texto += `*EQUIPES ${tipo.toUpperCase()} (${equipesDoTipo.length})*` + nl;
-    texto += "====================================" + nl + nl;
-
-    equipesDoTipo.forEach((equipe, index) => {
-      const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-      const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-      const motivoTrocaDisplay = equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
-      const isAltaPressao = tipo === 'Alta Pressão';
-
-      texto += `*EQUIPE ${index + 1}: ${equipe.numero || 'N/A'}*` + nl;
-      texto += `*Integrantes:* ${equipe.integrantes || 'N/A'}` + nl;
-      texto += `*Área:* ${equipe.area || 'N/A'}` + nl;
-      texto += `*Atividade:* ${equipe.atividade || 'N/A'}` + nl;
-      texto += `*Vaga:* ${vagaDisplay || 'N/A'}` + nl;
-      texto += `*Equipamento:* ${equipDisplay || 'N/A'}` + nl;
-
-      // Materiais específicos (simplificado)
-      if (isAltaPressao) {
-          if(equipe.lancesMangueira && equipe.lancesMangueira !== 'N/A') texto += `- Lances Mangueira: ${equipe.lancesMangueira}` + nl;
-          if(equipe.lancesVaretas && equipe.lancesVaretas !== 'N/A') texto += `- Lances Varetas: ${equipe.lancesVaretas}` + nl;
-      } else { // Vácuo
-          if(equipe.mangotes3Polegadas && equipe.mangotes3Polegadas !== 'N/A') texto += `- Mangotes 3": ${equipe.mangotes3Polegadas}` + nl;
-          if(equipe.mangotes4Polegadas && equipe.mangotes4Polegadas !== 'N/A') texto += `- Mangotes 4": ${equipe.mangotes4Polegadas}` + nl;
-          if(equipe.mangotes6Polegadas && equipe.mangotes6Polegadas !== 'N/A') texto += `- Mangotes 6": ${equipe.mangotes6Polegadas}` + nl;
-      }
-
-      // Troca (se houver)
-      if (equipe.trocaEquipamento === 'Sim') {
-        texto += nl + "*TROCA EQUIPAMENTO:* Sim" + nl;
-        texto += `- Motivo: ${motivoTrocaDisplay || 'Não especificado'}` + nl;
-        if (equipe.defeito) texto += `- Defeito: ${equipe.defeito}` + nl;
-        if (equipe.placaNova) texto += `- Placa Nova: ${equipe.placaNova}` + nl;
-        if (equipe.dataHoraTroca) texto += `- Data/Hora: ${formatarDataHora(equipe.dataHoraTroca)}` + nl;
-      }
-
-      // Observações (se houver)
-      if (equipe.observacoes) {
-        texto += nl + `*Observações:* ${equipe.observacoes}` + nl;
-      }
-
-      texto += nl; // Espaço entre equipes
-    });
+  if (!dadosTurno || !Array.isArray(equipes)) {
+      return "Erro: Dados inválidos para formatação.";
   }
 
-  texto += "----------------------------" + nl;
-  texto += "Relatório gerado pelo Sistema v" + (window.CONFIG?.VERSAO_APP || '3.0') + nl;
-  texto += "----------------------------";
+  // Cabeçalho do Relatório
+  texto += "*RELATÓRIO DE TURNO - GPS MECANIZADA*" + nl;
+  texto += separadorPrincipal + nl;
+  texto += `*Data:* ${formatarData(dadosTurno.Data || dadosTurno.data)}` + nl;
+  texto += `*Horário:* ${dadosTurno.Horário || dadosTurno.horario || 'N/A'}` + nl;
+  texto += `*Letra:* ${dadosTurno.Letra || dadosTurno.letra || 'N/A'}` + nl;
+  texto += `*Supervisor:* ${dadosTurno.Supervisor || dadosTurno.supervisor || 'N/A'}` + nl + nl;
+
+  // Agrupar equipes por tipo
+  var equipesPorTipo = equipes.reduce((acc, eq) => {
+      var tipo = eq.Tipo_Equipe || eq.tipo || 'Tipo Desconhecido';
+      if (!acc[tipo]) acc[tipo] = [];
+      acc[tipo].push(eq);
+      return acc;
+  }, {});
+
+  // Formatar cada tipo de equipe
+  for (const tipo in equipesPorTipo) {
+      const equipesDoTipo = equipesPorTipo[tipo];
+      texto += `*EQUIPES ${tipo.toUpperCase()} (${equipesDoTipo.length})*` + nl;
+      texto += separadorSecao + nl;
+
+      equipesDoTipo.forEach(function(equipe, index) {
+          // Compatibilidade com diferentes formatos de campo
+          const getField = (field, altField, defaultVal = 'N/A') => 
+            equipe[field] !== undefined ? equipe[field] : (equipe[altField] !== undefined ? equipe[altField] : defaultVal);
+          
+          texto += `*Equipe ${index + 1}:* ${getField('numero', 'Numero_Equipe')}` + nl;
+          texto += `  Motorista: ${getField('motorista', 'Motorista')}` + nl;
+          texto += `  Operador(es): ${getField('operadores', 'Operadores')}` + nl;
+          texto += `  Área: ${getField('area', 'Area')}` + nl;
+          texto += `  Atividade: ${getField('atividade', 'Atividade')}` + nl;
+          
+          const vaga = getField('vaga', 'Vaga');
+          const vagaPersonalizada = getField('vagaPersonalizada', 'Vaga_Personalizada', '');
+          let vagaDisplay = vaga + (vagaPersonalizada ? ` (${vagaPersonalizada})` : "");
+          texto += `  Vaga: ${vagaDisplay || 'N/A'}` + nl;
+          
+          const equipamento = getField('equipamento', 'Equipamento');
+          const equipPersonalizado = getField('equipamentoPersonalizado', 'Equipamento_Personalizada', '');
+          let equipDisplay = equipamento + (equipPersonalizado ? ` (${equipPersonalizado})` : "");
+          texto += `  Equipamento: ${equipDisplay || 'N/A'}` + nl;
+          
+          const identificacaoUsiminas = getField('identificacaoUsiminas', 'Identificacao_Usiminas', '');
+          if (identificacaoUsiminas) {
+            texto += `  ID Usiminas: ${identificacaoUsiminas}` + nl;
+          }
+
+          // Materiais específicos (simplificado)
+          if (tipo === 'Alta Pressão' || tipo.toUpperCase().includes('ALTA')) {
+              const lancesMangueira = getField('lancesMangueira', 'Lances_Mangueira');
+              const lancesVaretas = getField('lancesVaretas', 'Lances_Varetas');
+              if(lancesMangueira && lancesMangueira !== 'N/A') 
+                texto += `  Lances Mang.: ${lancesMangueira}` + nl;
+              if(lancesVaretas && lancesVaretas !== 'N/A') 
+                texto += `  Lances Varetas: ${lancesVaretas}` + nl;
+          } else { // Vácuo / Hiper Vácuo
+              const mangotes3 = getField('mangotes3Polegadas', 'Mangotes_3_Polegadas');
+              const mangotes4 = getField('mangotes4Polegadas', 'Mangotes_4_Polegadas');
+              const mangotes6 = getField('mangotes6Polegadas', 'Mangotes_6_Polegadas');
+              if(mangotes3 && mangotes3 !== 'N/A') 
+                texto += `  Mangotes 3": ${mangotes3}` + nl;
+              if(mangotes4 && mangotes4 !== 'N/A') 
+                texto += `  Mangotes 4": ${mangotes4}` + nl;
+              if(mangotes6 && mangotes6 !== 'N/A') 
+                texto += `  Mangotes 6": ${mangotes6}` + nl;
+          }
+
+          // Troca (se houver)
+          const trocaEquipamento = getField('trocaEquipamento', 'Troca_Equipamento', 'Não');
+          if (trocaEquipamento === 'Sim') {
+              texto += nl + "  *Troca de Equipamento: Sim*" + nl;
+              const motivoTroca = getField('motivoTroca', 'Motivo_Troca', '');
+              const motivoOutro = getField('motivoOutro', 'Motivo_Outro', '');
+              let motivoTrocaDisplay = motivoTroca === 'Outros Motivos (Justificar)' ? motivoOutro : motivoTroca;
+              motivoTrocaDisplay = motivoTroca?.includes('Defeitos') ? motivoOutro : motivoTrocaDisplay;
+              texto += `    Motivo: ${motivoTrocaDisplay || 'Não especificado'}` + nl;
+              
+              const defeito = getField('defeito', 'Defeito', '');
+              if (defeito) texto += `    Defeito/Medidas: ${defeito}` + nl;
+              
+              const placaNova = getField('placaNova', 'Placa_Nova', '');
+              if (placaNova) texto += `    Placa Nova: ${placaNova}` + nl;
+              
+              const dataHoraTroca = getField('dataHoraTroca', 'Data_Hora_Troca', '');
+              if (dataHoraTroca) texto += `    Data/Hora: ${formatarDataHora(dataHoraTroca)}` + nl;
+          }
+
+          // Observações (se houver)
+          const observacoes = getField('observacoes', 'Observacoes', '');
+          if (observacoes) {
+              texto += nl + `  *Observações:* ${observacoes}` + nl;
+          }
+
+          texto += nl; // Espaço entre equipes
+      });
+  }
+
+  // Rodapé
+  texto += separadorPrincipal;
+  texto += `Relatório gerado automaticamente pelo Sistema v${window.CONFIG?.VERSAO_APP || '3.1'}`;
 
   return texto;
 }
@@ -2545,6 +2690,7 @@ window.visualizarRelatorio = visualizarRelatorio;
 window.formatarWhatsApp = formatarWhatsApp;
 window.voltarParaSucesso = voltarParaSucesso;
 window.voltarDoWhatsApp = voltarDoWhatsApp;
+window.voltarDoRelatorio = voltarDoRelatorio;
 window.copiarRelatorio = copiarRelatorio;
 window.copiarWhatsApp = copiarWhatsApp;
 window.adicionarEquipe = adicionarEquipe;
