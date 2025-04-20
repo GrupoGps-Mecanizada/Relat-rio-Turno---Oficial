@@ -1,5 +1,6 @@
 /**
  * Módulo de Notificações - Implementa sistema de alertas e notificações
+ * Versão aprimorada com suporte ao tema escuro e fundos opacos
  */
 ModuleLoader.register('notifications', function() {
   // Configurações
@@ -29,17 +30,22 @@ ModuleLoader.register('notifications', function() {
             top: 20px;
             right: 20px;
             z-index: 9999;
-            width: 300px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
           }
           
           .notification {
             padding: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             animation: notification-fadein 0.3s;
             position: relative;
             transition: opacity 0.3s, transform 0.3s;
+            display: flex;
+            align-items: flex-start;
           }
           
           .notification.fade-out {
@@ -53,10 +59,35 @@ ModuleLoader.register('notifications', function() {
             right: 10px;
             cursor: pointer;
             opacity: 0.7;
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: inherit;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
           }
           
           .notification .close-btn:hover {
             opacity: 1;
+            background-color: rgba(0, 0, 0, 0.05);
+          }
+          
+          .notification-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .notification-content {
+            flex: 1;
+            padding-right: 20px;
           }
           
           .notification-info {
@@ -83,6 +114,32 @@ ModuleLoader.register('notifications', function() {
             color: #c62828;
           }
           
+          /* Estilos para modo escuro */
+          body.dark-mode .notification-info {
+            background-color: rgba(3, 169, 244, 0.15);
+            border-left: 4px solid #03a9f4;
+            color: #81d4fa;
+          }
+          
+          body.dark-mode .notification-success {
+            background-color: rgba(76, 175, 80, 0.15);
+            border-left: 4px solid #4caf50;
+            color: #a5d6a7;
+          }
+          
+          body.dark-mode .notification-warning {
+            background-color: rgba(255, 152, 0, 0.15);
+            border-left: 4px solid #ff9800;
+            color: #ffcc80;
+          }
+          
+          body.dark-mode .notification-error,
+          body.dark-mode .notification-danger {
+            background-color: rgba(244, 67, 54, 0.15);
+            border-left: 4px solid #f44336;
+            color: #ef9a9a;
+          }
+          
           @keyframes notification-fadein {
             from {
               opacity: 0;
@@ -98,6 +155,12 @@ ModuleLoader.register('notifications', function() {
       }
     }
     
+    // Escutar eventos de mudança de tema
+    document.addEventListener('themeChanged', function(event) {
+      const isDarkMode = event.detail ? event.detail.darkMode : false;
+      updateNotificationsTheme(isDarkMode);
+    });
+    
     // Exportar globalmente para compatibilidade com códigos antigos
     window.Notifications = {
       show: show,
@@ -109,6 +172,11 @@ ModuleLoader.register('notifications', function() {
     };
     
     console.log('Módulo Notifications inicializado com sucesso.');
+  }
+  
+  // Atualizar tema das notificações existentes
+  function updateNotificationsTheme(isDarkMode) {
+    // Nenhuma ação necessária, os estilos CSS já lidam com isso via classes
   }
   
   // Mostrar uma notificação
@@ -142,10 +210,9 @@ ModuleLoader.register('notifications', function() {
     
     // Conteúdo da notificação
     notification.innerHTML = `
-      <span class="close-btn"><i class="bi bi-x"></i></span>
-      <div class="notification-content">
-        ${icon} ${message}
-      </div>
+      <button class="close-btn" aria-label="Fechar"><i class="bi bi-x"></i></button>
+      <div class="notification-icon">${icon}</div>
+      <div class="notification-content">${message}</div>
     `;
     
     // Adicionar ao container
