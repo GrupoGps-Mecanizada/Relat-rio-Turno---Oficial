@@ -1,6 +1,6 @@
 /**
- * Gerenciador de temas da aplicação
- * Implementa modo escuro/claro e preferências de UI
+ * Gerenciador de temas da aplicação - Versão 2.0
+ * Implementa modo escuro/claro com transições suaves e cores aprimoradas
  */
 ModuleLoader.register('themeManager', function() {
   // Constantes
@@ -29,24 +29,29 @@ ModuleLoader.register('themeManager', function() {
     // Aplicar tema inicial
     applyTheme();
 
+    // Adicionar CSS para transições suaves
+    addSmoothTransitions();
+    
     // Adicionar toggle de tema DEPOIS que o DOM estiver pronto
     // Usar setTimeout pode ser frágil, melhor garantir que o DOMContentLoaded de main.js já rodou
     // Ou chamar addThemeToggle explicitamente de main.js após a inicialização dos módulos de UI
     // Por segurança, vamos manter um pequeno timeout, mas idealmente seria chamado explicitamente.
-     setTimeout(addThemeToggle, 100); // Reduzido timeout
+    setTimeout(addThemeToggle, 100); // Reduzido timeout
 
     // Observar preferências do sistema
     watchSystemPreference();
 
-    console.log('ThemeManager inicializado com sucesso.');
+    console.log('ThemeManager inicializado com sucesso. Modo escuro ativo:', isDarkMode);
   }
 
   // Aplicar o tema atual ao body e atualizar AppState
   function applyTheme() {
     if (isDarkMode) {
       document.body.classList.add(DARK_CLASS);
+      document.documentElement.setAttribute('data-bs-theme', 'dark');
     } else {
       document.body.classList.remove(DARK_CLASS);
+      document.documentElement.setAttribute('data-bs-theme', 'light');
     }
 
     // Atualizar AppState se disponível
@@ -57,6 +62,10 @@ ModuleLoader.register('themeManager', function() {
 
     // Atualizar o botão se ele já existir
     updateToggleButton();
+    
+    // Acionar evento de mudança de tema para outros componentes escutarem
+    const event = new CustomEvent('themeChanged', { detail: { darkMode: isDarkMode } });
+    document.dispatchEvent(event);
   }
 
   // Alternar entre temas
@@ -75,6 +84,20 @@ ModuleLoader.register('themeManager', function() {
     }
 
     return isDarkMode;
+  }
+
+  // Adicionar CSS para fazer transições suaves entre modos
+  function addSmoothTransitions() {
+    if (!document.getElementById('theme-transitions')) {
+      const styleEl = document.createElement('style');
+      styleEl.id = 'theme-transitions';
+      styleEl.textContent = `
+        * {
+          transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+      `;
+      document.head.appendChild(styleEl);
+    }
   }
 
   // Adicionar toggle de tema na interface (MAIS SEGURO)
@@ -96,7 +119,7 @@ ModuleLoader.register('themeManager', function() {
 
     // 3. Criar o botão
     const themeButton = document.createElement('button');
-    themeButton.className = 'btn btn-outline-light'; // Usar a classe visualmente correta
+    themeButton.className = 'btn btn-outline-light btn-action'; // Usar a classe visualmente correta
     themeButton.id = BUTTON_ID; // Definir o ID
     themeButton.title = 'Alternar Tema'; // Tooltip
 
@@ -113,10 +136,6 @@ ModuleLoader.register('themeManager', function() {
 
     // 7. Garantir que o texto/ícone inicial esteja correto
     updateToggleButton();
-
-    // Adicionar estilos CSS para modo escuro (se já não estiverem em styles.css)
-    // É melhor ter esses estilos diretamente em styles.css
-    ensureDarkThemeStyles();
   }
 
   // Atualizar ícone e texto do botão de acordo com o tema atual
@@ -126,6 +145,13 @@ ModuleLoader.register('themeManager', function() {
       themeButton.innerHTML = isDarkMode
         ? '<i class="bi bi-sun"></i> <span class="d-none d-sm-inline">Modo Claro</span>'
         : '<i class="bi bi-moon"></i> <span class="d-none d-sm-inline">Modo Escuro</span>';
+        
+      // Adicionar efeito de brilho no modo escuro
+      if (isDarkMode) {
+        themeButton.classList.add('theme-button-glow');
+      } else {
+        themeButton.classList.remove('theme-button-glow');
+      }
     }
   }
 
@@ -158,31 +184,6 @@ ModuleLoader.register('themeManager', function() {
     }
   }
 
-  // Garante que os estilos para o modo escuro existam (melhor ter isso em styles.css)
-  function ensureDarkThemeStyles() {
-      if (!document.getElementById('dark-mode-styles')) {
-          const darkStyles = document.createElement('style');
-          darkStyles.id = 'dark-mode-styles';
-          // Colar aqui todas as regras CSS de body.dark-mode, .dark-mode .card, etc.
-          // É altamente recomendado mover essas regras para o arquivo styles.css principal.
-          darkStyles.textContent = `
-              body.dark-mode { background-color: #121212; color: #e0e0e0; }
-              .dark-mode .card { background-color: #1e1e1e; border-color: #333; }
-              .dark-mode .card-header { background-color: #2c2c2c; border-bottom-color: #333; color: #e0e0e0; }
-              /* Adicione TODAS as outras regras .dark-mode ... aqui */
-              .dark-mode .form-control, .dark-mode .form-select { background-color: #2c2c2c; border-color: #444; color: #e0e0e0; }
-              .dark-mode .form-control:focus, .dark-mode .form-select:focus { background-color: #333; border-color: var(--primary-color); }
-              .dark-mode .table { color: #e0e0e0; }
-              .dark-mode .table-striped > tbody > tr:nth-of-type(odd) { background-color: rgba(255, 255, 255, 0.05); }
-              .dark-mode .alert-info { background-color: #0d2438; border-color: #1e4b70; color: #bee1f8; }
-              /* ... etc ... */
-          `;
-           if (document.head) {
-               document.head.appendChild(darkStyles);
-           }
-      }
-  }
-
   // Retornar estado atual
   function isDark() {
     return isDarkMode;
@@ -192,6 +193,7 @@ ModuleLoader.register('themeManager', function() {
   return {
     init,
     toggleTheme,
-    isDark
+    isDark,
+    applyTheme
   };
 });
