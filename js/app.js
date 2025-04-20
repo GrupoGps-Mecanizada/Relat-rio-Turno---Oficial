@@ -732,7 +732,7 @@ function adicionarEquipe(tipo) {
   document.getElementById('materiaisVacuo').style.display = isAltaPressao ? 'none' : 'block';
 
 // Preencher selects de Vaga e Equipamento com base no tipo e nos dados carregados/fallback
-const isAltaPressao = tipo === 'Alta Pressão'; // Definição de isAltaPressao
+const isAltaPressao = tipo === 'Alta Pressão';
 
 if (dadosFormulario && (dadosFormulario.vagasAltaPressao || dadosFormulario.opcoesHorario)) { // Verifica se o objeto principal existe e tem dados
     const base = dadosFormulario; // 'base' agora é o próprio objeto de opções
