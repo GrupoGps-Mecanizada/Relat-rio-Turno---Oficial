@@ -378,10 +378,16 @@
                                       </select>
                                   <div class="invalid-feedback">Campo obrigatório.</div>
                               </div>
+                              <!-- MUDANÇA 1: Substituição do campo "Integrantes" por "Motorista" e "Operador(es)" -->
                               <div class="mb-3">
-                                  <label for="equipeIntegrantes" class="form-label">Integrantes <span class="text-danger">*</span></label>
-                                  <textarea class="form-control" id="equipeIntegrantes" rows="2" required minlength="3" placeholder="Nome Sobrenome, Nome Sobrenome..."></textarea>
-                                  <div class="invalid-feedback">Informe os integrantes (mín. 3 caracteres).</div>
+                                <label for="equipeMotorista" class="form-label">Motorista <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="equipeMotorista" required minlength="3" placeholder="Nome do motorista">
+                                <div class="invalid-feedback">Informe o nome do motorista (mín. 3 caracteres).</div>
+                              </div>
+                              <div class="mb-3">
+                                <label for="equipeOperadores" class="form-label">Operador(es) <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="equipeOperadores" rows="2" required minlength="3" placeholder="Nome dos operadores"></textarea>
+                                <div class="invalid-feedback">Informe os operadores (mín. 3 caracteres).</div>
                               </div>
                               <div class="mb-3">
                                   <label for="equipeArea" class="form-label">Área de Atuação <span class="text-danger">*</span></label>
@@ -393,19 +399,24 @@
                                   <input type="text" class="form-control" id="equipeAtividade" required minlength="3" placeholder="Ex: Limpeza de caixa, Desobstrução...">
                                    <div class="invalid-feedback">Informe a atividade (mín. 3 caracteres).</div>
                               </div>
+                              <!-- MUDANÇA 2: Renomear "Vaga Estacionamento" para "Vaga (Parte Diária)" e adicionar "Identificação Usiminas" -->
                               <div class="row mb-3">
-                                  <div class="col-sm-8">
-                                      <label for="equipeVaga" class="form-label">Vaga Estacionamento <span class="text-danger">*</span></label>
-                                      <select class="form-select" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
-                                          <option value="" selected disabled>Selecione a vaga...</option>
-                                          </select>
-                                      <div class="invalid-feedback">Selecione a vaga.</div>
-                                  </div>
-                                  <div class="col-sm-4" id="vagaPersonalizadaContainer" style="display: none;">
-                                      <label for="equipeVagaPersonalizada" class="form-label">Qual? <span class="text-danger">*</span></label>
-                                      <input type="text" class="form-control form-control-sm" id="equipeVagaPersonalizada">
-                                       <div class="invalid-feedback">Informe a vaga.</div>
-                                  </div>
+                                <div class="col-sm-8">
+                                  <label for="equipeVaga" class="form-label">Vaga (Parte Diária) <span class="text-danger">*</span></label>
+                                  <select class="form-select" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
+                                    <option value="" selected disabled>Selecione a vaga...</option>
+                                  </select>
+                                  <div class="invalid-feedback">Selecione a vaga.</div>
+                                </div>
+                                <div class="col-sm-4" id="vagaPersonalizadaContainer" style="display: none;">
+                                  <label for="equipeVagaPersonalizada" class="form-label">Qual? <span class="text-danger">*</span></label>
+                                  <input type="text" class="form-control form-control-sm" id="equipeVagaPersonalizada">
+                                  <div class="invalid-feedback">Informe a vaga.</div>
+                                </div>
+                              </div>
+                              <div class="mb-3">
+                                <label for="equipeIdentificacaoUsiminas" class="form-label">Identificação Usiminas</label>
+                                <input type="text" class="form-control" id="equipeIdentificacaoUsiminas" placeholder="Código de identificação da Usiminas">
                               </div>
                                <div class="row mb-3">
                                   <div class="col-sm-8">
@@ -438,25 +449,30 @@
                                 </div>
                                 <div id="trocaDetalhes" style="display: none;" class="p-2 border rounded bg-light mb-3">
                                     <p class="fw-bold mb-1">Detalhes da Troca:</p>
+                                    <!-- MUDANÇA 3: Novas opções para Status do Equipamento -->
                                     <div class="mb-2">
-                                        <label class="form-label d-block">Motivo <span class="text-danger">*</span></label>
-                                         <div class="form-check form-check-inline">
-                                             <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoManutencao" value="Manutenção Preventiva" onchange="toggleMotivoOutro()">
-                                             <label class="form-check-label" for="motivoManutencao"><small>Manut. Preventiva</small></label>
-                                         </div>
-                                         <div class="form-check form-check-inline">
-                                             <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCorretiva" value="Manutenção Corretiva" onchange="toggleMotivoOutro()">
-                                             <label class="form-check-label" for="motivoCorretiva"><small>Manut. Corretiva</small></label>
-                                         </div>
-                                         <div class="form-check form-check-inline">
-                                             <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoAbastecimento" value="Abastecimento" onchange="toggleMotivoOutro()">
-                                             <label class="form-check-label" for="motivoAbastecimento"><small>Abastecimento</small></label>
-                                         </div>
-                                          <div class="form-check form-check-inline">
-                                             <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
-                                             <label class="form-check-label" for="motivoOutro"><small>Outro</small></label>
-                                         </div>
-                                         <div class="invalid-feedback" id="motivoTrocaFeedback" style="display: none;">Selecione um motivo.</div>
+                                      <label class="form-label d-block">Motivo <span class="text-danger">*</span></label>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoManutencao" value="Manutenção Preventiva" onchange="toggleMotivoOutro()">
+                                        <label class="form-check-label" for="motivoManutencao"><small>Manut. Preventiva</small></label>
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCorretiva" value="Manutenção Corretiva" onchange="toggleMotivoOutro()">
+                                        <label class="form-check-label" for="motivoCorretiva"><small>Manut. Corretiva</small></label>
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCliente" value="Solicitação Do Cliente" onchange="toggleMotivoOutro()">
+                                        <label class="form-check-label" for="motivoCliente"><small>Solicitação Cliente</small></label>
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoDefeitos" value="Defeitos Em Geral (Justificar)" onchange="toggleMotivoOutro()">
+                                        <label class="form-check-label" for="motivoDefeitos"><small>Defeitos Gerais</small></label>
+                                      </div>
+                                      <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
+                                        <label class="form-check-label" for="motivoOutro"><small>Outro</small></label>
+                                      </div>
+                                      <div class="invalid-feedback" id="motivoTrocaFeedback" style="display: none;">Selecione um motivo.</div>
                                     </div>
                                      <div class="mb-2" id="motivoOutroContainer" style="display: none;">
                                           <label for="equipeMotivoOutro" class="form-label">Especifique o Motivo <span class="text-danger">*</span></label>
@@ -480,20 +496,22 @@
                                 </div>
 
                                 <hr>
-                                <h5>Materiais e Segurança</h5>
+                                <!-- MUDANÇA 4: Renomear "Materiais e Segurança" para "Implementos e Segurança" -->
+                                <h5>Implementos e Segurança</h5>
 
                                 <div id="materiaisAltaPressao" style="display: none;">
                                     <div class="row mb-2">
-                                        <div class="col-sm-6"><label for="equipePistola" class="form-label"><small>Pistola</small></label><select class="form-select form-select-sm" id="equipePistola"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
-                                        <div class="col-sm-6"><label for="equipePistolaCanoLongo" class="form-label"><small>Pistola C.L.</small></label><select class="form-select form-select-sm" id="equipePistolaCanoLongo"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
+                                        <!-- MUDANÇA 5: Mudar valores padrão nos selects para "N/A" -->
+                                        <div class="col-sm-6"><label for="equipePistola" class="form-label"><small>Pistola</small></label><select class="form-select form-select-sm" id="equipePistola"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipePistolaCanoLongo" class="form-label"><small>Pistola C.L.</small></label><select class="form-select form-select-sm" id="equipePistolaCanoLongo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                      <div class="row mb-2">
-                                        <div class="col-sm-6"><label for="equipeMangueiraTorpedo" class="form-label"><small>Mang. Torpedo</small></label><select class="form-select form-select-sm" id="equipeMangueiraTorpedo"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
-                                        <div class="col-sm-6"><label for="equipePedal" class="form-label"><small>Pedal</small></label><select class="form-select form-select-sm" id="equipePedal"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
+                                        <div class="col-sm-6"><label for="equipeMangueiraTorpedo" class="form-label"><small>Mang. Torpedo</small></label><select class="form-select form-select-sm" id="equipeMangueiraTorpedo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipePedal" class="form-label"><small>Pedal</small></label><select class="form-select form-select-sm" id="equipePedal"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                     <div class="row mb-2">
-                                         <div class="col-sm-6"><label for="equipeVaretas" class="form-label"><small>Varetas</small></label><select class="form-select form-select-sm" id="equipeVaretas"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
-                                        <div class="col-sm-6"><label for="equipeRabicho" class="form-label"><small>Rabicho</small></label><select class="form-select form-select-sm" id="equipeRabicho"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
+                                         <div class="col-sm-6"><label for="equipeVaretas" class="form-label"><small>Varetas</small></label><select class="form-select form-select-sm" id="equipeVaretas"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipeRabicho" class="form-label"><small>Rabicho</small></label><select class="form-select form-select-sm" id="equipeRabicho"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                      <div class="row mb-2">
                                         <div class="col-sm-6"><label for="equipeLancesMangueira" class="form-label"><small>Lances Mangueira</small></label><select class="form-select form-select-sm" id="equipeLancesMangueira"></select></div>
@@ -503,8 +521,9 @@
 
                                 <div id="materiaisVacuo" style="display: none;">
                                     <div class="row mb-2">
-                                         <div class="col-sm-6"><label for="equipeMangotes" class="form-label"><small>Mangotes Check</small></label><select class="form-select form-select-sm" id="equipeMangotes"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
-                                        <div class="col-sm-6"><label for="equipeReducoes" class="form-label"><small>Reduções Check</small></label><select class="form-select form-select-sm" id="equipeReducoes"><option value="OK">OK</option><option value="Falta">Falta</option><option value="N/A">N/A</option></select></div>
+                                         <!-- MUDANÇA 6: Remover a palavra "Check" dos labels -->
+                                         <div class="col-sm-6"><label for="equipeMangotes" class="form-label"><small>Mangotes</small></label><select class="form-select form-select-sm" id="equipeMangotes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipeReducoes" class="form-label"><small>Reduções</small></label><select class="form-select form-select-sm" id="equipeReducoes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                     <div class="row mb-2">
                                          <div class="col-sm-4"><label for="equipeMangotes3Polegadas" class="form-label"><small>Mangotes 3"</small></label><select class="form-select form-select-sm" id="equipeMangotes3Polegadas"></select></div>
