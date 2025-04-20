@@ -9,6 +9,7 @@ ModuleLoader.register('dashboard', function() {
   // Dados para gráficos
   let chartInstanceEquipamentos = null;
   let chartInstanceAreas = null;
+  let chartInstanceMotivos = null;
   
   // Inicializar listeners
   function init() {
@@ -54,6 +55,8 @@ ModuleLoader.register('dashboard', function() {
               estatisticasGerais: result.estatisticasGerais || {},
               equipamentos: result.equipamentos || [],
               areas: result.areas || [],
+              motivos: result.motivos || [], // Adicionado para estatísticas de motivos de troca
+              supervisores: result.supervisores || {}, // Adicionado para dados de supervisor
               ultimosRelatorios: result.ultimosRelatorios || []
             };
             // Guardar em cache por 10 minutos
@@ -87,6 +90,10 @@ ModuleLoader.register('dashboard', function() {
       renderizarEstatisticasGerais(dashboardData.estatisticasGerais);
       renderizarGraficoEquipamentos(dashboardData.equipamentos);
       renderizarGraficoAreas(dashboardData.areas);
+      // Adicionar nova função para renderizar motivos de troca
+      if (dashboardData.motivos && dashboardData.motivos.length > 0) {
+        renderizarGraficoMotivos(dashboardData.motivos);
+      }
       renderizarUltimosRelatorios(dashboardData.ultimosRelatorios);
       
       ocultarLoading();
@@ -104,6 +111,7 @@ ModuleLoader.register('dashboard', function() {
     // Extrair equipamentos e áreas dos relatórios
     const equipamentosMap = new Map();
     const areasMap = new Map();
+    const motivosMap = new Map(); // Adicionado: mapa para motivos de troca
     
     let totalEquipes = 0;
     let totalTrocas = 0;
@@ -129,9 +137,21 @@ ModuleLoader.register('dashboard', function() {
           }
           areasMap.set(areaKey, areasMap.get(areaKey) + 1);
           
-          // Contar trocas
+          // Contar trocas e motivos
           if (eq.trocaEquipamento === 'Sim') {
             totalTrocas++;
+            
+            // Processar motivo da troca
+            let motivoKey = eq.motivoTroca || 'Não especificado';
+            // Se for "Outros Motivos" ou "Defeitos", usar o campo motivoOutro se disponível
+            if ((motivoKey === 'Outros Motivos (Justificar)' || motivoKey === 'Defeitos Em Geral (Justificar)') && eq.motivoOutro) {
+              motivoKey = eq.motivoOutro;
+            }
+            
+            if (!motivosMap.has(motivoKey)) {
+              motivosMap.set(motivoKey, 0);
+            }
+            motivosMap.set(motivoKey, motivosMap.get(motivoKey) + 1);
           }
         });
       }
@@ -147,6 +167,12 @@ ModuleLoader.register('dashboard', function() {
       .map(([area, quantidade]) => ({ area, quantidade }))
       .sort((a, b) => b.quantidade - a.quantidade)
       .slice(0, 5); // Top 5
+      
+    // Novo: converter motivos para array
+    const motivos = Array.from(motivosMap.entries())
+      .map(([motivo, quantidade]) => ({ motivo, quantidade }))
+      .sort((a, b) => b.quantidade - a.quantidade)
+      .slice(0, 6); // Top 6 motivos
     
     return {
       estatisticasGerais: {
@@ -157,6 +183,7 @@ ModuleLoader.register('dashboard', function() {
       },
       equipamentos: equipamentos,
       areas: areas,
+      motivos: motivos, // Novo array de motivos
       ultimosRelatorios: relatorios.map(rel => ({
         id: rel.id,
         data: rel.data,
@@ -193,6 +220,14 @@ ModuleLoader.register('dashboard', function() {
         { area: "Linha de Produção", quantidade: Math.floor(Math.random() * 20) + 15 },
         { area: "Manutenção", quantidade: Math.floor(Math.random() * 15) + 5 },
         { area: "Outras Áreas", quantidade: Math.floor(Math.random() * 10) + 5 }
+      ],
+      // Novo: dados simulados para motivos de troca
+      motivos: [
+        { motivo: "Manutenção Preventiva", quantidade: Math.floor(Math.random() * 10) + 5 },
+        { motivo: "Quebra", quantidade: Math.floor(Math.random() * 8) + 3 },
+        { motivo: "Falha Operacional", quantidade: Math.floor(Math.random() * 7) + 2 },
+        { motivo: "Troca Regular", quantidade: Math.floor(Math.random() * 5) + 4 },
+        { motivo: "Outros", quantidade: Math.floor(Math.random() * 5) + 1 }
       ],
       ultimosRelatorios: [
         {
@@ -355,6 +390,55 @@ ModuleLoader.register('dashboard', function() {
           title: {
             display: true,
             text: 'Áreas Mais Atendidas'
+          }
+        }
+      }
+    });
+  }
+  
+  // Nova função: Renderizar gráfico de motivos de troca
+  function renderizarGraficoMotivos(dados) {
+    const container = document.getElementById('graficoMotivos');
+    if (!container) {
+      console.warn("Container para gráfico de motivos não encontrado");
+      return;
+    }
+    
+    // Destruir gráfico anterior se existir
+    if (chartInstanceMotivos) {
+      chartInstanceMotivos.destroy();
+    }
+    
+    // Preparar dados para o gráfico
+    const labels = dados.map(item => item.motivo);
+    const values = dados.map(item => item.quantidade);
+    const backgroundColors = dados.map((_, index) => {
+      const hue = (index * 60) % 360;
+      return `hsla(${hue}, 70%, 60%, 0.7)`;
+    });
+    
+    // Criar novo gráfico
+    const ctx = container.getContext('2d');
+    chartInstanceMotivos = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: backgroundColors,
+          borderColor: backgroundColors.map(color => color.replace('0.7', '1')),
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'right'
+          },
+          title: {
+            display: true,
+            text: 'Motivos de Troca de Equipamento'
           }
         }
       }
