@@ -72,6 +72,8 @@ async function inicializarFormulario() {
   }
 }
 
+// Em app.js
+
 /**
  * Carregar dados do formulário
  */
@@ -79,21 +81,21 @@ async function carregarDadosFormulario() {
   mostrarLoading('Carregando opções...');
 
   try {
-    // Tentar buscar da API
-    // Nome da ação corrigido para 'obterDadosFormulario'
-    const result = await callAPI('obterDadosFormulario'); // <<< CORRIGIDO AQUI
+    const result = await callAPI('obterDadosFormulario');
 
-    if (result && result.success) {
-      dadosFormulario = result.dados || result; // Adaptar conforme a estrutura de resposta da API
+    // ---- MODIFICAÇÃO AQUI ----
+    // Verifica se a resposta foi bem-sucedida e se contém a chave OPCOES_FORMULARIO
+    if (result && result.success && result.OPCOES_FORMULARIO) {
+      dadosFormulario = result.OPCOES_FORMULARIO; // Pega os dados de dentro da chave
 
-      // Preencher selects - Garantir que result.dados tenha as propriedades esperadas
+      // Preencher selects usando dadosFormulario
       if (dadosFormulario.opcoesHorario) popularSelectOpcoes('horario', dadosFormulario.opcoesHorario);
       if (dadosFormulario.opcoesLetra) popularSelectOpcoes('letra', dadosFormulario.opcoesLetra);
       if (dadosFormulario.opcoesSupervisor) popularSelectOpcoes('supervisor', dadosFormulario.opcoesSupervisor);
-      if (dadosFormulario.opcoesNumeroEquipe) popularSelectOpcoes('equipeNumero', dadosFormulario.opcoesNumeroEquipe); // Para o modal
+      if (dadosFormulario.opcoesNumeroEquipe) popularSelectOpcoes('equipeNumero', dadosFormulario.opcoesNumeroEquipe);
 
-      // Preencher outros selects que são usados no modal (verificar nomes das propriedades)
-       if (dadosFormulario.opcoesLances) {
+      // Preencher outros selects do modal
+      if (dadosFormulario.opcoesLances) {
           popularSelectOpcoes('equipeLancesMangueira', dadosFormulario.opcoesLances);
           popularSelectOpcoes('equipeLancesVaretas', dadosFormulario.opcoesLances);
        }
@@ -106,38 +108,35 @@ async function carregarDadosFormulario() {
            popularSelectOpcoes('equipeCadeados', dadosFormulario.opcoesCadeadosPlaquetas);
            popularSelectOpcoes('equipePlaquetas', dadosFormulario.opcoesCadeadosPlaquetas);
        }
+       // Os selects de Vaga/Equipamento específicos são populados ao abrir o modal
 
       console.log('Dados do formulário carregados com sucesso via API');
     } else {
-      // Se a API falhou ou não retornou sucesso, usar fallback
-      console.warn('Falha ao carregar dados da API ou resposta sem sucesso. Usando fallback.');
-      if(result && result.message) console.warn('Mensagem da API:', result.message);
-      usarDadosFormularioFallback(); // Função separada para clareza
+      console.warn('Falha ao carregar dados da API ou estrutura inesperada. Usando fallback.', result); // Loga o resultado para depuração
+      usarDadosFormularioFallback();
     }
   } catch (error) {
     console.error('Erro crítico ao carregar dados do formulário:', error);
     mostrarNotificacao('Erro ao carregar opções do formulário. Usando dados padrão.', 'warning');
-    usarDadosFormularioFallback(); // Usar fallback em caso de erro na chamada
+    usarDadosFormularioFallback();
   } finally {
     ocultarLoading();
   }
 }
 
-/**
- * Preenche formulários com dados de fallback do CONFIG
- */
+// ---- FIM DA MODIFICAÇÃO ----
+
+// Certifique-se que a função usarDadosFormularioFallback também acessa CONFIG.OPCOES_FORMULARIO
 function usarDadosFormularioFallback() {
-    // Acessando OPCOES_FORMULARIO que está dentro de CONFIG no seu arquivo config.js atual
     if (window.CONFIG && CONFIG.OPCOES_FORMULARIO) {
       dadosFormulario = CONFIG.OPCOES_FORMULARIO; // Usar dados do config como fonte
 
-      // Preencher selects com dados padrão
       popularSelectOpcoes('horario', CONFIG.OPCOES_FORMULARIO.opcoesHorario || []);
       popularSelectOpcoes('letra', CONFIG.OPCOES_FORMULARIO.opcoesLetra || []);
       popularSelectOpcoes('supervisor', CONFIG.OPCOES_FORMULARIO.opcoesSupervisor || []);
-      popularSelectOpcoes('equipeNumero', CONFIG.OPCOES_FORMULARIO.opcoesNumeroEquipe || []); // Para o modal
+      popularSelectOpcoes('equipeNumero', CONFIG.OPCOES_FORMULARIO.opcoesNumeroEquipe || []);
 
-      // Preencher outros selects
+      // Preencher outros selects (certifique-se que estas chaves existem em OPCOES_FORMULARIO no config.js)
       popularSelectOpcoes('equipeLancesMangueira', CONFIG.OPCOES_FORMULARIO.opcoesLances || []);
       popularSelectOpcoes('equipeLancesVaretas', CONFIG.OPCOES_FORMULARIO.opcoesLances || []);
       popularSelectOpcoes('equipeMangotes3Polegadas', CONFIG.OPCOES_FORMULARIO.opcoesMangotes || []);
@@ -145,7 +144,6 @@ function usarDadosFormularioFallback() {
       popularSelectOpcoes('equipeMangotes6Polegadas', CONFIG.OPCOES_FORMULARIO.opcoesMangotes || []);
       popularSelectOpcoes('equipeCadeados', CONFIG.OPCOES_FORMULARIO.opcoesCadeadosPlaquetas || []);
       popularSelectOpcoes('equipePlaquetas', CONFIG.OPCOES_FORMULARIO.opcoesCadeadosPlaquetas || []);
-      // Preencher selects específicos de Vaga/Equipamento é feito ao abrir o modal (adicionarEquipe/editarEquipe)
 
       console.log('Dados do formulário preenchidos com fallback de CONFIG.');
     } else {
