@@ -731,30 +731,34 @@ function adicionarEquipe(tipo) {
   document.getElementById('materiaisAltaPressao').style.display = isAltaPressao ? 'block' : 'none';
   document.getElementById('materiaisVacuo').style.display = isAltaPressao ? 'none' : 'block';
 
-  // Preencher selects de Vaga e Equipamento com base no tipo e nos dados carregados/fallback
-  if (dadosFormulario && dadosFormulario.OPCOES_FORMULARIO) {
-      const base = dadosFormulario.OPCOES_FORMULARIO;
-      const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
-      const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
-      popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
-      popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
-       // Preencher selects de materiais comuns que usam opções do config
-      popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
-      popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
-      popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeMangotes4Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
-      popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
-  } else {
-       mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
-       popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
-       popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
-       // Limpar ou usar valores padrão mínimos para outros selects
-       popularSelectOpcoes('equipeLancesMangueira', ['N/A']); popularSelectOpcoes('equipeLancesVaretas', ['N/A']);
-       popularSelectOpcoes('equipeMangotes3Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes4Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes6Polegadas', ['N/A']);
-       popularSelectOpcoes('equipeCadeados', ['N/A', 'Em Falta']); popularSelectOpcoes('equipePlaquetas', ['N/A', 'Em Falta']);
-  }
+// Preencher selects de Vaga e Equipamento com base no tipo e nos dados carregados/fallback
+const isAltaPressao = tipo === 'Alta Pressão'; // Definição de isAltaPressao
+
+if (dadosFormulario && (dadosFormulario.vagasAltaPressao || dadosFormulario.opcoesHorario)) { // Verifica se o objeto principal existe e tem dados
+    const base = dadosFormulario; // 'base' agora é o próprio objeto de opções
+    const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
+    const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
+
+    popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
+    popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
+    // Preencher selects de materiais comuns que usam opções do config
+    popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
+    popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
+    popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeMangotes4Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
+    popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
+    console.log("Populando modal (adicionar) com dados carregados:", base); // Log para confirmar
+} else {
+    // Este bloco só roda se dadosFormulario for nulo/vazio
+    mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
+    popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
+    popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
+    popularSelectOpcoes('equipeLancesMangueira', ['N/A']); popularSelectOpcoes('equipeLancesVaretas', ['N/A']);
+    popularSelectOpcoes('equipeMangotes3Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes4Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes6Polegadas', ['N/A']);
+    popularSelectOpcoes('equipeCadeados', ['N/A', 'Em Falta']); popularSelectOpcoes('equipePlaquetas', ['N/A', 'Em Falta']);
+}
 
   // Garantir que listeners específicos do modal estejam ativos
   setupEventListeners();
@@ -814,31 +818,34 @@ function editarEquipe(index) {
   document.getElementById('materiaisAltaPressao').style.display = isAltaPressao ? 'block' : 'none';
   document.getElementById('materiaisVacuo').style.display = isAltaPressao ? 'none' : 'block';
 
+// Preencher selects de Vaga e Equipamento com base no tipo e nos dados carregados/fallback
+const isAltaPressao = tipo === 'Alta Pressão'; // Definição de isAltaPressao
 
-  // Preencher selects de Vaga e Equipamento com base no tipo e dados carregados/fallback
-  if (dadosFormulario && dadosFormulario.OPCOES_FORMULARIO) {
-      const base = dadosFormulario.OPCOES_FORMULARIO;
-      const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
-      const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
-      popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
-      popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
-      // Preencher selects de materiais
-      popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
-      popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
-      popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeMangotes4Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
-      popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
-      popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
-  } else {
-      // Fallback se dados não carregaram
-       mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
-       popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
-       popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
-       popularSelectOpcoes('equipeLancesMangueira', ['N/A']); popularSelectOpcoes('equipeLancesVaretas', ['N/A']);
-       popularSelectOpcoes('equipeMangotes3Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes4Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes6Polegadas', ['N/A']);
-       popularSelectOpcoes('equipeCadeados', ['N/A', 'Em Falta']); popularSelectOpcoes('equipePlaquetas', ['N/A', 'Em Falta']);
-  }
+if (dadosFormulario && (dadosFormulario.vagasAltaPressao || dadosFormulario.opcoesHorario)) { // Verifica se o objeto principal existe e tem dados
+    const base = dadosFormulario; // 'base' agora é o próprio objeto de opções
+    const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
+    const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
+
+    popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
+    popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
+    // Preencher selects de materiais comuns que usam opções do config
+    popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
+    popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
+    popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeMangotes4Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
+    popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
+    popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
+    console.log("Populando modal (adicionar) com dados carregados:", base); // Log para confirmar
+} else {
+    // Este bloco só roda se dadosFormulario for nulo/vazio
+    mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
+    popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
+    popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
+    popularSelectOpcoes('equipeLancesMangueira', ['N/A']); popularSelectOpcoes('equipeLancesVaretas', ['N/A']);
+    popularSelectOpcoes('equipeMangotes3Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes4Polegadas', ['N/A']); popularSelectOpcoes('equipeMangotes6Polegadas', ['N/A']);
+    popularSelectOpcoes('equipeCadeados', ['N/A', 'Em Falta']); popularSelectOpcoes('equipePlaquetas', ['N/A', 'Em Falta']);
+}
 
    // Adicionar a opção específica salva se não estiver na lista padrão
     function addOptionIfNotExists(selectId, value, text) {
