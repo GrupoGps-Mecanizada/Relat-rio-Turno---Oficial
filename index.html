@@ -26,20 +26,21 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/enhanced-styles.css">
   </head>
 <body>
   <div class="container app-container">
-    <div class="card mb-4 shadow-sm">
+    <div class="card mb-4 shadow-lg app-header">
       <div class="card-header d-flex justify-content-between align-items-center barra-superior">
         <h2 class="h5 mb-0"><i class="bi bi-clipboard-check-fill me-2"></i>Sistema de Relatório de Turno</h2>
         <div class="botoes-direita">
-          <button class="btn btn-outline-light" id="dashboardTab" title="Dashboard">
+          <button class="btn btn-outline-light btn-action" id="dashboardTab" title="Dashboard">
             <i class="bi bi-graph-up"></i> <span class="d-none d-sm-inline">Dashboard</span>
           </button>
-          <button class="btn btn-outline-light" id="btnPesquisar" title="Pesquisar Relatórios">
+          <button class="btn btn-outline-light btn-action" id="btnPesquisar" title="Pesquisar Relatórios">
             <i class="bi bi-search"></i> <span class="d-none d-sm-inline">Pesquisar</span>
           </button>
-          <button class="btn btn-outline-light" id="btnAjuda" title="Ajuda">
+          <button class="btn btn-outline-light btn-action" id="btnAjuda" title="Ajuda">
             <i class="bi bi-question-circle"></i> <span class="d-none d-sm-inline">Ajuda</span>
           </button>
           </div>
@@ -62,7 +63,7 @@
     </div>
 
     <div id="stepTurno" class="content-step" style="display: block;">
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo">
           <h3 class="h5 mb-0">Etapa 1: Informações Básicas do Turno</h3>
         </div>
@@ -73,32 +74,32 @@
           </div>
 
           <form id="formTurno" class="needs-validation" novalidate>
-            <div class="row mb-3">
+            <div class="row mb-4">
               <div class="col-md-6 mb-3 mb-md-0">
                 <label for="data" class="form-label">Data do turno <span class="text-danger">*</span></label>
-                <input type="date" class="form-control" id="data" required>
+                <input type="date" class="form-control enhanced-input" id="data" required>
                 <div class="invalid-feedback">Por favor, informe a data do turno.</div>
               </div>
               <div class="col-md-6">
                 <label for="horario" class="form-label">Horário do turno <span class="text-danger">*</span></label>
-                <select class="form-select" id="horario" required>
+                <select class="form-select enhanced-input" id="horario" required>
                   <option value="" selected disabled>Selecione o horário...</option>
                   </select>
                 <div class="invalid-feedback">Por favor, selecione o horário do turno.</div>
               </div>
             </div>
 
-            <div class="row mb-3">
+            <div class="row mb-4">
               <div class="col-md-6 mb-3 mb-md-0">
                 <label for="letra" class="form-label">Letra do turno <span class="text-danger">*</span></label>
-                <select class="form-select" id="letra" required>
+                <select class="form-select enhanced-input" id="letra" required>
                   <option value="" selected disabled>Selecione a letra...</option>
                   </select>
                 <div class="invalid-feedback">Por favor, selecione a letra do turno.</div>
               </div>
               <div class="col-md-6">
                 <label for="supervisor" class="form-label">Supervisor responsável <span class="text-danger">*</span></label>
-                <select class="form-select" id="supervisor" required>
+                <select class="form-select enhanced-input" id="supervisor" required>
                   <option value="" selected disabled>Selecione o supervisor...</option>
                   </select>
                 <div class="invalid-feedback">Por favor, selecione o supervisor responsável.</div>
@@ -106,7 +107,7 @@
             </div>
 
             <div class="d-flex justify-content-end mt-4">
-              <button type="submit" class="btn btn-primary" id="btnAvancarEquipes">
+              <button type="submit" class="btn btn-primary btn-lg action-button pulse-effect" id="btnAvancarEquipes">
                 Próximo: Adicionar Equipes <i class="bi bi-arrow-right ms-2"></i>
               </button>
             </div>
@@ -116,30 +117,32 @@
     </div>
 
     <div id="stepEquipes" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4">
+       <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">Etapa 2: Detalhes das Equipes</h3>
-           <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success" onclick="adicionarEquipe('Alta Pressão')">
-                    <i class="bi bi-plus-circle-fill me-1"></i> Add Alta Pressão
+           <div class="btn-group action-group">
+                <button type="button" class="btn btn-success action-button" onclick="adicionarEquipe('Alta Pressão')">
+                    <i class="bi bi-plus-circle-fill me-1"></i> <span class="btn-text">Add Alta Pressão</span>
                 </button>
-                <button type="button" class="btn btn-sm btn-danger" onclick="adicionarEquipe('Auto Vácuo / Hiper Vácuo')">
-                     <i class="bi bi-plus-circle-fill me-1"></i> Add Vácuo/Hiper
+                <button type="button" class="btn btn-danger action-button" onclick="adicionarEquipe('Auto Vácuo / Hiper Vácuo')">
+                     <i class="bi bi-plus-circle-fill me-1"></i> <span class="btn-text">Add Vácuo/Hiper</span>
                 </button>
             </div>
         </div>
         <div class="card-body">
-            <div id="listaEquipes">
-                <div id="semEquipes" class="alert alert-secondary text-center">
-                    Nenhuma equipe adicionada ainda. Clique nos botões acima para adicionar.
+            <div id="listaEquipes" class="teams-container">
+                <div id="semEquipes" class="alert alert-secondary text-center empty-teams">
+                    <i class="bi bi-exclamation-circle mb-3 empty-icon"></i>
+                    <p>Nenhuma equipe adicionada ainda.</p>
+                    <p class="mb-0">Clique nos botões acima para adicionar.</p>
                 </div>
             </div>
-             <hr>
-             <div class="d-flex justify-content-between mt-4">
-               <button type="button" class="btn btn-secondary" onclick="voltarParaTurno()">
+             <hr class="section-divider">
+             <div class="d-flex justify-content-between mt-4 navigation-buttons">
+               <button type="button" class="btn btn-secondary btn-lg action-button" onclick="voltarParaTurno()">
                  <i class="bi bi-arrow-left me-2"></i> Voltar (Turno)
                </button>
-               <button type="button" class="btn btn-primary" id="btnAvancarRevisao" onclick="avancarParaRevisao()" disabled>
+               <button type="button" class="btn btn-primary btn-lg action-button" id="btnAvancarRevisao" onclick="avancarParaRevisao()" disabled>
                  Próximo: Revisão <i class="bi bi-arrow-right ms-2"></i>
                </button>
             </div>
@@ -148,7 +151,7 @@
     </div>
 
     <div id="stepRevisao" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4">
+       <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo">
           <h3 class="h5 mb-0">Etapa 3: Revisão e Finalização</h3>
         </div>
@@ -158,20 +161,20 @@
                 Confira todos os dados antes de salvar o relatório.
             </div>
 
-            <h4 class="mb-3">Resumo do Turno</h4>
-            <div id="resumoTurno" class="info-grid mb-4">
+            <h4 class="section-title mb-3">Resumo do Turno</h4>
+            <div id="resumoTurno" class="info-grid mb-4 summary-section">
                 </div>
 
-            <h4 class="mb-3">Resumo das Equipes</h4>
-            <div id="resumoEquipes" class="mb-4">
+            <h4 class="section-title mb-3">Resumo das Equipes</h4>
+            <div id="resumoEquipes" class="mb-4 summary-section">
                 </div>
 
-             <hr>
-             <div class="d-flex justify-content-between mt-4">
-               <button type="button" class="btn btn-secondary" onclick="voltarParaEquipes()">
+             <hr class="section-divider">
+             <div class="d-flex justify-content-between mt-4 navigation-buttons">
+               <button type="button" class="btn btn-secondary btn-lg action-button" onclick="voltarParaEquipes()">
                  <i class="bi bi-arrow-left me-2"></i> Voltar (Equipes)
                </button>
-               <button type="button" class="btn btn-success" onclick="salvarRelatorioComFallback()">
+               <button type="button" class="btn btn-success btn-lg action-button pulse-effect" onclick="salvarRelatorioComFallback()">
                  <i class="bi bi-check-lg me-2"></i> Salvar Relatório
                </button>
             </div>
@@ -180,24 +183,27 @@
     </div>
 
      <div id="stepSucesso" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4 text-center">
+       <div class="card shadow-lg mb-4 text-center content-card success-card">
         <div class="card-header bg-success text-white">
-          <h3 class="h5 mb-0"><i class="bi bi-check-circle-fill"></i> Relatório Salvo!</h3>
+          <h3 class="h5 mb-0"><i class="bi bi-check-circle-fill me-2"></i> Relatório Salvo!</h3>
         </div>
         <div class="card-body">
+            <div class="success-icon-container mb-3">
+                <i class="bi bi-check-circle-fill success-icon"></i>
+            </div>
             <p id="mensagemSucessoStatus" class="lead">Relatório registrado com sucesso!</p>
             <p>O que você gostaria de fazer agora?</p>
-             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4">
-                <button type="button" class="btn btn-primary" onclick="visualizarRelatorio()">
+             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center mt-4 action-buttons-group">
+                <button type="button" class="btn btn-primary action-button" onclick="visualizarRelatorio()">
                    <i class="bi bi-eye me-1"></i> Visualizar Relatório
                 </button>
-                <button type="button" class="btn btn-info text-white" onclick="formatarWhatsApp()">
+                <button type="button" class="btn btn-info text-white action-button" onclick="formatarWhatsApp()">
                    <i class="bi bi-whatsapp me-1"></i> Formatar p/ WhatsApp
                 </button>
-                 <button type="button" class="btn btn-danger" onclick="gerarPDFExistente(AppState?.get('ultimoRelatorioId') || ultimoRelatorioId, (String(AppState?.get('ultimoRelatorioId') || ultimoRelatorioId).startsWith('local_') ? 'local' : 'servidor'))" title="Gerar PDF do último relatório salvo">
+                 <button type="button" class="btn btn-danger action-button" onclick="gerarPDFExistente(AppState?.get('ultimoRelatorioId') || ultimoRelatorioId, (String(AppState?.get('ultimoRelatorioId') || ultimoRelatorioId).startsWith('local_') ? 'local' : 'servidor'))" title="Gerar PDF do último relatório salvo">
                     <i class="bi bi-file-pdf"></i> Gerar PDF
                  </button>
-                <button type="button" class="btn btn-secondary" onclick="novoRelatorio()">
+                <button type="button" class="btn btn-secondary action-button" onclick="novoRelatorio()">
                    <i class="bi bi-plus-circle me-1"></i> Criar Novo Relatório
                 </button>
             </div>
@@ -206,18 +212,18 @@
     </div>
 
      <div id="stepRelatorio" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4">
+       <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
            <h3 class="h5 mb-0">Visualização do Relatório</h3>
-            <button type="button" class="btn btn-sm btn-light" onclick="copiarRelatorio()" title="Copiar Texto">
+            <button type="button" class="btn btn-light action-button-sm" onclick="copiarRelatorio()" title="Copiar Texto">
                 <i class="bi bi-clipboard"></i> Copiar
             </button>
          </div>
          <div class="card-body">
-            <pre id="relatorioTexto" class="relatorio-text bg-light p-3 border rounded"></pre>
-            <hr>
+            <pre id="relatorioTexto" class="relatorio-text bg-light p-3 border rounded report-container"></pre>
+            <hr class="section-divider">
             <div class="d-flex justify-content-start mt-4">
-               <button type="button" class="btn btn-secondary" id="btnVoltarRelatorio">
+               <button type="button" class="btn btn-secondary btn-lg action-button" id="btnVoltarRelatorio">
                  <i class="bi bi-arrow-left me-2"></i> Voltar
                </button>
             </div>
@@ -226,24 +232,24 @@
      </div>
 
      <div id="stepWhatsApp" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4">
+       <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
            <h3 class="h5 mb-0">Texto Formatado para WhatsApp</h3>
-            <button type="button" class="btn btn-sm btn-light" onclick="copiarWhatsApp()" title="Copiar Texto">
+            <button type="button" class="btn btn-light action-button-sm" onclick="copiarWhatsApp()" title="Copiar Texto">
                 <i class="bi bi-clipboard"></i> Copiar
             </button>
          </div>
          <div class="card-body">
              <div class="alert alert-success d-flex align-items-center" role="alert">
-                 <i class="bi bi-whatsapp me-2"></i>
+                 <i class="bi bi-whatsapp me-2 fs-4"></i>
                  <div>
                     Copie o texto abaixo e cole na sua conversa do WhatsApp.
                  </div>
              </div>
-            <pre id="whatsAppTexto" class="whatsapp-message p-3 border rounded"></pre>
-            <hr>
+            <pre id="whatsAppTexto" class="whatsapp-message p-3 border rounded report-container"></pre>
+            <hr class="section-divider">
             <div class="d-flex justify-content-start mt-4">
-               <button type="button" class="btn btn-secondary" id="btnVoltarWhatsApp">
+               <button type="button" class="btn btn-secondary btn-lg action-button" id="btnVoltarWhatsApp">
                  <i class="bi bi-arrow-left me-2"></i> Voltar
                </button>
             </div>
@@ -252,19 +258,19 @@
     </div>
 
     <div id="stepPesquisa" class="content-step" style="display: none;">
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
            <h3 class="h5 mb-0">Pesquisar Relatórios</h3>
-            <button type="button" class="btn btn-sm btn-secondary" onclick="voltarDaPesquisa()" title="Voltar ao Início">
+            <button type="button" class="btn btn-secondary action-button-sm" onclick="voltarDaPesquisa()" title="Voltar ao Início">
                 <i class="bi bi-house"></i> Voltar ao Início
             </button>
          </div>
          <div class="card-body">
-            <form id="formPesquisa" onsubmit="event.preventDefault(); executarPesquisa();">
+            <form id="formPesquisa" onsubmit="event.preventDefault(); executarPesquisa();" class="enhanced-form">
                  <div class="row g-3 align-items-end">
                     <div class="col-md-4">
                          <label for="tipoPesquisa" class="form-label">Pesquisar por:</label>
-                         <select id="tipoPesquisa" class="form-select" onchange="ajustarCampoPesquisa()">
+                         <select id="tipoPesquisa" class="form-select enhanced-input" onchange="ajustarCampoPesquisa()">
                              <option value="geral" selected>Termo Geral ou ID</option>
                              <option value="data">Data Específica</option>
                              <option value="mes_ano">Mês/Ano</option>
@@ -275,24 +281,25 @@
                     </div>
                     <div class="col-md-6">
                         <label for="termoPesquisa" class="form-label" id="labelPesquisa">Termo de Pesquisa ou ID</label>
-                        <input type="text" class="form-control" id="termoPesquisa" placeholder="Digite ID ou termo geral" required>
+                        <input type="text" class="form-control enhanced-input" id="termoPesquisa" placeholder="Digite ID ou termo geral" required>
                     </div>
                      <div class="col-md-2">
-                         <button type="submit" class="btn btn-primary w-100">
+                         <button type="submit" class="btn btn-primary action-button w-100">
                              <i class="bi bi-search"></i> Pesquisar
                          </button>
                     </div>
                  </div>
             </form>
 
-             <hr class="my-4">
+             <hr class="section-divider my-4">
 
              <div id="resultadosPesquisa" style="display: none;">
-                 <h4>Resultados</h4>
+                 <h4 class="section-title">Resultados</h4>
                  <div id="semResultados" class="alert alert-warning" style="display: none;">
+                     <i class="bi bi-exclamation-triangle-fill me-2"></i>
                      Nenhum relatório encontrado com os critérios informados.
                  </div>
-                 <div class="table-responsive">
+                 <div class="table-responsive results-table">
                      <table class="table table-striped table-hover table-sm">
                          <thead>
                              <tr>
@@ -314,33 +321,33 @@
     </div>
 
      <div id="dashboard" class="content-step" style="display: none;">
-       <div class="card shadow-sm mb-4">
+       <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo d-flex justify-content-between align-items-center">
           <h3 class="h5 mb-0">Dashboard</h3>
-           <button type="button" class="btn btn-sm btn-secondary" onclick="voltarDoDashboard()" title="Voltar ao Início">
+           <button type="button" class="btn btn-secondary action-button-sm" onclick="voltarDoDashboard()" title="Voltar ao Início">
                 <i class="bi bi-house"></i> Voltar ao Início
            </button>
         </div>
         <div class="card-body">
-            <p>Visão geral e estatísticas do sistema.</p>
-            <div id="estatisticasGerais" class="mb-4">
+            <p class="dashboard-intro">Visão geral e estatísticas do sistema.</p>
+            <div id="estatisticasGerais" class="mb-4 stats-container">
                 <div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div></div>
             </div>
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <div class="card">
+                    <div class="card chart-card">
                          <div class="card-header">Utilização de Equipamentos</div>
                          <div class="card-body"><canvas id="graficoEquipamentos"></canvas></div>
                     </div>
                 </div>
                  <div class="col-md-6">
-                    <div class="card">
+                    <div class="card chart-card">
                          <div class="card-header">Áreas Atendidas</div>
                          <div class="card-body"><canvas id="graficoAreas"></canvas></div>
                     </div>
                 </div>
             </div>
-             <div id="ultimosRelatorios" class="mb-4">
+             <div id="ultimosRelatorios" class="mb-4 recent-reports">
                   <h5 class="mb-3">Últimos Relatórios Registrados</h5>
                   <div class="text-center p-3"><div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Carregando...</span></div></div>
                   </div>
@@ -349,7 +356,7 @@
     </div>
 
 
-    <footer class="text-center mt-4 mb-3 text-muted small">
+    <footer class="text-center mt-4 mb-3 text-muted small app-footer">
       <hr class="my-3">
       <p class="mb-0">
         <i class="bi bi-code-slash me-1"></i>
@@ -357,8 +364,11 @@
         <span class="mx-1">•</span>
         v3.0 </p>
     </footer>
-  </div> <div class="modal fade" id="modalEquipe" tabindex="-1" aria-labelledby="modalEquipeLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
-      <div class="modal-dialog modal-xl"> <div class="modal-content">
+  </div> 
+  
+  <div class="modal fade" id="modalEquipe" tabindex="-1" aria-labelledby="modalEquipeLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-xl modal-dialog-centered"> 
+        <div class="modal-content enhanced-modal">
               <form id="formEquipe" class="needs-validation" novalidate onsubmit="event.preventDefault(); salvarEquipe();">
                   <div class="modal-header" id="modalEquipeHeader">
                       <h5 class="modal-title" id="modalEquipeLabel">Adicionar/Editar Equipe</h5>
@@ -370,247 +380,249 @@
 
                       <div class="row">
                           <div class="col-md-6 border-end">
-                              <h5>Informações da Equipe</h5>
+                              <h5 class="form-section-title">Informações da Equipe</h5>
                               <div class="mb-3">
                                   <label for="equipeNumero" class="form-label">Número/Nome da Equipe <span class="text-danger">*</span></label>
-                                  <select class="form-select" id="equipeNumero" required>
+                                  <select class="form-select enhanced-input" id="equipeNumero" required>
                                       <option value="" selected disabled>Selecione...</option>
                                       </select>
                                   <div class="invalid-feedback">Campo obrigatório.</div>
                               </div>
-                              <!-- MUDANÇA 1: Substituição do campo "Integrantes" por "Motorista" e "Operador(es)" -->
+                              <!-- Campos de Motorista e Operador(es) -->
                               <div class="mb-3">
                                 <label for="equipeMotorista" class="form-label">Motorista <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" id="equipeMotorista" required minlength="3" placeholder="Nome do motorista">
+                                <input type="text" class="form-control enhanced-input" id="equipeMotorista" required minlength="3" placeholder="Nome do motorista">
                                 <div class="invalid-feedback">Informe o nome do motorista (mín. 3 caracteres).</div>
                               </div>
                               <div class="mb-3">
                                 <label for="equipeOperadores" class="form-label">Operador(es) <span class="text-danger">*</span></label>
-                                <textarea class="form-control" id="equipeOperadores" rows="2" required minlength="3" placeholder="Nome dos operadores"></textarea>
+                                <textarea class="form-control enhanced-input" id="equipeOperadores" rows="2" required minlength="3" placeholder="Nome dos operadores"></textarea>
                                 <div class="invalid-feedback">Informe os operadores (mín. 3 caracteres).</div>
                               </div>
                               <div class="mb-3">
                                   <label for="equipeArea" class="form-label">Área de Atuação <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="equipeArea" required minlength="3" placeholder="Ex: Galpão X, Linha Y...">
+                                  <input type="text" class="form-control enhanced-input" id="equipeArea" required minlength="3" placeholder="Ex: Galpão X, Linha Y...">
                                    <div class="invalid-feedback">Informe a área (mín. 3 caracteres).</div>
                               </div>
                               <div class="mb-3">
                                   <label for="equipeAtividade" class="form-label">Atividade Principal <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control" id="equipeAtividade" required minlength="3" placeholder="Ex: Limpeza de caixa, Desobstrução...">
+                                  <input type="text" class="form-control enhanced-input" id="equipeAtividade" required minlength="3" placeholder="Ex: Limpeza de caixa, Desobstrução...">
                                    <div class="invalid-feedback">Informe a atividade (mín. 3 caracteres).</div>
                               </div>
-                              <!-- MUDANÇA 2: Renomear "Vaga Estacionamento" para "Vaga (Parte Diária)" e adicionar "Identificação Usiminas" -->
+                              <!-- Campo de Vaga (Parte Diária) -->
                               <div class="row mb-3">
                                 <div class="col-sm-8">
                                   <label for="equipeVaga" class="form-label">Vaga (Parte Diária) <span class="text-danger">*</span></label>
-                                  <select class="form-select" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
+                                  <select class="form-select enhanced-input" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
                                     <option value="" selected disabled>Selecione a vaga...</option>
                                   </select>
                                   <div class="invalid-feedback">Selecione a vaga.</div>
                                 </div>
                                 <div class="col-sm-4" id="vagaPersonalizadaContainer" style="display: none;">
                                   <label for="equipeVagaPersonalizada" class="form-label">Qual? <span class="text-danger">*</span></label>
-                                  <input type="text" class="form-control form-control-sm" id="equipeVagaPersonalizada">
+                                  <input type="text" class="form-control form-control-sm enhanced-input" id="equipeVagaPersonalizada">
                                   <div class="invalid-feedback">Informe a vaga.</div>
                                 </div>
                               </div>
-                              <div class="mb-3">
-                                <label for="equipeIdentificacaoUsiminas" class="form-label">Identificação Usiminas</label>
-                                <input type="text" class="form-control" id="equipeIdentificacaoUsiminas" placeholder="Código de identificação da Usiminas">
-                              </div>
+                              
                                <div class="row mb-3">
                                   <div class="col-sm-8">
                                       <label for="equipeEquipamento" class="form-label">Equipamento <span class="text-danger">*</span></label>
-                                      <select class="form-select" id="equipeEquipamento" required onchange="toggleEquipamentoPersonalizado()">
+                                      <select class="form-select enhanced-input" id="equipeEquipamento" required onchange="toggleEquipamentoPersonalizado()">
                                           <option value="" selected disabled>Selecione o equipamento...</option>
                                          </select>
                                       <div class="invalid-feedback">Selecione o equipamento.</div>
                                   </div>
                                   <div class="col-sm-4" id="equipamentoPersonalizadoContainer" style="display: none;">
                                       <label for="equipeEquipamentoPersonalizado" class="form-label">Qual? <span class="text-danger">*</span></label>
-                                      <input type="text" class="form-control form-control-sm" id="equipeEquipamentoPersonalizado">
+                                      <input type="text" class="form-control form-control-sm enhanced-input" id="equipeEquipamentoPersonalizado">
                                        <div class="invalid-feedback">Informe o equipamento.</div>
                                   </div>
                               </div>
                           </div>
 
                           <div class="col-md-6">
-                               <h5>Status do Equipamento</h5>
-                               <div class="mb-3">
+                               <h5 class="form-section-title">Status do Equipamento</h5>
+                               <div class="mb-3 equipment-status-section">
                                     <label class="form-label">Houve troca de equipamento?</label><br>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaSim" value="Sim" onchange="toggleTrocaEquipamento()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeTroca" id="equipeTrocaSim" value="Sim" onchange="toggleTrocaEquipamento()">
                                         <label class="form-check-label" for="equipeTrocaSim">Sim</label>
                                     </div>
                                     <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeTroca" id="equipeTrocaNao" value="Não" checked onchange="toggleTrocaEquipamento()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeTroca" id="equipeTrocaNao" value="Não" checked onchange="toggleTrocaEquipamento()">
                                         <label class="form-check-label" for="equipeTrocaNao">Não</label>
                                     </div>
                                 </div>
-                                <div id="trocaDetalhes" style="display: none;" class="p-2 border rounded bg-light mb-3">
-                                    <p class="fw-bold mb-1">Detalhes da Troca:</p>
-                                    <!-- MUDANÇA 3: Novas opções para Status do Equipamento -->
-                                    <div class="mb-2">
+                                <div id="trocaDetalhes" style="display: none;" class="p-3 border rounded bg-light mb-3 equipment-change-details">
+                                    <p class="fw-bold mb-2">Detalhes da Troca:</p>
+                                    <!-- Opções para Status do Equipamento -->
+                                    <div class="mb-3">
                                       <label class="form-label d-block">Motivo <span class="text-danger">*</span></label>
                                       <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoManutencao" value="Manutenção Preventiva" onchange="toggleMotivoOutro()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeMotivoTroca" id="motivoManutencao" value="Manutenção Preventiva" onchange="toggleMotivoOutro()">
                                         <label class="form-check-label" for="motivoManutencao"><small>Manut. Preventiva</small></label>
                                       </div>
                                       <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCorretiva" value="Manutenção Corretiva" onchange="toggleMotivoOutro()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeMotivoTroca" id="motivoCorretiva" value="Manutenção Corretiva" onchange="toggleMotivoOutro()">
                                         <label class="form-check-label" for="motivoCorretiva"><small>Manut. Corretiva</small></label>
                                       </div>
                                       <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoCliente" value="Solicitação Do Cliente" onchange="toggleMotivoOutro()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeMotivoTroca" id="motivoCliente" value="Solicitação Do Cliente" onchange="toggleMotivoOutro()">
                                         <label class="form-check-label" for="motivoCliente"><small>Solicitação Cliente</small></label>
                                       </div>
                                       <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoDefeitos" value="Defeitos Em Geral (Justificar)" onchange="toggleMotivoOutro()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeMotivoTroca" id="motivoDefeitos" value="Defeitos Em Geral (Justificar)" onchange="toggleMotivoOutro()">
                                         <label class="form-check-label" for="motivoDefeitos"><small>Defeitos Gerais</small></label>
                                       </div>
                                       <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
+                                        <input class="form-check-input enhanced-radio" type="radio" name="equipeMotivoTroca" id="motivoOutro" value="Outros Motivos (Justificar)" onchange="toggleMotivoOutro()">
                                         <label class="form-check-label" for="motivoOutro"><small>Outro</small></label>
                                       </div>
                                       <div class="invalid-feedback" id="motivoTrocaFeedback" style="display: none;">Selecione um motivo.</div>
                                     </div>
-                                     <div class="mb-2" id="motivoOutroContainer" style="display: none;">
+                                     <div class="mb-3" id="motivoOutroContainer" style="display: none;">
                                           <label for="equipeMotivoOutro" class="form-label">Especifique o Motivo <span class="text-danger">*</span></label>
-                                          <input type="text" class="form-control form-control-sm" id="equipeMotivoOutro">
+                                          <input type="text" class="form-control form-control-sm enhanced-input" id="equipeMotivoOutro">
                                            <div class="invalid-feedback">Campo obrigatório.</div>
                                       </div>
-                                    <div class="mb-2">
+                                    <div class="mb-3">
                                         <label for="equipeDefeito" class="form-label">Defeito / Medidas Tomadas <span class="text-danger">*</span></label>
-                                        <textarea class="form-control form-control-sm" id="equipeDefeito" rows="2"></textarea>
+                                        <textarea class="form-control form-control-sm enhanced-input" id="equipeDefeito" rows="2"></textarea>
                                         <div class="invalid-feedback">Descreva o defeito/medidas.</div>
                                     </div>
-                                     <div class="mb-2">
+                                     <div class="mb-3">
                                         <label for="equipePlacaNova" class="form-label">Placa Nova (se aplicável)</label>
-                                        <input type="text" class="form-control form-control-sm" id="equipePlacaNova" placeholder="AAA-0000 ou AAA0A00">
+                                        <input type="text" class="form-control form-control-sm enhanced-input" id="equipePlacaNova" placeholder="AAA-0000 ou AAA0A00">
                                          <div class="invalid-feedback">Formato de placa inválido.</div>
                                     </div>
-                                    <div class="mb-2">
+                                    <div class="mb-3">
                                         <label for="equipeDataHoraTroca" class="form-label">Data/Hora da Troca (se aplicável)</label>
-                                        <input type="datetime-local" class="form-control form-control-sm" id="equipeDataHoraTroca">
+                                        <input type="datetime-local" class="form-control form-control-sm enhanced-input" id="equipeDataHoraTroca">
                                     </div>
                                 </div>
 
-                                <hr>
-                                <!-- MUDANÇA 4: Renomear "Materiais e Segurança" para "Implementos e Segurança" -->
-                                <h5>Implementos e Segurança</h5>
+                                <hr class="section-divider">
+                                <!-- Renomear para "Implementos e Segurança" -->
+                                <h5 class="form-section-title">Implementos e Segurança</h5>
 
-                                <div id="materiaisAltaPressao" style="display: none;">
-                                    <div class="row mb-2">
-                                        <!-- MUDANÇA 5: Mudar valores padrão nos selects para "N/A" -->
-                                        <div class="col-sm-6"><label for="equipePistola" class="form-label"><small>Pistola</small></label><select class="form-select form-select-sm" id="equipePistola"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
-                                        <div class="col-sm-6"><label for="equipePistolaCanoLongo" class="form-label"><small>Pistola C.L.</small></label><select class="form-select form-select-sm" id="equipePistolaCanoLongo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                <div id="materiaisAltaPressao" style="display: none;" class="implements-container">
+                                    <div class="row mb-3">
+                                        <!-- Valor padrão "N/A" -->
+                                        <div class="col-sm-6"><label for="equipePistola" class="form-label"><small>Pistola</small></label><select class="form-select form-select-sm enhanced-input" id="equipePistola"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipePistolaCanoLongo" class="form-label"><small>Pistola C.L.</small></label><select class="form-select form-select-sm enhanced-input" id="equipePistolaCanoLongo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
-                                     <div class="row mb-2">
-                                        <div class="col-sm-6"><label for="equipeMangueiraTorpedo" class="form-label"><small>Mang. Torpedo</small></label><select class="form-select form-select-sm" id="equipeMangueiraTorpedo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
-                                        <div class="col-sm-6"><label for="equipePedal" class="form-label"><small>Pedal</small></label><select class="form-select form-select-sm" id="equipePedal"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                     <div class="row mb-3">
+                                        <div class="col-sm-6"><label for="equipeMangueiraTorpedo" class="form-label"><small>Mang. Torpedo</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangueiraTorpedo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipePedal" class="form-label"><small>Pedal</small></label><select class="form-select form-select-sm enhanced-input" id="equipePedal"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
-                                    <div class="row mb-2">
-                                         <div class="col-sm-6"><label for="equipeVaretas" class="form-label"><small>Varetas</small></label><select class="form-select form-select-sm" id="equipeVaretas"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
-                                        <div class="col-sm-6"><label for="equipeRabicho" class="form-label"><small>Rabicho</small></label><select class="form-select form-select-sm" id="equipeRabicho"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                    <div class="row mb-3">
+                                         <div class="col-sm-6"><label for="equipeVaretas" class="form-label"><small>Varetas</small></label><select class="form-select form-select-sm enhanced-input" id="equipeVaretas"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipeRabicho" class="form-label"><small>Rabicho</small></label><select class="form-select form-select-sm enhanced-input" id="equipeRabicho"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
-                                     <div class="row mb-2">
-                                        <div class="col-sm-6"><label for="equipeLancesMangueira" class="form-label"><small>Lances Mangueira</small></label><select class="form-select form-select-sm" id="equipeLancesMangueira"></select></div>
-                                        <div class="col-sm-6"><label for="equipeLancesVaretas" class="form-label"><small>Lances Varetas</small></label><select class="form-select form-select-sm" id="equipeLancesVaretas"></select></div>
+                                     <div class="row mb-3">
+                                        <div class="col-sm-6"><label for="equipeLancesMangueira" class="form-label"><small>Lances Mangueira</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesMangueira"></select></div>
+                                        <div class="col-sm-6"><label for="equipeLancesVaretas" class="form-label"><small>Lances Varetas</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesVaretas"></select></div>
                                     </div>
                                 </div>
 
-                                <div id="materiaisVacuo" style="display: none;">
-                                    <div class="row mb-2">
-                                         <!-- MUDANÇA 6: Remover a palavra "Check" dos labels -->
-                                         <div class="col-sm-6"><label for="equipeMangotes" class="form-label"><small>Mangotes</small></label><select class="form-select form-select-sm" id="equipeMangotes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
-                                        <div class="col-sm-6"><label for="equipeReducoes" class="form-label"><small>Reduções</small></label><select class="form-select form-select-sm" id="equipeReducoes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                <div id="materiaisVacuo" style="display: none;" class="implements-container">
+                                    <div class="row mb-3">
+                                         <!-- Remover a palavra "Check" dos labels -->
+                                         <div class="col-sm-6"><label for="equipeMangotes" class="form-label"><small>Mangotes</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
+                                        <div class="col-sm-6"><label for="equipeReducoes" class="form-label"><small>Reduções</small></label><select class="form-select form-select-sm enhanced-input" id="equipeReducoes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
-                                    <div class="row mb-2">
-                                         <div class="col-sm-4"><label for="equipeMangotes3Polegadas" class="form-label"><small>Mangotes 3"</small></label><select class="form-select form-select-sm" id="equipeMangotes3Polegadas"></select></div>
-                                         <div class="col-sm-4"><label for="equipeMangotes4Polegadas" class="form-label"><small>Mangotes 4"</small></label><select class="form-select form-select-sm" id="equipeMangotes4Polegadas"></select></div>
-                                         <div class="col-sm-4"><label for="equipeMangotes6Polegadas" class="form-label"><small>Mangotes 6"</small></label><select class="form-select form-select-sm" id="equipeMangotes6Polegadas"></select></div>
+                                    <div class="row mb-3">
+                                         <div class="col-sm-4"><label for="equipeMangotes3Polegadas" class="form-label"><small>Mangotes 3"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes3Polegadas"></select></div>
+                                         <div class="col-sm-4"><label for="equipeMangotes4Polegadas" class="form-label"><small>Mangotes 4"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes4Polegadas"></select></div>
+                                         <div class="col-sm-4"><label for="equipeMangotes6Polegadas" class="form-label"><small>Mangotes 6"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes6Polegadas"></select></div>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
                                     <label for="equipeJustificativa" class="form-label"><small>Justificativa (se algum material em Falta)</small></label>
-                                    <textarea class="form-control form-control-sm" id="equipeJustificativa" rows="1"></textarea>
+                                    <textarea class="form-control form-control-sm enhanced-input" id="equipeJustificativa" rows="1"></textarea>
                                 </div>
 
-                                <hr class="my-2">
+                                <hr class="section-divider my-3">
 
-                                 <div class="row mb-2">
+                                 <div class="row mb-3 security-equipment">
                                     <div class="col-sm-4">
                                          <label class="form-label d-block"><small>Caixa Bloqueio</small></label>
                                          <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioSim" value="Sim">
+                                            <input class="form-check-input enhanced-radio" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioSim" value="Sim">
                                             <label class="form-check-label" for="caixaBloqueioSim">Sim</label>
                                          </div>
                                          <div class="form-check form-check-inline">
-                                             <input class="form-check-input" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioNao" value="Não" checked>
+                                             <input class="form-check-input enhanced-radio" type="radio" name="equipeCaixaBloqueio" id="caixaBloqueioNao" value="Não" checked>
                                              <label class="form-check-label" for="caixaBloqueioNao">Não</label>
                                          </div>
                                     </div>
                                     <div class="col-sm-4">
                                          <label for="equipeCadeados" class="form-label"><small>Cadeados</small></label>
-                                         <select class="form-select form-select-sm" id="equipeCadeados"></select>
+                                         <select class="form-select form-select-sm enhanced-input" id="equipeCadeados"></select>
                                     </div>
                                     <div class="col-sm-4">
                                          <label for="equipePlaquetas" class="form-label"><small>Plaquetas</small></label>
-                                         <select class="form-select form-select-sm" id="equipePlaquetas"></select>
+                                         <select class="form-select form-select-sm enhanced-input" id="equipePlaquetas"></select>
                                     </div>
                                 </div>
 
                                <div class="mb-3">
                                   <label for="equipeObservacoes" class="form-label">Observações Adicionais</label>
-                                  <textarea class="form-control" id="equipeObservacoes" rows="3"></textarea>
+                                  <textarea class="form-control enhanced-input" id="equipeObservacoes" rows="3"></textarea>
                                </div>
 
-                          </div> </div> </div> <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                      <button type="submit" class="btn btn-primary">Salvar Equipe</button> </div>
+                          </div> 
+                      </div> 
+                  </div> 
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary action-button" data-bs-dismiss="modal">Cancelar</button>
+                      <button type="submit" class="btn btn-primary action-button pulse-effect">Salvar Equipe</button> 
+                  </div>
               </form>
           </div>
       </div>
   </div>
 
   <div class="modal fade" id="modalHelp" tabindex="-1" aria-labelledby="modalHelpLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-          <div class="modal-content">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+          <div class="modal-content enhanced-modal">
               <div class="modal-header">
                   <h5 class="modal-title" id="modalHelpLabel">Ajuda - Sistema de Relatório de Turno</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
-                  <h6>Como usar:</h6>
-                  <ol>
-                      <li>Preencha as Informações do Turno (Data, Horário, Letra, Supervisor).</li>
-                      <li>Clique em "Próximo".</li>
-                      <li>Adicione as equipes de Alta Pressão e/ou Vácuo/Hiper Vácuo clicando nos botões correspondentes.</li>
-                      <li>Preencha os detalhes de cada equipe no formulário que aparecerá.</li>
-                       <li>Se houver troca de equipamento, marque "Sim" e preencha os detalhes obrigatórios.</li>
-                      <li>Após adicionar todas as equipes, clique em "Próximo: Revisão".</li>
-                      <li>Confira todos os dados no resumo.</li>
-                      <li>Clique em "Salvar Relatório".</li>
-                      <li>Após salvar, você poderá visualizar o relatório, formatá-lo para WhatsApp ou gerar um PDF (se salvo no servidor).</li>
-                       <li>Use o botão "Pesquisar" no topo para encontrar relatórios antigos.</li>
-                        <li>Use o botão "Dashboard" para ver estatísticas (requer login Google, se configurado).</li>
-                  </ol>
-                  <h6>Solução de Problemas:</h6>
-                  <ul>
-                       <li>Se as opções nos menus não carregarem, verifique sua conexão com a internet. O sistema usará opções padrão se a conexão falhar.</li>
-                       <li>Se o salvamento falhar, o sistema tentará salvar localmente no seu navegador. Relatórios locais podem ser pesquisados usando a opção "Relatórios Locais".</li>
-                       <li>Para erros persistentes, contate o desenvolvedor (Warlison Abreu).</li>
-                  </ul>
-                  <h6>Dicas:</h6>
-                   <ul>
-                       <li>Use o botão "Modo Escuro" para alternar o tema visual.</li>
-                       <li>Relatórios salvos localmente só ficam disponíveis neste navegador.</li>
-                   </ul>
-
+                  <div class="help-container">
+                      <h6 class="help-section-title">Como usar:</h6>
+                      <ol class="help-instructions">
+                          <li>Preencha as Informações do Turno (Data, Horário, Letra, Supervisor).</li>
+                          <li>Clique em "Próximo".</li>
+                          <li>Adicione as equipes de Alta Pressão e/ou Vácuo/Hiper Vácuo clicando nos botões correspondentes.</li>
+                          <li>Preencha os detalhes de cada equipe no formulário que aparecerá.</li>
+                          <li>Se houver troca de equipamento, marque "Sim" e preencha os detalhes obrigatórios.</li>
+                          <li>Após adicionar todas as equipes, clique em "Próximo: Revisão".</li>
+                          <li>Confira todos os dados no resumo.</li>
+                          <li>Clique em "Salvar Relatório".</li>
+                          <li>Após salvar, você poderá visualizar o relatório, formatá-lo para WhatsApp ou gerar um PDF (se salvo no servidor).</li>
+                          <li>Use o botão "Pesquisar" no topo para encontrar relatórios antigos.</li>
+                          <li>Use o botão "Dashboard" para ver estatísticas (requer login Google, se configurado).</li>
+                      </ol>
+                      <h6 class="help-section-title">Solução de Problemas:</h6>
+                      <ul class="help-troubleshooting">
+                          <li>Se as opções nos menus não carregarem, verifique sua conexão com a internet. O sistema usará opções padrão se a conexão falhar.</li>
+                          <li>Se o salvamento falhar, o sistema tentará salvar localmente no seu navegador. Relatórios locais podem ser pesquisados usando a opção "Relatórios Locais".</li>
+                          <li>Para erros persistentes, contate o desenvolvedor (Warlison Abreu).</li>
+                      </ul>
+                      <h6 class="help-section-title">Dicas:</h6>
+                      <ul class="help-tips">
+                          <li>Use o botão "Modo Escuro" para alternar o tema visual.</li>
+                          <li>Relatórios salvos localmente só ficam disponíveis neste navegador.</li>
+                      </ul>
+                  </div>
               </div>
               <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                  <button type="button" class="btn btn-secondary action-button" data-bs-dismiss="modal">Fechar</button>
               </div>
           </div>
       </div>
