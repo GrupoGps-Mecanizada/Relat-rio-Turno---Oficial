@@ -1,135 +1,4 @@
 /**
- * Gerar texto de relatório local (Melhorado e mais detalhado)
- */
-function gerarTextoRelatorioLocal(relatorio) {
-  if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) {
-    return 'Erro: Dados do relatório local inválidos ou ausentes.';
-  }
-
-  const { dadosTurno, equipes, id, timestamp } = relatorio;
-  let texto = ''; // <--- Usar 'texto' como no resto da função
-  const linhaSeparadora = '='.repeat(72) + '\n';
-  const subLinha = '-'.repeat(72) + '\n';
-
-  texto += linhaSeparadora;
-  texto += '                     RELATÓRIO DE TURNO (LOCAL)\n';
-  texto += '                   GRUPO GPS - MECANIZADA\n';
-  texto += linhaSeparadora + '\n';
-
-  texto += 'INFORMAÇÕES GERAIS\n';
-  texto += subLinha;
-  texto += `Data: ${formatarData(dadosTurno.data)}\n`;
-  texto += `Horário: ${dadosTurno.horario || 'N/A'}\n`;
-  texto += `Letra do turno: ${dadosTurno.letra || 'N/A'}\n`;
-  texto += `Supervisor: ${dadosTurno.supervisor || 'N/A'}\n`;
-  texto += `ID Relatório Local: ${id || 'N/A'}\n`;
-  texto += `Salvo em: ${formatarDataHora(timestamp)}\n`; // Usa a data de salvamento
-  texto += subLinha + '\n';
-
-  // Separar equipes por tipo
-  const equipesPorTipo = equipes.reduce((acc, equipe) => {
-    const tipo = equipe.tipo || 'Outro';
-    if (!acc[tipo]) acc[tipo] = [];
-    acc[tipo].push(equipe);
-    return acc;
-  }, {});
-
-  // Processar cada tipo de equipe
-  for (const tipo in equipesPorTipo) {
-    const equipesDoTipo = equipesPorTipo[tipo];
-    texto += linhaSeparadora;
-    texto += `          EQUIPES DE ${tipo.toUpperCase()} (${equipesDoTipo.length})\n`;
-    texto += linhaSeparadora + '\n';
-
-    equipesDoTipo.forEach((equipe, index) => {
-      const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-      const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-      const motivoTrocaDisplay = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca;
-      const isAltaPressao = tipo === 'Alta Pressão';
-
-      texto += `EQUIPE ${index + 1} | ${equipe.numero || 'N/A'}\n`;
-      texto += subLinha;
-      texto += `Motorista: ${equipe.motorista || 'N/A'}\n`;
-      texto += `Operador(es): ${equipe.operadores || 'N/A'}\n`;
-      texto += `Área: ${equipe.area || 'N/A'}\n`;
-      texto += `Atividade: ${equipe.atividade || 'N/A'}\n`;
-
-      // <<< --- CÓDIGO ADICIONADO --- >>>
-      // Acessa as propriedades diretamente do objeto equipe local
-      texto += `> Tipo de Atividade: ${equipe.tipoAtividade || 'Rotineira'}\n`;
-      texto += `> Status: ${equipe.statusAtividade || 'Concluído'}\n`;
-      // Adiciona verificação se statusAtividade existe antes de comparar
-      if (equipe.statusAtividade && equipe.statusAtividade !== 'Concluído' && equipe.pendencia) {
-        texto += `  - Pendência: ${equipe.pendencia}\n`;
-      }
-      // <<< --- FIM DO CÓDIGO ADICIONADO --- >>>
-
-      texto += `Vaga: ${vagaDisplay || 'N/A'}\n`;
-      texto += `Equipamento: ${equipDisplay || 'N/A'}\n`;
-      if (equipe.identificacaoUsiminas) texto += `Identificação Usiminas: ${equipe.identificacaoUsiminas}\n`;
-
-      // Detalhes da Troca
-      texto += '\n> Status Equipamento:\n';
-      texto += `  Houve troca: ${equipe.trocaEquipamento || 'Não'}\n`;
-      if (equipe.trocaEquipamento === 'Sim') {
-        texto += `  - Motivo: ${motivoTrocaDisplay || 'Não especificado'}\n`;
-        texto += `  - Defeito/Medidas: ${equipe.defeito || 'N/A'}\n`;
-        if (equipe.placaNova) texto += `  - Placa Nova: ${equipe.placaNova}\n`;
-        if (equipe.dataHoraTroca) texto += `  - Data/Hora Troca: ${formatarDataHora(equipe.dataHoraTroca)}\n`; // Formata aqui também
-      }
-
-      // Implementos
-      texto += '\n> Implementos:\n';
-      if (isAltaPressao) {
-         texto += `  - Pistola: ${equipe.materiais?.pistola ?? 'N/A'}\n`;
-         texto += `  - Pistola C.L.: ${equipe.materiais?.pistolaCanoLongo ?? 'N/A'}\n`;
-         texto += `  - Mang. Torpedo: ${equipe.materiais?.mangueiraTorpedo ?? 'N/A'}\n`;
-         texto += `  - Pedal: ${equipe.materiais?.pedal ?? 'N/A'}\n`;
-         texto += `  - Varetas: ${equipe.materiais?.varetas ?? 'N/A'}\n`;
-         texto += `  - Rabicho: ${equipe.materiais?.rabicho ?? 'N/A'}\n`;
-         texto += `  - Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}\n`;
-         texto += `  - Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}\n`;
-      } else { // Vácuo / Hiper Vácuo
-         texto += `  - Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
-         texto += `  - Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
-         texto += `  - Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}\n`;
-         texto += `  - Mangotes 4": ${equipe.mangotes4Polegadas ?? 'N/A'}\n`;
-         texto += `  - Mangotes 6": ${equipe.mangotes6Polegadas ?? 'N/A'}\n`;
-      }
-
-      if (equipe.justificativa) {
-        texto += `\n> Justificativa Implementos Falta:\n  ${equipe.justificativa}\n`;
-      }
-
-      // Segurança
-      texto += '\n> Segurança:\n';
-      texto += `  - Caixa Bloqueio: ${equipe.caixaBloqueio ?? 'N/A'}\n`;
-      texto += `  - Cadeados: ${equipe.cadeados ?? 'N/A'}\n`;
-      texto += `  - Plaquetas: ${equipe.plaquetas ?? 'N/A'}\n`;
-
-      if (equipe.observacoes) {
-        texto += `\n> Observações Adicionais:\n  ${equipe.observacoes}\n`;
-      }
-
-      texto += subLinha + '\n';
-    });
-  }
-
-  // Rodapé
-  texto += linhaSeparadora;
-  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.1'} (Relatório Local)\n`;
-  texto += linhaSeparadora;
-
-  return texto;
-}
-```
-
----
-
-**Código Completo `app.js` Atualizado:**
-
-```javascript
-/**
  * Sistema de Relatório de Turno v3.1
  * Arquivo principal de lógica da aplicação (app.js)
  */
@@ -481,6 +350,13 @@ function setupEventListeners() {
        radio.removeEventListener('change', toggleMotivoOutro); // Passar a mesma função
        radio.addEventListener('change', toggleMotivoOutro);
    });
+
+    // Listener para status da atividade (para mostrar/ocultar pendência)
+    const statusSelect = document.getElementById('equipeStatusAtividade');
+    if (statusSelect) {
+        statusSelect.removeEventListener('change', togglePendencia); // Evitar duplicação
+        statusSelect.addEventListener('change', togglePendencia);
+    }
 }
 
 /**
@@ -1946,11 +1822,20 @@ async function executarPesquisa() {
 
   try {
     let resultados = [];
-    
+    /*
+    // --- Bloco de código para pesquisa por status (parece incompleto/deslocado) ---
+    // Este bloco estava solto aqui, precisa ser integrado à lógica de pesquisa se for necessário.
+    // Presumo que a intenção era adicionar um `case 'status':` no switch de ajuste ou
+    // ter uma lógica separada para pesquisa por status na API ou localmente.
+    // Por ora, comentei para não causar erro.
     if (tipoPesquisa === 'status') {
-      match = linha[statusAtividadeIndex] && 
-              linha[statusAtividadeIndex].toString().toLowerCase().includes(termoLower);
+       // match = linha[statusAtividadeIndex] &&
+       //         linha[statusAtividadeIndex].toString().toLowerCase().includes(termoLower);
+       console.warn("Pesquisa por 'status' não implementada completamente.");
+       // Implementar busca por status aqui (API ou local)
     }
+    // --- Fim do Bloco ---
+    */
 
     if (tipoPesquisa === 'local') {
       resultados = pesquisarRelatoriosLocais(termoPesquisa.trim());
@@ -2007,23 +1892,38 @@ function pesquisarRelatoriosLocais(termo) {
     if (!dadosTurno) return false;
 
     // Função auxiliar para busca case-insensitive
-const checkMatch = (valor) => valor && String(valor).toLowerCase().includes(termoLower);
+    const checkMatch = (valor) => valor && String(valor).toLowerCase().includes(termoLower);
 
-// Checar ID
-if (checkMatch(id)) return true;
-// Checar dados do turno
-if (checkMatch(dadosTurno.letra)) return true;
-if (checkMatch(dadosTurno.supervisor)) return true;
-if (checkMatch(dadosTurno.data)) return true; // Checa YYYY-MM-DD
-if (checkMatch(formatarData(dadosTurno.data))) return true; // Checa DD/MM/YYYY
-if (checkMatch(dadosTurno.horario)) return true;
+    // Checar ID
+    if (checkMatch(id)) return true;
+    // Checar dados do turno
+    if (checkMatch(dadosTurno.letra)) return true;
+    if (checkMatch(dadosTurno.supervisor)) return true;
+    if (checkMatch(dadosTurno.data)) return true; // Checa YYYY-MM-DD
+    if (checkMatch(formatarData(dadosTurno.data))) return true; // Checa DD/MM/YYYY
+    if (checkMatch(dadosTurno.horario)) return true;
 
-// Checar motorista/operadores nos dados das equipes
-return equipes.some(eq =>
-  checkMatch(eq.numero) || checkMatch(eq.motorista) || checkMatch(eq.operadores) ||
-  checkMatch(eq.equipamento) || checkMatch(eq.equipamentoPersonalizado) ||
-  checkMatch(eq.area) || checkMatch(eq.atividade) || checkMatch(eq.identificacaoUsiminas)
-);
+    // Checar campos das equipes
+    return equipes.some(eq =>
+        checkMatch(eq.numero) ||
+        checkMatch(eq.motorista) ||
+        checkMatch(eq.operadores) ||
+        checkMatch(eq.area) ||
+        checkMatch(eq.atividade) ||
+        checkMatch(eq.tipoAtividade) || // Incluir novos campos na busca
+        checkMatch(eq.statusAtividade) ||
+        checkMatch(eq.pendencia) ||
+        checkMatch(eq.vaga) ||
+        checkMatch(eq.vagaPersonalizada) ||
+        checkMatch(eq.equipamento) ||
+        checkMatch(eq.equipamentoPersonalizado) ||
+        checkMatch(eq.identificacaoUsiminas) ||
+        checkMatch(eq.motivoTroca) || // Incluir motivos na busca
+        checkMatch(eq.motivoOutro) ||
+        checkMatch(eq.defeito) ||
+        checkMatch(eq.placaNova) ||
+        checkMatch(eq.observacoes)
+    );
 }).map(relatorio => ({ // Formatar para exibição na tabela
   id: relatorio.id,
   data: formatarData(relatorio.dadosTurno.data),
