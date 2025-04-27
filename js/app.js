@@ -1,7 +1,7 @@
 /**
- * Sistema de Relatório de Turno v3.1
+ * Sistema de Relatório de Turno v3.2
  * Arquivo principal de lógica da aplicação (app.js)
- * ATUALIZADO para incluir Data/Hora FIM da Troca
+ * ATUALIZADO para incluir Data/Hora FIM da Troca e validações associadas.
  */
 
 // Variáveis globais (Considerar mover para AppState no futuro)
@@ -97,6 +97,9 @@ async function carregarDadosFormulario() {
            popularSelectOpcoes('equipeCadeados', dadosFormulario.opcoesCadeadosPlaquetas);
            popularSelectOpcoes('equipePlaquetas', dadosFormulario.opcoesCadeadosPlaquetas);
        }
+       // Adicionado para popular selects de Vaga e Equipamento no modal
+       if (dadosFormulario.vagasAltaPressao) popularSelectOpcoes('equipeVaga', dadosFormulario.vagasAltaPressao); // Exemplo, ajustar conforme necessário
+       if (dadosFormulario.equipamentosAltaPressao) popularSelectOpcoes('equipeEquipamento', dadosFormulario.equipamentosAltaPressao); // Exemplo, ajustar conforme necessário
 
       console.log('Dados do formulário carregados com sucesso via API');
     } else {
@@ -129,6 +132,10 @@ function usarDadosFormularioFallback() {
       popularSelectOpcoes('equipeMangotes6Polegadas', CONFIG.OPCOES_FORMULARIO.opcoesMangotes || []);
       popularSelectOpcoes('equipeCadeados', CONFIG.OPCOES_FORMULARIO.opcoesCadeadosPlaquetas || []);
       popularSelectOpcoes('equipePlaquetas', CONFIG.OPCOES_FORMULARIO.opcoesCadeadosPlaquetas || []);
+      // Adicionado para popular selects de Vaga e Equipamento no modal (Fallback)
+      popularSelectOpcoes('equipeVaga', CONFIG.OPCOES_FORMULARIO.vagasAltaPressao || ['OUTRA VAGA']); // Exemplo
+      popularSelectOpcoes('equipeEquipamento', CONFIG.OPCOES_FORMULARIO.equipamentosAltaPressao || ['OUTRO EQUIPAMENTO']); // Exemplo
+
 
       console.log('Dados do formulário preenchidos com fallback de CONFIG.');
     } else {
@@ -160,12 +167,22 @@ function popularSelectOpcoes(elementId, opcoes) {
   while (select.options.length > 1) {
     select.remove(1);
   }
+  // Se o primeiro não for placeholder, limpar tudo
+  if (select.options.length === 1 && select.options[0].value !== "" && !select.options[0].disabled) {
+      select.innerHTML = '<option value="" selected disabled>Selecione...</option>'; // Resetar com placeholder padrão
+  } else if (select.options.length === 0) {
+       select.innerHTML = '<option value="" selected disabled>Selecione...</option>'; // Garantir placeholder se vazio
+  }
+
 
   // Criar conjunto para verificar duplicatas
   const valoresJaAdicionados = new Set();
-  if (select.options.length > 0) {
-    valoresJaAdicionados.add(select.options[0].value);
+  if (select.options.length > 0 && select.options[0].value === "") { // Considera o placeholder
+    // Não adiciona o placeholder ao set para permitir que ele seja adicionado se vier nas opções
+  } else if (select.options.length > 0) {
+     valoresJaAdicionados.add(select.options[0].value);
   }
+
 
   // Adicionar novas opções, verificando duplicatas
   opcoes.forEach(opcao => {
@@ -215,13 +232,10 @@ function configureFormValidation() {
   // Formulário de equipe (no modal)
   const formEquipe = document.getElementById('formEquipe');
   if (formEquipe) {
-    // IMPORTANTE: O listener do submit chama salvarEquipe, que agora também chama a validação condicional.
-    // Removemos a chamada direta a salvarEquipe daqui para evitar dupla execução.
-    // O onsubmit no HTML foi removido para usar este listener.
+    // O onsubmit do form chama salvarEquipe (que chama a validação primeiro)
     formEquipe.addEventListener('submit', function handleFormEquipeSubmit(event) {
       event.preventDefault();
       event.stopPropagation();
-      // A validação condicional agora é chamada DENTRO de salvarEquipe
       salvarEquipe(); // Chama a função que agora inclui a validação
       // A classe 'was-validated' é adicionada dentro de salvarEquipe se a validação falhar
     });
@@ -235,6 +249,14 @@ function configureFormValidation() {
  */
 function validarCamposCondicionaisEquipe() {
     let isValid = true;
+    let primeiroErroFocado = false;
+
+    function focarPrimeiroErro(elemento) {
+        if (!primeiroErroFocado && elemento) {
+            elemento.focus();
+            primeiroErroFocado = true;
+        }
+    }
 
     // Vaga Personalizada
     const vagaSelect = document.getElementById('equipeVaga');
@@ -242,7 +264,7 @@ function validarCamposCondicionaisEquipe() {
     if (vagaSelect && vagaSelect.value === 'OUTRA VAGA' && vagaPersonalizadaInput && !vagaPersonalizadaInput.value.trim()) {
         mostrarNotificacao('Por favor, especifique a "Outra Vaga".', 'warning');
         vagaPersonalizadaInput.classList.add('is-invalid');
-        if(isValid) vagaPersonalizadaInput.focus(); // Foca no primeiro erro
+        focarPrimeiroErro(vagaPersonalizadaInput);
         isValid = false;
     } else if (vagaPersonalizadaInput) {
         vagaPersonalizadaInput.classList.remove('is-invalid');
@@ -254,7 +276,7 @@ function validarCamposCondicionaisEquipe() {
      if (equipSelect && equipSelect.value === 'OUTRO EQUIPAMENTO' && equipPersonalizadoInput && !equipPersonalizadoInput.value.trim()) {
         mostrarNotificacao('Por favor, especifique o "Outro Equipamento".', 'warning');
         equipPersonalizadoInput.classList.add('is-invalid');
-        if(isValid) equipPersonalizadoInput.focus();
+        focarPrimeiroErro(equipPersonalizadoInput);
         isValid = false;
     } else if (equipPersonalizadoInput) {
         equipPersonalizadoInput.classList.remove('is-invalid');
@@ -279,7 +301,7 @@ function validarCamposCondicionaisEquipe() {
             if (motivoTrocaFeedback) motivoTrocaFeedback.style.display = 'block';
             mostrarNotificacao('Por favor, selecione o motivo da troca.', 'warning');
              const primeiroRadioMotivo = document.getElementById('motivoManutencao');
-             if(isValid && primeiroRadioMotivo) primeiroRadioMotivo.focus();
+             focarPrimeiroErro(primeiroRadioMotivo);
             isValid = false;
         } else {
              if (motivoTrocaFeedback) motivoTrocaFeedback.style.display = 'none';
@@ -289,7 +311,7 @@ function validarCamposCondicionaisEquipe() {
         if ((motivoTroca === 'Outros Motivos (Justificar)' || motivoTroca === 'Defeitos Em Geral (Justificar)') && motivoOutroInput && !motivoOutroInput.value.trim()) {
             mostrarNotificacao('Por favor, especifique o "Motivo" da troca.', 'warning');
             motivoOutroInput.classList.add('is-invalid');
-             if(isValid) motivoOutroInput.focus();
+             focarPrimeiroErro(motivoOutroInput);
             isValid = false;
         } else if (motivoOutroInput) {
              motivoOutroInput.classList.remove('is-invalid');
@@ -299,7 +321,7 @@ function validarCamposCondicionaisEquipe() {
         if (defeitoInput && !defeitoInput.value.trim()) {
             mostrarNotificacao('Por favor, descreva o defeito e as medidas tomadas para a troca.', 'warning');
             defeitoInput.classList.add('is-invalid');
-             if(isValid) defeitoInput.focus();
+             focarPrimeiroErro(defeitoInput);
             isValid = false;
         } else if (defeitoInput) {
             defeitoInput.classList.remove('is-invalid');
@@ -310,30 +332,31 @@ function validarCamposCondicionaisEquipe() {
         if (dataHoraFimInput && !dataHoraFimInput.value) {
             mostrarNotificacao('Por favor, informe a Data/Hora de FIM da troca.', 'warning');
             dataHoraFimInput.classList.add('is-invalid');
-            if(isValid) dataHoraFimInput.focus();
+            focarPrimeiroErro(dataHoraFimInput);
             isValid = false;
         } else if (dataHoraFimInput) {
-            dataHoraFimInput.classList.remove('is-invalid');
-        }
+            dataHoraFimInput.classList.remove('is-invalid'); // Limpa se preenchido
 
-        // Opcional: Validar se FIM é maior que INÍCIO
-        if (dataHoraInicioInput && dataHoraFimInput && dataHoraInicioInput.value && dataHoraFimInput.value) {
-             try {
-                 const inicio = new Date(dataHoraInicioInput.value);
-                 const fim = new Date(dataHoraFimInput.value);
-                 if (fim <= inicio) {
-                     mostrarNotificacao('A Data/Hora de FIM da troca deve ser posterior à Data/Hora de INÍCIO.', 'warning');
-                     dataHoraFimInput.classList.add('is-invalid'); // Marca o campo FIM como inválido
-                     if(isValid) dataHoraFimInput.focus();
-                     isValid = false;
-                 } else {
-                     // Se a data for válida, remove a classe (caso tenha sido adicionada antes)
-                      dataHoraFimInput.classList.remove('is-invalid');
+            // Opcional: Validar se FIM é maior que INÍCIO (somente se FIM foi preenchido)
+            if (dataHoraInicioInput && dataHoraInicioInput.value && dataHoraFimInput.value) {
+                 try {
+                     const inicio = new Date(dataHoraInicioInput.value);
+                     const fim = new Date(dataHoraFimInput.value);
+                     // Adiciona uma pequena tolerância (1 minuto) para evitar problemas com segundos
+                     if (fim.getTime() <= inicio.getTime()) {
+                         mostrarNotificacao('A Data/Hora de FIM da troca deve ser posterior à Data/Hora de INÍCIO.', 'warning');
+                         dataHoraFimInput.classList.add('is-invalid'); // Marca o campo FIM como inválido
+                         focarPrimeiroErro(dataHoraFimInput);
+                         isValid = false;
+                     } else {
+                         // Se a data for válida, remove a classe (caso tenha sido adicionada antes)
+                          dataHoraFimInput.classList.remove('is-invalid');
+                     }
+                 } catch (e) {
+                     // Se houver erro ao converter as datas, ignora essa validação específica
+                     console.warn("Erro ao comparar datas de troca:", e);
                  }
-             } catch (e) {
-                 // Se houver erro ao converter as datas, ignora essa validação específica
-                 console.warn("Erro ao comparar datas de troca:", e);
-             }
+            }
         }
         // <<< FIM: Validação Data/Hora Fim >>>
 
@@ -345,7 +368,7 @@ function validarCamposCondicionaisEquipe() {
     if (statusSelect && statusSelect.value !== 'Concluído' && pendenciaInput && !pendenciaInput.value.trim()) {
         mostrarNotificacao('Por favor, informe a justificativa/pendência para o status selecionado.', 'warning');
         pendenciaInput.classList.add('is-invalid');
-        if(isValid) pendenciaInput.focus();
+        focarPrimeiroErro(pendenciaInput);
         isValid = false;
     } else if (pendenciaInput) {
          pendenciaInput.classList.remove('is-invalid');
@@ -417,8 +440,25 @@ function setupEventListeners() {
  */
 function mostrarNotificacao(mensagem, tipo = 'success') {
   // A lógica agora está no wrapper em main.js que chama o módulo Notifications
-  console.log(`[Notificação - ${tipo.toUpperCase()}] ${mensagem}`); // Mantém log
-  // O wrapper em main.js cuidará de chamar o módulo Notifications
+   if (window.Notifications && typeof window.Notifications.show === 'function') {
+       window.Notifications.show(mensagem, tipo);
+   } else {
+       // Fallback para console e talvez um alert ou toast simples
+       console.log(`[Notificação Fallback - ${tipo.toUpperCase()}] ${mensagem}`);
+       // Tentar usar o Toast fallback do HTML
+       const toastEl = document.getElementById('toastNotificacao');
+       const toastBody = document.getElementById('toastTexto');
+       if (toastEl && toastBody) {
+           toastBody.textContent = mensagem;
+           // Remover classes de cor antigas e adicionar a nova
+           toastEl.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-info');
+           toastEl.classList.add(`bg-${tipo}`); // Assume que tipo corresponde a classes bg-*
+           const toast = new bootstrap.Toast(toastEl);
+           toast.show();
+       } else {
+            alert(`${tipo.toUpperCase()}: ${mensagem}`); // Último recurso
+       }
+   }
 }
 
 
@@ -460,7 +500,9 @@ function avancarParaEquipes() {
   if (!formTurno || !formTurno.checkValidity()) {
     if(formTurno) formTurno.classList.add('was-validated');
     mostrarNotificacao('Por favor, preencha todos os campos obrigatórios do turno.', 'warning');
-    formTurno?.requestSubmit?.();
+    // Tenta focar no primeiro campo inválido do formulário de turno
+    const firstInvalid = formTurno.querySelector(':invalid');
+    if (firstInvalid) { firstInvalid.focus(); }
     return;
   }
 
@@ -533,6 +575,7 @@ function navegarParaEtapa(idEtapaAlvo) {
   const etapaAlvo = document.getElementById(idEtapaAlvo);
   if (etapaAlvo) {
     etapaAlvo.style.display = 'block';
+     window.scrollTo(0, 0); // Rola para o topo ao mudar de etapa
      if(window.AppState) {
          AppState.update('currentStep', idEtapaAlvo);
      }
@@ -612,7 +655,7 @@ function preencherResumosRevisao() {
           const motivoTrocaDisplay = equipe.motivoTroca === 'Defeitos Em Geral (Justificar)' || equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
 
           html += `
-            <div class="card mb-3 equipe-card ${borderClass}">
+            <div class="card mb-3 equipe-card-revisao ${borderClass}"> <!-- Classe CSS ajustada -->
               <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Equipe ${index + 1}: ${equipe.numero || 'N/A'}</h5>
                 <div class="badge ${bgClass}">${equipe.tipo}</div>
@@ -639,18 +682,20 @@ function preencherResumosRevisao() {
                   <div class="col-md-6"><strong>Troca Equip.:</strong> ${equipe.trocaEquipamento || 'N/A'}</div>
                 </div>
 
+                <!-- ======================= INÍCIO BLOCO ATUALIZADO ======================= -->
                 ${equipe.trocaEquipamento === 'Sim' ? `
-                <div class="alert alert-warning p-2">
+                <div class="alert alert-warning p-2 mt-2 mb-3"> <!-- Adicionado mt-2 mb-3 -->
                   <small>
                     <strong>Detalhes da Troca:</strong><br>
                     Motivo: ${motivoTrocaDisplay || 'N/A'}<br>
                     Defeito/Medidas: ${equipe.defeito || 'N/A'}<br>
                     ${equipe.placaNova ? `Nova Placa: ${equipe.placaNova}<br>` : ''}
-                    ${equipe.dataHoraTroca ? `Início: ${formatarDataHora(equipe.dataHoraTroca)}<br>` : ''} <!-- Label Ajustado -->
-                    ${equipe.dataHoraFimTroca ? `Fim: ${formatarDataHora(equipe.dataHoraFimTroca)}` : ''} <!-- NOVO: Mostra Fim -->
+                    ${equipe.dataHoraTroca ? `Início: ${formatarDataHora(equipe.dataHoraTroca)}<br>` : ''}
+                    ${equipe.dataHoraFimTroca ? `Fim: ${formatarDataHora(equipe.dataHoraFimTroca)}` : ''} <!-- EXIBIÇÃO DO NOVO CAMPO -->
                   </small>
                 </div>
                 ` : ''}
+                <!-- ======================= FIM BLOCO ATUALIZADO ========================= -->
 
                 <h6 class="mt-3">Implementos e Segurança</h6>
                 <div class="row">
@@ -721,12 +766,14 @@ function adicionarEquipe(tipo) {
   if (formEquipe) {
     formEquipe.reset();
     formEquipe.classList.remove('was-validated');
-    // Resetar campos que não são resetados automaticamente (como divs ocultas)
+    // Limpar todas as classes is-invalid que podem ter ficado
+    formEquipe.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    // Resetar campos que não são resetados automaticamente (como divs ocultas e seus inputs)
     toggleVagaPersonalizada();
     toggleEquipamentoPersonalizado();
-    toggleTrocaEquipamento();
-    toggleMotivoOutro();
-    togglePendencia();
+    toggleTrocaEquipamento(); // Este deve limpar os campos dentro de #trocaDetalhes
+    toggleMotivoOutro();      // Garante que o campo outro esteja limpo e oculto
+    togglePendencia();        // Garante que a pendência esteja limpa e oculta
   } else {
       mostrarNotificacao("Erro: Formulário de equipe não encontrado no modal.", "danger");
       return;
@@ -753,12 +800,15 @@ function adicionarEquipe(tipo) {
   document.getElementById('materiaisVacuo').style.display = isAltaPressao ? 'none' : 'block';
 
   // Preencher selects de Vaga e Equipamento com base no tipo e nos dados carregados/fallback
-  if (dadosFormulario && (dadosFormulario.vagasAltaPressao || dadosFormulario.opcoesHorario)) {
+  if (dadosFormulario) { // Verifica se dadosFormulario foi carregado
       const base = dadosFormulario;
-      const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
-      const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
-      popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
-      popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
+      const vagas = isAltaPressao ? (base.vagasAltaPressao || []) : (base.vagasVacuo || []);
+      const equipamentos = isAltaPressao ? (base.equipamentosAltaPressao || []) : (base.equipamentosVacuo || []);
+
+      popularSelectOpcoes('equipeVaga', [...vagas, 'OUTRA VAGA']); // Garante que 'OUTRA VAGA' exista
+      popularSelectOpcoes('equipeEquipamento', [...equipamentos, 'OUTRO EQUIPAMENTO']); // Garante que 'OUTRO EQUIPAMENTO' exista
+
+      // Popula outros selects com dados globais
       popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
       popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
       popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
@@ -766,42 +816,86 @@ function adicionarEquipe(tipo) {
       popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
       popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
       popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
+      popularSelectOpcoes('equipeNumero', base.opcoesNumeroEquipe || []); // Popula Números/Nomes
   } else {
       mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
+      // Define opções mínimas de fallback
       popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
       popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
-      // ... outros selects de fallback
+      popularSelectOpcoes('equipeNumero', []); // Fallback vazio para números
+      // Zerar outros selects para evitar dados inconsistentes
+      popularSelectOpcoes('equipeLancesMangueira', []); popularSelectOpcoes('equipeLancesVaretas', []);
+      popularSelectOpcoes('equipeMangotes3Polegadas', []); popularSelectOpcoes('equipeMangotes4Polegadas', []); popularSelectOpcoes('equipeMangotes6Polegadas', []);
+      popularSelectOpcoes('equipeCadeados', []); popularSelectOpcoes('equipePlaquetas', []);
   }
 
-  // Definir automaticamente o próximo número de equipe disponível
+  // Definir automaticamente o próximo número de equipe disponível (ex: 'Equipe 1', 'Equipe 2')
   const equipesAtuais = window.AppState?.get('equipes') || equipes;
-  let proximoNumero = "Equipe 1";
+  let proximoNumero = "Equipe 1"; // Default
+  // Lógica para encontrar o próximo número sequencial baseado nos existentes que seguem o padrão "Equipe N"
+  const numerosExistentes = equipesAtuais
+      .map(eq => eq.numero)
+      .filter(numStr => numStr && numStr.startsWith("Equipe "))
+      .map(numStr => parseInt(numStr.replace("Equipe ", ""), 10))
+      .filter(num => !isNaN(num))
+      .sort((a, b) => a - b);
 
-  if (equipesAtuais.length > 0) {
-    const numerosAtivos = equipesAtuais
-      .map(eq => { const match = eq.numero?.match(/Equipe (\d+)/); return match ? parseInt(match[1]) : 0; })
-      .filter(num => num > 0).sort((a, b) => a - b);
-    let proximo = 1;
-    for (const num of numerosAtivos) { if (num > proximo) break; proximo = num + 1; }
-    proximoNumero = `Equipe ${proximo}`;
+  let proximoNumInt = 1;
+  for (const num of numerosExistentes) {
+      if (num === proximoNumInt) {
+          proximoNumInt++;
+      } else if (num > proximoNumInt) {
+          break; // Encontrou uma lacuna
+      }
   }
+  proximoNumero = `Equipe ${proximoNumInt}`;
 
-  // Selecionar automaticamente o próximo número disponível
+
+  // Selecionar automaticamente o próximo número disponível ou o primeiro da lista se o padrão não for encontrado
   const equipeNumeroSelect = document.getElementById('equipeNumero');
   if (equipeNumeroSelect) {
-    if (!Array.from(equipeNumeroSelect.options).some(opt => opt.value === proximoNumero)) {
-      equipeNumeroSelect.add(new Option(proximoNumero, proximoNumero));
-    }
-    equipeNumeroSelect.value = proximoNumero;
+     const options = Array.from(equipeNumeroSelect.options);
+     // Tenta encontrar a opção "Equipe N" calculada
+     const proximaOpcao = options.find(opt => opt.value === proximoNumero);
+     if (proximaOpcao) {
+         equipeNumeroSelect.value = proximoNumero;
+     } else if (options.length > 1) {
+         // Se não encontrou "Equipe N", seleciona a primeira opção válida (não o placeholder)
+         equipeNumeroSelect.selectedIndex = 1;
+     } else {
+         // Se só tem o placeholder, não faz nada ou adiciona a opção "Equipe N" se necessário
+         // Poderia adicionar: if (!options.find(opt => opt.value === proximoNumero)) { equipeNumeroSelect.add(new Option(proximoNumero, proximoNumero)); equipeNumeroSelect.value = proximoNumero; }
+     }
   }
 
-  // Definir valores padrão para implementos
+  // Definir valores padrão para implementos como N/A ou o primeiro valor numérico (0)
   document.querySelectorAll('#materiaisAltaPressao select, #materiaisVacuo select').forEach(select => {
-    if (select.options.length > 0 && select.options[0].value !== 'N/A') {
-      select.prepend(new Option('N/A', 'N/A'));
-    }
-    select.selectedIndex = 0; // Selecionar N/A
+      if (select.options.length > 0) {
+          const naoAplicavelOption = Array.from(select.options).find(opt => opt.value === 'N/A');
+          if (naoAplicavelOption) {
+              select.value = 'N/A';
+          } else {
+              // Se não tem N/A, seleciona o primeiro (provavelmente 0 para contagens)
+              select.selectedIndex = 0;
+          }
+      }
   });
+  // Define padrão para selects numéricos como 0
+  ['equipeLancesMangueira', 'equipeLancesVaretas', 'equipeMangotes3Polegadas', 'equipeMangotes4Polegadas', 'equipeMangotes6Polegadas', 'equipeCadeados', 'equipePlaquetas'].forEach(id => {
+       const sel = document.getElementById(id);
+       if(sel && sel.options.length > 0 && sel.options[0].value !== "" ) { // Verifica se não é placeholder
+           sel.value = "0"; // Assume que 0 é uma opção válida padrão
+       } else if (sel) {
+           sel.selectedIndex = 0; // Usa placeholder se existir
+       }
+  });
+
+  // Definir padrões para outros campos
+  const statusSelect = document.getElementById('equipeStatusAtividade'); if (statusSelect) statusSelect.value = 'Concluído';
+  const tipoAtivSelect = document.getElementById('equipeTipoAtividade'); if (tipoAtivSelect) tipoAtivSelect.value = 'Rotineira';
+  const caixaBloqueioNao = document.getElementById('caixaBloqueioNao'); if (caixaBloqueioNao) caixaBloqueioNao.checked = true;
+  const trocaNao = document.getElementById('equipeTrocaNao'); if (trocaNao) trocaNao.checked = true;
+
 
   // Garantir listeners
   setupEventListeners();
@@ -830,12 +924,18 @@ function editarEquipe(index) {
 
   const equipe = equipesAtuais[index];
 
-  // Limpar formulário
+  // Limpar formulário antes de preencher
   const formEquipe = document.getElementById('formEquipe');
   if (formEquipe) {
     formEquipe.reset();
     formEquipe.classList.remove('was-validated');
     formEquipe.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+    // Resetar divs que podem ter ficado visíveis
+    toggleVagaPersonalizada();
+    toggleEquipamentoPersonalizado();
+    toggleTrocaEquipamento();
+    toggleMotivoOutro();
+    togglePendencia();
   } else {
        mostrarNotificacao("Erro: Formulário de equipe não encontrado no modal.", "danger");
       return;
@@ -861,40 +961,56 @@ function editarEquipe(index) {
   document.getElementById('materiaisAltaPressao').style.display = isAltaPressao ? 'block' : 'none';
   document.getElementById('materiaisVacuo').style.display = isAltaPressao ? 'none' : 'block';
 
-  // Preencher selects principais (Vaga, Equipamento, etc.)
-  if (dadosFormulario && (dadosFormulario.vagasAltaPressao || dadosFormulario.opcoesHorario)) {
+  // Preencher selects principais (Vaga, Equipamento, etc.) dinamicamente
+   if (dadosFormulario) { // Verifica se dadosFormulario foi carregado
       const base = dadosFormulario;
-      const vagas = isAltaPressao ? base.vagasAltaPressao : base.vagasVacuo;
-      const equipamentos = isAltaPressao ? base.equipamentosAltaPressao : base.equipamentosVacuo;
-      popularSelectOpcoes('equipeVaga', vagas || ['OUTRA VAGA']);
-      popularSelectOpcoes('equipeEquipamento', equipamentos || ['OUTRO EQUIPAMENTO']);
-      // ... outros selects ...
+      const vagas = isAltaPressao ? (base.vagasAltaPressao || []) : (base.vagasVacuo || []);
+      const equipamentos = isAltaPressao ? (base.equipamentosAltaPressao || []) : (base.equipamentosVacuo || []);
+
+      popularSelectOpcoes('equipeVaga', [...vagas, 'OUTRA VAGA']);
+      popularSelectOpcoes('equipeEquipamento', [...equipamentos, 'OUTRO EQUIPAMENTO']);
+      popularSelectOpcoes('equipeNumero', base.opcoesNumeroEquipe || []); // Popula Números/Nomes
+      // Popula outros selects com dados globais
+      popularSelectOpcoes('equipeLancesMangueira', base.opcoesLances || []);
+      popularSelectOpcoes('equipeLancesVaretas', base.opcoesLances || []);
+      popularSelectOpcoes('equipeMangotes3Polegadas', base.opcoesMangotes || []);
+      popularSelectOpcoes('equipeMangotes4Polegadas', base.opcoesMangotes || []);
+      popularSelectOpcoes('equipeMangotes6Polegadas', base.opcoesMangotes || []);
+      popularSelectOpcoes('equipeCadeados', base.opcoesCadeadosPlaquetas || []);
+      popularSelectOpcoes('equipePlaquetas', base.opcoesCadeadosPlaquetas || []);
   } else {
-      mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
-      // ... fallbacks ...
+       mostrarNotificacao("Aviso: Dados de formulário não carregados, opções podem estar limitadas.", "warning");
+       // Define opções mínimas de fallback
+       popularSelectOpcoes('equipeVaga', ['OUTRA VAGA']);
+       popularSelectOpcoes('equipeEquipamento', ['OUTRO EQUIPAMENTO']);
+       popularSelectOpcoes('equipeNumero', []); // Fallback vazio para números
   }
 
    // Adicionar opção específica salva se não estiver na lista padrão
     function addOptionIfNotExists(selectId, value, text) {
         const select = document.getElementById(selectId);
         if (select && value && !select.querySelector(`option[value="${value}"]`)) {
-            select.add(new Option(text || value, value));
+             // Adiciona apenas se o valor não for vazio e não existir
+             if (value.trim() !== '') {
+                select.add(new Option(text || value, value));
+             }
         }
     }
-    addOptionIfNotExists('equipeVaga', equipe.vaga);
-    addOptionIfNotExists('equipeEquipamento', equipe.equipamento);
+    addOptionIfNotExists('equipeNumero', equipe.numero); // Garante que o número/nome da equipe exista
+    addOptionIfNotExists('equipeVaga', equipe.vaga); // Garante que a vaga exista
+    addOptionIfNotExists('equipeEquipamento', equipe.equipamento); // Garante que o equipamento exista
 
 
    // --- Preencher campos do formulário ---
     function setFieldValue(id, value) { const field = document.getElementById(id); if (field) field.value = value ?? ''; }
-    function setSelectValue(id, value) { const field = document.getElementById(id); if (field) { field.value = value ?? ''; if(field.selectedIndex === -1) field.selectedIndex = 0; } }
-    function setRadioValue(name, value) { const radio = document.querySelector(`input[name="${name}"][value="${value}"]`); if (radio) radio.checked = true; else { const firstRadio = document.querySelector(`input[name="${name}"]`); if(firstRadio) firstRadio.checked = true; } }
+    function setSelectValue(id, value) { const field = document.getElementById(id); if (field) { field.value = value ?? ''; if(field.selectedIndex === -1) field.selectedIndex = 0; } } // Usa placeholder se valor nulo
+    function setRadioValue(name, value) { const radio = document.querySelector(`input[name="${name}"][value="${value}"]`); if (radio) radio.checked = true; else { const firstRadio = document.querySelector(`input[name="${name}"]`); if(firstRadio) firstRadio.checked = true; } } // Marca o primeiro se valor não encontrado
 
     setSelectValue('equipeNumero', equipe.numero);
     setSelectValue('equipeTipoAtividade', equipe.tipoAtividade);
     setSelectValue('equipeStatusAtividade', equipe.statusAtividade);
     setFieldValue('equipePendencia', equipe.pendencia);
-    togglePendencia();
+    togglePendencia(); // Mostra/oculta e aplica required se necessário
     setFieldValue('equipeMotorista', equipe.motorista);
     setFieldValue('equipeOperadores', equipe.operadores);
     setFieldValue('equipeArea', equipe.area);
@@ -903,47 +1019,52 @@ function editarEquipe(index) {
 
     // Vaga e Equipamento
     setSelectValue('equipeVaga', equipe.vaga);
-    toggleVagaPersonalizada();
+    toggleVagaPersonalizada(); // Mostra/oculta e aplica required
     if (equipe.vaga === 'OUTRA VAGA') { setFieldValue('equipeVagaPersonalizada', equipe.vagaPersonalizada); }
     setSelectValue('equipeEquipamento', equipe.equipamento);
-    toggleEquipamentoPersonalizado();
+    toggleEquipamentoPersonalizado(); // Mostra/oculta e aplica required
     if (equipe.equipamento === 'OUTRO EQUIPAMENTO') { setFieldValue('equipeEquipamentoPersonalizado', equipe.equipamentoPersonalizado); }
 
     // Troca de equipamento
     setRadioValue('equipeTroca', equipe.trocaEquipamento || 'Não');
-    toggleTrocaEquipamento();
+    toggleTrocaEquipamento(); // Mostra/oculta os detalhes e aplica required
     if (equipe.trocaEquipamento === 'Sim') {
         setRadioValue('equipeMotivoTroca', equipe.motivoTroca);
-        toggleMotivoOutro();
+        toggleMotivoOutro(); // Mostra/oculta o campo "outro" e aplica required
         if (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') {
             setFieldValue('equipeMotivoOutro', equipe.motivoOutro);
         }
         setFieldValue('equipeDefeito', equipe.defeito);
         setFieldValue('equipePlacaNova', equipe.placaNova);
         setFieldValue('equipeDataHoraTroca', equipe.dataHoraTroca);
-        setFieldValue('equipeDataHoraFimTroca', equipe.dataHoraFimTroca); // <<< PREENCHER CAMPO FIM >>>
+        // ======================= PREENCHER CAMPO FIM =======================
+        setFieldValue('equipeDataHoraFimTroca', equipe.dataHoraFimTroca);
+        // ===================================================================
     }
 
-    // Materiais
-    if (isAltaPressao && equipe.materiais) {
-        // ... preenchimento materiais AP ...
-        setSelectValue('equipePistola', equipe.materiais.pistola);
-        setSelectValue('equipePistolaCanoLongo', equipe.materiais.pistolaCanoLongo);
-        // ... etc ...
-        setSelectValue('equipeLancesMangueira', equipe.lancesMangueira);
-        setSelectValue('equipeLancesVaretas', equipe.lancesVaretas);
-    } else if (!isAltaPressao && equipe.materiaisVacuo) {
-        // ... preenchimento materiais Vacuo ...
-        setSelectValue('equipeMangotes', equipe.materiaisVacuo.mangotes);
-        // ... etc ...
-        setSelectValue('equipeMangotes6Polegadas', equipe.mangotes6Polegadas);
+    // Materiais (Usa ?? 'N/A' para selects e ?? '0' para numéricos como padrão se valor for null/undefined)
+    if (isAltaPressao) {
+        setSelectValue('equipePistola', equipe.materiais?.pistola ?? 'N/A');
+        setSelectValue('equipePistolaCanoLongo', equipe.materiais?.pistolaCanoLongo ?? 'N/A');
+        setSelectValue('equipeMangueiraTorpedo', equipe.materiais?.mangueiraTorpedo ?? 'N/A');
+        setSelectValue('equipePedal', equipe.materiais?.pedal ?? 'N/A');
+        setSelectValue('equipeVaretas', equipe.materiais?.varetas ?? 'N/A');
+        setSelectValue('equipeRabicho', equipe.materiais?.rabicho ?? 'N/A');
+        setSelectValue('equipeLancesMangueira', equipe.lancesMangueira ?? '0');
+        setSelectValue('equipeLancesVaretas', equipe.lancesVaretas ?? '0');
+    } else { // Vácuo / Hiper
+        setSelectValue('equipeMangotes', equipe.materiaisVacuo?.mangotes ?? 'N/A');
+        setSelectValue('equipeReducoes', equipe.materiaisVacuo?.reducoes ?? 'N/A');
+        setSelectValue('equipeMangotes3Polegadas', equipe.mangotes3Polegadas ?? '0');
+        setSelectValue('equipeMangotes4Polegadas', equipe.mangotes4Polegadas ?? '0');
+        setSelectValue('equipeMangotes6Polegadas', equipe.mangotes6Polegadas ?? '0');
     }
 
     // Outros campos
     setFieldValue('equipeJustificativa', equipe.justificativa);
     setRadioValue('equipeCaixaBloqueio', equipe.caixaBloqueio || 'Não');
-    setSelectValue('equipeCadeados', equipe.cadeados);
-    setSelectValue('equipePlaquetas', equipe.plaquetas);
+    setSelectValue('equipeCadeados', equipe.cadeados ?? '0');
+    setSelectValue('equipePlaquetas', equipe.plaquetas ?? '0');
     setFieldValue('equipeObservacoes', equipe.observacoes);
 
     // Garantir listeners
@@ -965,10 +1086,11 @@ function removerEquipe(index) {
     return;
   }
 
-  if (confirm('Tem certeza que deseja remover esta equipe?')) {
+  if (confirm(`Tem certeza que deseja remover a equipe "${equipesAtuais[index].numero || `Equipe ${index + 1}`}"?`)) { // Mensagem de confirmação melhorada
     const novasEquipes = equipesAtuais.filter((_, i) => i !== index);
     if (window.AppState) {
       AppState.update('equipes', novasEquipes);
+      // O listener do AppState deve chamar atualizarListaEquipes e atualizarBotaoAvancar
     } else {
         equipes = novasEquipes;
         atualizarListaEquipes();
@@ -998,11 +1120,20 @@ function salvarEquipe() {
     return;
   }
 
-  // ** VALIDAÇÃO PRIMEIRO **
-  if (!formEquipe.checkValidity() || !validarCamposCondicionaisEquipe()) {
+  // ** VALIDAÇÃO PRIMEIRO (Bootstrap + Condicional) **
+  const bootstrapValido = formEquipe.checkValidity();
+  const condicionalValido = validarCamposCondicionaisEquipe();
+
+  if (!bootstrapValido || !condicionalValido) {
     formEquipe.classList.add('was-validated'); // Mostra erros visuais do Bootstrap
     salvandoEquipe = false; // Libera flag
-    // A validação condicional já deve ter mostrado notificações específicas
+    if (!bootstrapValido) {
+        mostrarNotificacao('Por favor, preencha todos os campos obrigatórios marcados.', 'warning');
+        // Foca no primeiro campo inválido do Bootstrap
+        const firstInvalidBootstrap = formEquipe.querySelector(':invalid');
+        if (firstInvalidBootstrap) { firstInvalidBootstrap.focus(); }
+    }
+    // A validação condicional já deve ter mostrado notificações específicas e focado o erro
     return; // Não prosseguir se inválido
   }
 
@@ -1048,7 +1179,9 @@ function salvarEquipe() {
     defeito: null,
     placaNova: null,
     dataHoraTroca: null,
-    dataHoraFimTroca: null // <<< Inicializa o novo campo >>>
+    // ======================= INICIALIZA CAMPO FIM =======================
+    dataHoraFimTroca: null
+    // ===================================================================
   };
 
   // Adicionar detalhes da troca se aplicável
@@ -1060,7 +1193,9 @@ function salvarEquipe() {
     novaEquipe.defeito = getFieldValue('equipeDefeito');
     novaEquipe.placaNova = getFieldValue('equipePlacaNova');
     novaEquipe.dataHoraTroca = getFieldValue('equipeDataHoraTroca');
-    novaEquipe.dataHoraFimTroca = getFieldValue('equipeDataHoraFimTroca'); // <<< LER O NOVO CAMPO >>>
+    // ======================= LÊ O CAMPO FIM DO FORM =====================
+    novaEquipe.dataHoraFimTroca = getFieldValue('equipeDataHoraFimTroca');
+    // ====================================================================
   }
 
   // Adicionar materiais específicos por tipo
@@ -1100,6 +1235,7 @@ function salvarEquipe() {
   // Atualizar estado
   if (window.AppState) {
     AppState.update('equipes', equipesAtualizadas);
+    // O listener do AppState deve chamar atualizarListaEquipes e atualizarBotaoAvancar
   } else {
     equipes = equipesAtualizadas;
     atualizarListaEquipes();
@@ -1111,7 +1247,7 @@ function salvarEquipe() {
     modalEquipe.hide();
   }
 
-  // Resetar flag de salvamento após um pequeno delay
+  // Resetar flag de salvamento após um pequeno delay para permitir que o modal feche
   setTimeout(() => {
     salvandoEquipe = false;
   }, 300);
@@ -1119,7 +1255,7 @@ function salvarEquipe() {
 
 
 /**
- * Atualizar lista de equipes na UI
+ * Atualizar lista de equipes na UI (Etapa 2)
  */
 function atualizarListaEquipes() {
   const listaEquipesDiv = document.getElementById('listaEquipes');
@@ -1130,46 +1266,52 @@ function atualizarListaEquipes() {
   const equipesAtuais = window.AppState?.get('equipes') || equipes;
 
   if (semEquipesDiv) {
-    semEquipesDiv.style.display = equipesAtuais.length === 0 ? 'block' : 'none';
+    semEquipesDiv.style.display = equipesAtuais.length === 0 ? 'flex' : 'none'; // Usa flex para centralizar
   }
 
+  // Limpar apenas os cards de equipe existentes
   listaEquipesDiv.querySelectorAll('.equipe-card').forEach(card => card.remove());
 
   equipesAtuais.forEach((equipe, index) => {
     const isAltaPressao = equipe.tipo === 'Alta Pressão';
     const cardClass = isAltaPressao ? 'equipe-card card border-primary' : 'equipe-card card equipe-vacuo border-danger';
     const badgeClass = isAltaPressao ? 'bg-primary' : 'bg-danger';
-    const statusClass = equipe.statusAtividade === 'Concluído' ? 'text-success' : 'text-warning';
-    const statusIcon = equipe.statusAtividade === 'Concluído' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
+    const statusClass = equipe.statusAtividade === 'Concluído' ? 'text-success' : (equipe.statusAtividade === 'Em andamento' ? 'text-warning' : 'text-danger');
+    const statusIcon = equipe.statusAtividade === 'Concluído' ? 'bi-check-circle-fill' : (equipe.statusAtividade === 'Em andamento' ? 'bi-arrow-repeat' : 'bi-exclamation-octagon-fill');
 
     const card = document.createElement('div');
-    card.className = `${cardClass} mb-3`;
+    card.className = `${cardClass} mb-3 shadow-sm`; // Adiciona sombra leve
 
     card.innerHTML = `
-      <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">${equipe.numero || 'N/A'} <span class="badge ${badgeClass} ms-2">${equipe.tipo}</span></h5>
+      <div class="card-header d-flex justify-content-between align-items-center py-2"> <!-- Reduz padding -->
+        <h5 class="mb-0 fs-6">${equipe.numero || `Equipe ${index+1}`} <span class="badge ${badgeClass} ms-2">${equipe.tipo}</span></h5>
         <div class="btn-group btn-group-sm">
-          <button type="button" class="btn btn-warning" onclick="editarEquipe(${index})" title="Editar Equipe">
+          <button type="button" class="btn btn-outline-warning btn-action-sm" onclick="editarEquipe(${index})" title="Editar Equipe">
             <i class="bi bi-pencil-fill"></i>
           </button>
-          <button type="button" class="btn btn-danger" onclick="removerEquipe(${index})" title="Remover Equipe">
+          <button type="button" class="btn btn-outline-danger btn-action-sm" onclick="removerEquipe(${index})" title="Remover Equipe">
             <i class="bi bi-trash-fill"></i>
           </button>
         </div>
       </div>
-      <div class="card-body p-2">
+      <div class="card-body p-2"> <!-- Reduz padding -->
         <small>
             <strong>Motorista:</strong> ${equipe.motorista || 'N/A'}<br>
             <strong>Operador(es):</strong> ${equipe.operadores || 'N/A'}<br>
             <strong>Área:</strong> ${equipe.area || 'N/A'}<br>
             <strong>Atividade:</strong> ${equipe.atividade || 'N/A'}<br>
-            <strong class="${statusClass}"><i class="bi ${statusIcon}"></i> Status:</strong> <span class="${statusClass}">${equipe.statusAtividade || 'Concluído'} ${equipe.pendencia ? `(${equipe.pendencia})` : ''}</span><br>
+            <strong class="${statusClass}"><i class="bi ${statusIcon} me-1"></i> Status:</strong> <span class="${statusClass}">${equipe.statusAtividade || 'Concluído'} ${equipe.pendencia ? `(${equipe.pendencia})` : ''}</span><br>
             <strong>Troca Equip.:</strong> ${equipe.trocaEquipamento || 'N/A'}
         </small>
       </div>
     `;
 
-    listaEquipesDiv.appendChild(card);
+    // Adiciona o card antes da div #semEquipes (se ela existir) ou no final
+    if (semEquipesDiv) {
+        listaEquipesDiv.insertBefore(card, semEquipesDiv);
+    } else {
+        listaEquipesDiv.appendChild(card);
+    }
   });
 }
 
@@ -1201,7 +1343,7 @@ function toggleVagaPersonalizada() {
     input.required = show;
     if (!show) {
         input.value = '';
-        input.classList.remove('is-invalid');
+        input.classList.remove('is-invalid'); // Remove validação se oculto
     }
   }
 }
@@ -1220,7 +1362,7 @@ function toggleEquipamentoPersonalizado() {
     input.required = show;
      if (!show) {
         input.value = '';
-        input.classList.remove('is-invalid');
+        input.classList.remove('is-invalid'); // Remove validação se oculto
     }
   }
 }
@@ -1236,20 +1378,23 @@ function toggleTrocaEquipamento() {
   if (trocaSimRadio && detalhesDiv) {
     const show = trocaSimRadio.checked;
     detalhesDiv.style.display = show ? 'block' : 'none';
-    // Limpar campos e validações se escondido
-    if (!show) {
-        // Inclui datetime-local para limpar campos de INÍCIO e FIM
-        detalhesDiv.querySelectorAll('input[type="text"], input[type="datetime-local"], textarea').forEach(el => {
+
+    // Limpar campos e validações dentro de #trocaDetalhes se escondido
+    detalhesDiv.querySelectorAll('input[type="text"], input[type="datetime-local"], textarea').forEach(el => {
+        el.required = show && el.id !== 'equipePlacaNova'; // Torna obrigatório se visível (exceto placa)
+        if (!show) {
             el.value = '';
             el.classList.remove('is-invalid'); // Remove validação visual
-        });
-        detalhesDiv.querySelectorAll('input[type="radio"][name="equipeMotivoTroca"]').forEach(radio => {
-             radio.checked = false;
-        });
-        toggleMotivoOutro();
-        const motivoFeedback = document.getElementById('motivoTrocaFeedback');
-        if(motivoFeedback) motivoFeedback.style.display = 'none';
-    }
+        }
+    });
+    // Limpar radios e feedback de motivo se escondido
+    detalhesDiv.querySelectorAll('input[type="radio"][name="equipeMotivoTroca"]').forEach(radio => {
+         radio.required = show; // Torna o grupo de radios obrigatório
+         if (!show) radio.checked = false;
+    });
+    toggleMotivoOutro(); // Garante que o campo outro seja tratado
+    const motivoFeedback = document.getElementById('motivoTrocaFeedback');
+    if(motivoFeedback && !show) motivoFeedback.style.display = 'none';
   }
 }
 
@@ -1262,8 +1407,9 @@ function toggleMotivoOutro() {
   const motivoDefeitosRadio = document.getElementById('motivoDefeitos');
   const container = document.getElementById('motivoOutroContainer');
   const input = document.getElementById('equipeMotivoOutro');
-  const motivoFeedback = document.getElementById('motivoTrocaFeedback');
+  const motivoFeedback = document.getElementById('motivoTrocaFeedback'); // Para esconder o feedback geral
 
+  // Esconde feedback geral se um motivo foi selecionado
   if (motivoFeedback && document.querySelector('input[name="equipeMotivoTroca"]:checked')) {
     motivoFeedback.style.display = 'none';
   }
@@ -1272,10 +1418,10 @@ function toggleMotivoOutro() {
     const show = (motivoOutroRadio && motivoOutroRadio.checked) ||
                  (motivoDefeitosRadio && motivoDefeitosRadio.checked);
     container.style.display = show ? 'block' : 'none';
-    input.required = show;
+    input.required = show; // Torna obrigatório apenas se visível
     if (!show) {
       input.value = '';
-      input.classList.remove('is-invalid');
+      input.classList.remove('is-invalid'); // Remove validação se oculto
     }
   }
 }
@@ -1291,10 +1437,10 @@ function togglePendencia() {
     if (statusSelect && pendenciaContainer && pendenciaInput) {
         const show = statusSelect.value !== 'Concluído';
         pendenciaContainer.style.display = show ? 'block' : 'none';
-        pendenciaInput.required = show;
+        pendenciaInput.required = show; // Torna obrigatório apenas se visível
         if (!show) {
             pendenciaInput.value = '';
-            pendenciaInput.classList.remove('is-invalid');
+            pendenciaInput.classList.remove('is-invalid'); // Remove validação se oculto
         }
     }
 }
@@ -1310,6 +1456,14 @@ function salvarRelatorioLocal() {
     const dadosTurnoAtual = window.AppState?.get('dadosTurno') || dadosTurno;
     const equipesAtuais = window.AppState?.get('equipes') || equipes;
 
+    // Validação mínima antes de salvar localmente
+    if (equipesAtuais.length === 0) {
+       mostrarNotificacao('Não é possível salvar localmente: Adicione pelo menos uma equipe.', 'warning'); return false;
+    }
+    if (!dadosTurnoAtual.data || !dadosTurnoAtual.horario || !dadosTurnoAtual.letra || !dadosTurnoAtual.supervisor) {
+        mostrarNotificacao('Não é possível salvar localmente: Dados do turno incompletos.', 'warning'); return false;
+    }
+
     const localId = 'local_' + new Date().getTime();
     const relatorio = { id: localId, dadosTurno: dadosTurnoAtual, equipes: equipesAtuais, timestamp: new Date().toISOString(), origem: 'local' };
 
@@ -1320,19 +1474,23 @@ function salvarRelatorioLocal() {
     } catch (e) { console.error('Erro ao carregar relatórios locais:', e); relatoriosLocais = []; }
 
     relatoriosLocais.push(relatorio);
-    if(relatoriosLocais.length > 20) { relatoriosLocais = relatoriosLocais.slice(-20); }
+    // Limitar o número de relatórios locais armazenados
+    if(relatoriosLocais.length > (window.CONFIG?.MAX_LOCAL_REPORTS || 20)) {
+         relatoriosLocais = relatoriosLocais.slice(relatoriosLocais.length - (window.CONFIG?.MAX_LOCAL_REPORTS || 20));
+         console.log("Histórico local truncado para os últimos " + (window.CONFIG?.MAX_LOCAL_REPORTS || 20) + " relatórios.");
+    }
     localStorage.setItem('relatorios_locais', JSON.stringify(relatoriosLocais));
 
     const idParaEstado = localId;
     if (window.AppState) { AppState.update('ultimoRelatorioId', idParaEstado); } else { ultimoRelatorioId = idParaEstado; }
 
-    mostrarTelaSucesso(idParaEstado, true);
+    // Não mostra tela de sucesso aqui, pois é chamado como fallback
     mostrarNotificacao('Relatório salvo localmente com sucesso!', 'success');
-    return true;
+    return true; // Indica sucesso no salvamento local
   } catch (error) {
     console.error('Erro ao salvar relatório localmente:', error);
     mostrarNotificacao('Erro ao salvar localmente: ' + error.message, 'danger');
-    return false;
+    return false; // Indica falha no salvamento local
   }
 }
 
@@ -1348,6 +1506,7 @@ async function salvarRelatorioComFallback() {
      const dadosTurnoAtual = window.AppState?.get('dadosTurno') || dadosTurno;
      const equipesAtuais = window.AppState?.get('equipes') || equipes;
 
+    // Validações antes de tentar salvar
     if (equipesAtuais.length === 0) throw new Error('Adicione pelo menos uma equipe.');
     if (!dadosTurnoAtual.data || !dadosTurnoAtual.horario || !dadosTurnoAtual.letra || !dadosTurnoAtual.supervisor) throw new Error('Dados do turno incompletos.');
 
@@ -1362,23 +1521,30 @@ async function salvarRelatorioComFallback() {
         console.log(`Relatório salvo na API com ID: ${idRelatorioSalvo}`);
         mostrarNotificacao('Relatório salvo com sucesso no servidor!', 'success');
       } else {
-        throw new Error(result?.message || 'Erro desconhecido ao salvar na API.');
+        // Log detalhado do erro da API
+        console.error("Falha ao salvar na API:", result);
+        throw new Error(result?.message || 'Erro desconhecido ao salvar na API. Verifique o console para detalhes.');
       }
     } catch (apiError) {
       console.error('Erro ao salvar na API:', apiError);
       mostrarNotificacao('Falha ao salvar no servidor. Tentando salvar localmente...', 'warning');
+      // Tenta salvar localmente como fallback
       if (salvarRelatorioLocal()) {
-          idRelatorioSalvo = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
+          idRelatorioSalvo = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId; // Pega o ID local gerado
           salvoLocalmente = true;
+           // Notificação de sucesso local já foi mostrada por salvarRelatorioLocal
       } else {
-        throw new Error('Falha ao salvar remotamente e localmente.');
+        // Se falhar localmente também, lança um erro final
+        throw new Error('Falha ao salvar remotamente e localmente. Verifique os dados e a conexão.');
       }
     }
 
+    // Atualiza o ID do último relatório no estado, seja ele local ou do servidor
     if (idRelatorioSalvo) {
         if (window.AppState) AppState.update('ultimoRelatorioId', idRelatorioSalvo);
         else ultimoRelatorioId = idRelatorioSalvo;
     }
+    // Mostra a tela de sucesso, indicando se foi salvo localmente ou não
      mostrarTelaSucesso(idRelatorioSalvo, salvoLocalmente);
     return true;
   } catch (error) {
@@ -1387,6 +1553,7 @@ async function salvarRelatorioComFallback() {
     return false;
   } finally {
     ocultarLoading();
+    // Aumenta um pouco o delay para garantir que a UI atualize
     setTimeout(() => { salvandoRelatorio = false; }, 500);
   }
 }
@@ -1402,18 +1569,29 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
       mensagemSucessoStatus.textContent = foiLocal
           ? `Relatório salvo localmente. ID: ${idSalvo || 'N/A'}`
           : `Relatório #${idSalvo || 'N/A'} registrado com sucesso no servidor!`;
+       // Adiciona classe visual para diferenciar
+       mensagemSucessoStatus.classList.toggle('text-warning', foiLocal);
+       mensagemSucessoStatus.classList.toggle('text-success', !foiLocal);
   }
 
+  // Habilita/desabilita botões na tela de sucesso com base no ID e origem
   const idAtual = idSalvo || (window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId);
-  document.querySelectorAll('#stepSucesso button').forEach(btn => btn.disabled = !idAtual); // Desabilita se não tiver ID
+  const origemAtual = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
 
-  if (idAtual) {
-      const btnPDF = document.querySelector('#stepSucesso button[onclick^="gerarPDFExistente"]');
-      if (btnPDF) {
-          const origemPDF = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
-          btnPDF.onclick = () => gerarPDFExistente(idAtual, origemPDF);
-          btnPDF.disabled = (origemPDF === 'local'); // Desabilita se for local
-          btnPDF.title = (origemPDF === 'local') ? "PDF não disponível para relatórios locais." : "Gerar PDF do último relatório salvo";
+  const btnVisualizar = document.querySelector('#stepSucesso button[onclick^="visualizarRelatorio"]');
+  const btnWhatsApp = document.querySelector('#stepSucesso button[onclick^="formatarWhatsApp"]');
+  const btnPDF = document.querySelector('#stepSucesso button[onclick^="gerarPDFExistente"]');
+  const btnNovo = document.querySelector('#stepSucesso button[onclick^="novoRelatorio"]');
+
+  if (btnVisualizar) btnVisualizar.disabled = !idAtual;
+  if (btnWhatsApp) btnWhatsApp.disabled = !idAtual;
+  if (btnNovo) btnNovo.disabled = false; // Botão Novo sempre habilitado
+
+  if (btnPDF) {
+      btnPDF.disabled = (origemAtual !== 'servidor'); // PDF só funciona para servidor
+      btnPDF.title = (origemAtual === 'servidor') ? "Gerar PDF do último relatório salvo" : "PDF não disponível para relatórios locais.";
+      if (idAtual && origemAtual) { // Atualiza o onclick apenas se houver ID
+          btnPDF.onclick = () => gerarPDFExistente(idAtual, origemAtual);
       }
   }
 }
@@ -1427,14 +1605,17 @@ function novoRelatorio() {
     AppState.update('dadosTurno', {});
     AppState.update('equipes', []);
     AppState.update('ultimoRelatorioId', null);
+    // O listener do AppState deve chamar atualizarListaEquipes e atualizarBotaoAvancar
   } else {
       dadosTurno = {}; equipes = []; ultimoRelatorioId = null;
       atualizarListaEquipes(); atualizarBotaoAvancar();
   }
 
+  // Limpar formulário de turno e validação
   const formTurno = document.getElementById('formTurno');
    if(formTurno) { formTurno.reset(); formTurno.classList.remove('was-validated'); }
 
+  // Definir data atual como padrão
   const dataInput = document.getElementById('data');
   if (dataInput) {
     try {
@@ -1442,13 +1623,27 @@ function novoRelatorio() {
       dataInput.value = new Date(today.getTime() - offset).toISOString().split('T')[0];
     } catch (e) { console.error("Erro ao definir data padrão:", e); dataInput.value = ''; }
   }
+  // Resetar selects do turno para placeholder
+  ['horario', 'letra', 'supervisor'].forEach(id => {
+      const sel = document.getElementById(id); if (sel) sel.selectedIndex = 0;
+  });
+
+  // Limpar lista de equipes na UI (caso não use AppState)
+   if (!window.AppState) {
+        const listaEquipesDiv = document.getElementById('listaEquipes');
+        const semEquipesDiv = document.getElementById('semEquipes');
+        if (listaEquipesDiv) listaEquipesDiv.querySelectorAll('.equipe-card').forEach(card => card.remove());
+        if (semEquipesDiv) semEquipesDiv.style.display = 'flex';
+        atualizarBotaoAvancar(); // Garante que o botão de avançar seja desabilitado
+   }
+
 
   navegarParaEtapa('stepTurno');
   atualizarIndicadoresEtapa(1);
 }
 
 /**
- * Função auxiliar para gerenciar a navegação
+ * Função auxiliar para gerenciar a navegação (armazenar de onde veio)
  */
 function setOrigemNavegacao(origem) {
   if (window.AppState) { AppState.update('origemNavegacao', origem); }
@@ -1459,24 +1654,39 @@ function setOrigemNavegacao(origem) {
  * Função para obter origem da navegação
  */
 function getOrigemNavegacao() {
-  return window.AppState ? AppState.get('origemNavegacao') : window.origemNavegacao;
+  // Prioriza AppState se disponível
+  return (window.AppState ? AppState.get('origemNavegacao') : window.origemNavegacao) || 'stepTurno'; // Fallback para stepTurno
 }
 
 /**
- * Função que determina para onde voltar
+ * Função que determina para onde voltar (usada pelos botões "Voltar" das telas de visualização)
  */
 function voltarParaTelaOrigem() {
   const origem = getOrigemNavegacao();
-  if (origem === 'stepSucesso') voltarParaSucesso();
-  else if (origem === 'stepPesquisa') voltarDaVisualizacaoParaPesquisa();
-  else voltarParaSucesso(); // Fallback
+  // Se a origem for a tela de sucesso, volta para lá
+  if (origem === 'stepSucesso') {
+      voltarParaSucesso();
+  }
+  // Se a origem for a tela de pesquisa, volta para lá
+  else if (origem === 'stepPesquisa') {
+      voltarDaVisualizacaoParaPesquisa();
+  }
+  // Se a origem for a tela de dashboard (visualizando relatório de lá)
+  else if (origem === 'dashboard') {
+        voltarDoDashboard(); // Ou talvez para uma view específica do dashboard? Ajustar se necessário.
+  }
+  // Fallback: Volta para a tela de sucesso (pode acontecer se a origem não for definida corretamente)
+  else {
+      console.warn("Origem de navegação desconhecida ou não definida, voltando para tela de Sucesso como fallback.");
+      voltarParaSucesso();
+  }
 }
 
 /**
- * Visualizar relatório (usa ID salvo no estado)
+ * Visualizar relatório (usa ID salvo no estado da tela de Sucesso)
  */
 async function visualizarRelatorio() {
-  setOrigemNavegacao('stepSucesso');
+  setOrigemNavegacao('stepSucesso'); // Define que veio da tela de sucesso
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
   if (!idAtual) { mostrarNotificacao("ID do relatório não encontrado.", "warning"); return; }
   const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
@@ -1484,10 +1694,10 @@ async function visualizarRelatorio() {
 }
 
 /**
- * Formatar relatório para WhatsApp (usa ID salvo no estado)
+ * Formatar relatório para WhatsApp (usa ID salvo no estado da tela de Sucesso)
  */
 async function formatarWhatsApp() {
-  setOrigemNavegacao('stepSucesso');
+  setOrigemNavegacao('stepSucesso'); // Define que veio da tela de sucesso
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
    if (!idAtual) { mostrarNotificacao("ID do relatório não encontrado.", "warning"); return; }
   const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
@@ -1495,16 +1705,16 @@ async function formatarWhatsApp() {
 }
 
 /**
- * Voltar para a tela de sucesso (vinda da visualização/whatsapp)
+ * Voltar para a tela de sucesso (vinda da visualização/whatsapp iniciados da tela de Sucesso)
  */
 function voltarParaSucesso() {
     const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
-    const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
+    const origem = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
     mostrarTelaSucesso(idAtual, origem === 'local');
 }
 
 /**
- * Voltar da visualização do relatório ou WhatsApp para a tela de origem
+ * Voltar da visualização do relatório ou WhatsApp para a tela de origem (função genérica chamada pelos botões)
  */
 function voltarDoWhatsApp() { voltarParaTelaOrigem(); }
 function voltarDoRelatorio() { voltarParaTelaOrigem(); }
@@ -1516,20 +1726,28 @@ function voltarDoRelatorio() { voltarParaTelaOrigem(); }
 function copiarTextoParaClipboard(elementId, tipoTexto) {
   const elemento = document.getElementById(elementId);
   if (!elemento) { mostrarNotificacao(`Erro: Elemento ${elementId} não encontrado.`, "danger"); return; }
+  // Usa textContent para <pre>, value para <textarea>/<input>
   const textoParaCopiar = elemento.textContent || elemento.value || '';
 
+  if (!textoParaCopiar) {
+    mostrarNotificacao(`Nenhum ${tipoTexto} para copiar.`, 'warning');
+    return;
+  }
+
   if (!navigator.clipboard) {
+    // Fallback para navegadores antigos ou contextos inseguros
     try {
       const ta = document.createElement('textarea'); ta.value = textoParaCopiar;
       ta.style.position = 'absolute'; ta.style.left = '-9999px'; document.body.appendChild(ta);
       ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
       mostrarNotificacao(`${tipoTexto} copiado! (Método antigo)`, 'success');
-    } catch (err) { console.error('Falha ao copiar (fallback):', err); mostrarNotificacao(`Copie manualmente (Ctrl+C).`, 'warning'); }
+    } catch (err) { console.error('Falha ao copiar (fallback):', err); mostrarNotificacao(`Não foi possível copiar automaticamente. Selecione e copie manualmente (Ctrl+C).`, 'warning'); }
     return;
   }
+  // Método moderno (requer HTTPS ou localhost)
   navigator.clipboard.writeText(textoParaCopiar).then(() => {
-    mostrarNotificacao(`${tipoTexto} copiado!`, 'success');
-  }).catch(err => { console.error(`Erro ao copiar ${tipoTexto}:`, err); mostrarNotificacao(`Falha ao copiar ${tipoTexto}.`, 'danger'); });
+    mostrarNotificacao(`${tipoTexto} copiado para a área de transferência!`, 'success');
+  }).catch(err => { console.error(`Erro ao copiar ${tipoTexto}:`, err); mostrarNotificacao(`Falha ao copiar ${tipoTexto}. Verifique as permissões do navegador.`, 'danger'); });
 }
 
 /** Copiar relatório gerado */
@@ -1557,22 +1775,35 @@ function ajustarCampoPesquisa() {
   const tipoPesquisaSelect = document.getElementById('tipoPesquisa'); const termoPesquisaInput = document.getElementById('termoPesquisa'); const labelPesquisaLabel = document.getElementById('labelPesquisa');
   if (!tipoPesquisaSelect || !termoPesquisaInput || !labelPesquisaLabel) return;
   const tipo = tipoPesquisaSelect.value;
-  termoPesquisaInput.value = '';
+  termoPesquisaInput.value = ''; // Limpa valor ao trocar tipo
+  termoPesquisaInput.required = true; // Campo é sempre obrigatório
+
   switch (tipo) {
     case 'data': labelPesquisaLabel.textContent = 'Data (AAAA-MM-DD)'; termoPesquisaInput.type = 'date'; termoPesquisaInput.placeholder = ''; break;
     case 'mes_ano': labelPesquisaLabel.textContent = 'Mês/Ano (AAAA-MM)'; termoPesquisaInput.type = 'month'; termoPesquisaInput.placeholder = ''; break;
     case 'supervisor': labelPesquisaLabel.textContent = 'Nome do Supervisor'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'Digite o nome'; break;
-    case 'letra': labelPesquisaLabel.textContent = 'Letra do Turno'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'A, B, C...'; break;
-    case 'local': labelPesquisaLabel.textContent = 'Pesquisar em Relatórios Locais'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'Termo, data, supervisor...'; break;
-    default: labelPesquisaLabel.textContent = 'Termo de Pesquisa ou ID'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'Digite ID ou termo geral';
+    case 'letra': labelPesquisaLabel.textContent = 'Letra do Turno'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'A, B, C...'; termoPesquisaInput.maxLength = 1; break; // Limita a 1 caractere
+    case 'local': labelPesquisaLabel.textContent = 'Pesquisar em Relatórios Locais'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Termo, data, supervisor...'; break; // Usa 'search' para UX
+    case 'geral': // Termo Geral ou ID
+    default: labelPesquisaLabel.textContent = 'Termo de Pesquisa ou ID'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Digite ID ou termo geral'; termoPesquisaInput.maxLength = 50; break; // Limita tamanho
   }
 }
 
 /** Executar pesquisa (API ou Local) */
 async function executarPesquisa() {
+  const formPesquisa = document.getElementById('formPesquisa');
+  if (!formPesquisa.checkValidity()) {
+      formPesquisa.classList.add('was-validated');
+      mostrarNotificacao('Por favor, preencha o campo de pesquisa.', 'warning');
+      const termoInput = document.getElementById('termoPesquisa');
+      if(termoInput) termoInput.focus();
+      return;
+  }
+
   const tipoPesquisa = document.getElementById('tipoPesquisa').value; let termoPesquisa = document.getElementById('termoPesquisa').value;
-  if (!termoPesquisa || !termoPesquisa.trim()) { mostrarNotificacao('Digite um termo de pesquisa.', 'warning'); return; }
   let termoParaAPI = termoPesquisa.trim();
+
+  // Formatar Mês/Ano para MM/AAAA se necessário (ajustar se API esperar outro formato)
   if (tipoPesquisa === 'mes_ano' && /^\d{4}-\d{2}$/.test(termoParaAPI)) { const [ano, mes] = termoParaAPI.split('-'); termoParaAPI = `${mes}/${ano}`; }
 
   mostrarLoading('Pesquisando relatórios...');
@@ -1582,11 +1813,21 @@ async function executarPesquisa() {
       resultados = pesquisarRelatoriosLocais(termoPesquisa.trim());
     } else {
       const result = await callAPI('pesquisarRelatorios', { termo: termoParaAPI, tipo: tipoPesquisa });
-      if (result && result.success) { resultados = result.resultados || []; resultados.forEach(r => { r.origem = 'servidor'; }); }
-      else { throw new Error(result?.message || 'Erro ao pesquisar no servidor.'); }
+      if (result && result.success) {
+          resultados = result.resultados || [];
+          // Adiciona origem 'servidor' para cada resultado da API
+          resultados.forEach(r => { r.origem = 'servidor'; });
+       } else {
+           console.error("Erro da API de pesquisa:", result);
+           throw new Error(result?.message || 'Erro ao pesquisar no servidor.');
+       }
     }
     exibirResultadosPesquisa(resultados);
-    if(resultados.length === 0) mostrarNotificacao('Nenhum relatório encontrado.', 'info');
+    if(resultados.length === 0) {
+        mostrarNotificacao('Nenhum relatório encontrado com os critérios informados.', 'info');
+    } else {
+        mostrarNotificacao(`${resultados.length} relatório(s) encontrado(s).`, 'success');
+    }
   } catch (error) {
     console.error('Erro ao executar pesquisa:', error); mostrarNotificacao('Erro ao pesquisar: ' + error.message, 'danger'); exibirResultadosPesquisa([]);
   } finally { ocultarLoading(); }
@@ -1596,16 +1837,48 @@ async function executarPesquisa() {
 function pesquisarRelatoriosLocais(termo) {
   let relatoriosLocais = [];
   try { const json = localStorage.getItem('relatorios_locais'); if (json) { relatoriosLocais = JSON.parse(json); if (!Array.isArray(relatoriosLocais)) relatoriosLocais = []; } }
-  catch (e) { console.error('Erro ao carregar relatórios locais:', e); return []; }
+  catch (e) { console.error('Erro ao carregar relatórios locais para pesquisa:', e); return []; }
+
+  if (!termo) return []; // Retorna vazio se termo for vazio
+
   const termoLower = termo.toLowerCase();
+
+  // Função auxiliar para verificar se um valor contém o termo
+  const check = (v) => v && String(v).toLowerCase().includes(termoLower);
+
   return relatoriosLocais.filter(relatorio => {
+    // Verifica ID, dados do turno e dados das equipes
     const { dadosTurno, equipes = [], id } = relatorio; if (!dadosTurno) return false;
-    const check = (v) => v && String(v).toLowerCase().includes(termoLower);
-    if (check(id)) return true; if (check(dadosTurno.letra)) return true; if (check(dadosTurno.supervisor)) return true;
-    if (check(dadosTurno.data)) return true; if (check(formatarData(dadosTurno.data))) return true; if (check(dadosTurno.horario)) return true;
-    return equipes.some(eq => check(eq.numero) || check(eq.motorista) || check(eq.operadores) || check(eq.area) || check(eq.atividade) || check(eq.tipoAtividade) || check(eq.statusAtividade) || check(eq.pendencia) || check(eq.vaga) || check(eq.vagaPersonalizada) || check(eq.equipamento) || check(eq.equipamentoPersonalizado) || check(eq.identificacaoUsiminas) || check(eq.motivoTroca) || check(eq.motivoOutro) || check(eq.defeito) || check(eq.placaNova) || check(eq.observacoes));
-  }).map(relatorio => ({ id: relatorio.id, data: formatarData(relatorio.dadosTurno.data), horario: relatorio.dadosTurno.horario || 'N/A', letra: relatorio.dadosTurno.letra || 'N/A', supervisor: relatorio.dadosTurno.supervisor || 'N/A', origem: 'local' }))
-    .sort((a, b) => { let dA = a.data.split('/').reverse().join('-'); let dB = b.data.split('/').reverse().join('-'); return dB.localeCompare(dA); });
+
+    if (check(id)) return true;
+    if (check(dadosTurno.letra)) return true;
+    if (check(dadosTurno.supervisor)) return true;
+    if (check(dadosTurno.data)) return true; // Verifica AAAA-MM-DD
+    if (check(formatarData(dadosTurno.data))) return true; // Verifica DD/MM/AAAA
+    if (check(dadosTurno.horario)) return true;
+
+    // Verifica cada campo relevante dentro de cada equipe
+    return equipes.some(eq =>
+        check(eq.numero) || check(eq.motorista) || check(eq.operadores) || check(eq.area) || check(eq.atividade) || check(eq.tipoAtividade) || check(eq.statusAtividade) || check(eq.pendencia) || check(eq.vaga) || check(eq.vagaPersonalizada) || check(eq.equipamento) || check(eq.equipamentoPersonalizado) || check(eq.identificacaoUsiminas) || check(eq.motivoTroca) || check(eq.motivoOutro) || check(eq.defeito) || check(eq.placaNova) || check(eq.observacoes) || check(formatarDataHora(eq.dataHoraTroca)) || check(formatarDataHora(eq.dataHoraFimTroca)) // Inclui datas de troca formatadas
+    );
+  })
+  // Mapeia para o formato esperado pela tabela de resultados
+  .map(relatorio => ({
+      id: relatorio.id,
+      data: formatarData(relatorio.dadosTurno.data),
+      horario: relatorio.dadosTurno.horario || 'N/A',
+      letra: relatorio.dadosTurno.letra || 'N/A',
+      supervisor: relatorio.dadosTurno.supervisor || 'N/A',
+      origem: 'local'
+  }))
+  // Ordena por data decrescente (mais recente primeiro)
+    .sort((a, b) => {
+        try {
+            let dA = a.data.split('/').reverse().join('-'); // Converte DD/MM/YYYY para YYYY-MM-DD
+            let dB = b.data.split('/').reverse().join('-');
+            return dB.localeCompare(dA); // Compara YYYY-MM-DD
+        } catch (e) { return 0; } // Fallback se data inválida
+    });
 }
 
 
@@ -1613,18 +1886,34 @@ function pesquisarRelatoriosLocais(termo) {
 function exibirResultadosPesquisa(resultados) {
   const resDiv = document.getElementById('resultadosPesquisa'); const tbody = document.getElementById('tabelaResultados'); const semResDiv = document.getElementById('semResultados');
   if (!resDiv || !tbody || !semResDiv) return;
-  resDiv.style.display = 'block'; semResDiv.style.display = (!resultados || resultados.length === 0) ? 'block' : 'none';
-  tbody.innerHTML = '';
+
+  resDiv.style.display = 'block'; // Mostra a área de resultados
+  semResDiv.style.display = (!resultados || resultados.length === 0) ? 'block' : 'none'; // Mostra/oculta mensagem "sem resultados"
+  tbody.innerHTML = ''; // Limpa resultados anteriores
+
   if (resultados && resultados.length > 0) {
       resultados.forEach(r => {
-        const linha = document.createElement('tr'); const badgeClass = r.origem === 'local' ? 'bg-secondary' : 'bg-info'; const podePDF = r.origem === 'servidor';
+        const linha = document.createElement('tr');
+        const badgeClass = r.origem === 'local' ? 'bg-secondary' : 'bg-info text-dark'; // Badge para servidor com texto escuro
+        const podePDF = r.origem === 'servidor'; // PDF só para servidor
+
         linha.innerHTML = `
-          <td><span class="badge ${badgeClass}">${r.origem}</span></td> <td>${r.data || 'N/A'}</td> <td>${r.horario || 'N/A'}</td> <td>${r.letra || 'N/A'}</td> <td>${r.supervisor || 'N/A'}</td>
+          <td><span class="badge ${badgeClass}">${r.origem}</span></td>
+          <td>${r.data || 'N/A'}</td>
+          <td>${r.horario || 'N/A'}</td>
+          <td>${r.letra || 'N/A'}</td>
+          <td>${r.supervisor || 'N/A'}</td>
           <td class="text-center">
-            <div class="action-buttons btn-group btn-group-sm">
-              <button type="button" class="btn btn-primary" onclick="visualizarRelatorioExistente('${r.id}', '${r.origem}', 'gerarRelatorioTexto')" title="Visualizar"><i class="bi bi-eye"></i></button>
-              <button type="button" class="btn btn-danger" onclick="gerarPDFExistente('${r.id}', '${r.origem}')" title="Gerar PDF" ${!podePDF ? 'disabled' : ''}><i class="bi bi-file-pdf"></i></button>
-              <button type="button" class="btn btn-info text-white" onclick="formatarWhatsAppExistente('${r.id}', '${r.origem}', 'formatarWhatsApp')" title="Formatar WhatsApp"><i class="bi bi-whatsapp"></i></button>
+            <div class="action-buttons btn-group btn-group-sm" role="group" aria-label="Ações do Relatório">
+              <button type="button" class="btn btn-primary btn-action-sm" onclick="visualizarRelatorioExistente('${r.id}', '${r.origem}', 'gerarRelatorioTexto')" title="Visualizar Relatório">
+                <i class="bi bi-eye"></i> <span class="d-none d-md-inline">Ver</span>
+              </button>
+              <button type="button" class="btn btn-danger btn-action-sm" onclick="gerarPDFExistente('${r.id}', '${r.origem}')" title="${podePDF ? 'Gerar PDF' : 'PDF não disponível para relatórios locais'}" ${!podePDF ? 'disabled' : ''}>
+                <i class="bi bi-file-pdf"></i> <span class="d-none d-md-inline">PDF</span>
+              </button>
+              <button type="button" class="btn btn-info text-white btn-action-sm" onclick="formatarWhatsAppExistente('${r.id}', '${r.origem}', 'formatarWhatsApp')" title="Formatar para WhatsApp">
+                <i class="bi bi-whatsapp"></i> <span class="d-none d-md-inline">Zap</span>
+              </button>
             </div>
           </td>`;
         tbody.appendChild(linha);
@@ -1635,23 +1924,27 @@ function exibirResultadosPesquisa(resultados) {
 /** Visualizar um relatório específico (local ou servidor) */
 async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction = 'gerarRelatorioTexto') {
   if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-  setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepSucesso');
+  // Armazena a etapa atual como origem para poder voltar
+  setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume stepPesquisa se não houver AppState
   mostrarLoading('Carregando relatório...');
   try {
     let textoRelatorio = ''; let relatorioCompleto = null;
     if (origem === 'local') {
       relatorioCompleto = obterRelatorioLocal(id); if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
-      textoRelatorio = gerarTextoRelatorioLocal(relatorioCompleto);
-    } else {
+      textoRelatorio = gerarTextoRelatorioLocal(relatorioCompleto); // Gera texto a partir dos dados locais
+    } else { // Origem 'servidor'
       const result = await callAPI(apiAction, { turnoId: id });
       if (result && result.success && result.relatorio) { textoRelatorio = result.relatorio; }
-      else { throw new Error(result?.message || `Erro ao buscar relatório (${apiAction}).`); }
+      else { throw new Error(result?.message || `Erro ao buscar relatório do servidor (${apiAction}).`); }
     }
-    if(window.AppState) AppState.update('ultimoRelatorioId', id); else ultimoRelatorioId = id;
-    navegarParaEtapa('stepRelatorio');
+
+    // Atualiza o ID do último relatório visualizado (útil se navegar de volta)
+    if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
+
+    navegarParaEtapa('stepRelatorio'); // Vai para a tela de visualização
     const el = document.getElementById('relatorioTexto'); if (el) el.textContent = textoRelatorio;
-    const btn = document.getElementById('btnVoltarRelatorio'); if (btn) btn.onclick = voltarDoRelatorio;
-  } catch (error) { console.error('Erro ao visualizar:', error); mostrarNotificacao('Erro: ' + error.message, 'danger'); }
+    const btn = document.getElementById('btnVoltarRelatorio'); if (btn) btn.onclick = voltarDoRelatorio; // Configura botão voltar
+  } catch (error) { console.error('Erro ao visualizar relatório:', error); mostrarNotificacao('Erro ao carregar relatório: ' + error.message, 'danger'); }
   finally { ocultarLoading(); }
 }
 
@@ -1697,7 +1990,19 @@ function gerarTextoRelatorioLocal(relatorio) {
     const tipo = equipe.tipo || 'Outro'; if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(equipe); return acc;
   }, {});
 
-  for (const tipo in equipesPorTipo) {
+  // Ordenar tipos (Alta Pressão primeiro, depois Vácuo/Hiper)
+  const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
+  const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => {
+      const indexA = ordemTipos.indexOf(a);
+      const indexB = ordemTipos.indexOf(b);
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b); // Alfabético para tipos desconhecidos
+      if (indexA === -1) return 1; // Desconhecidos no final
+      if (indexB === -1) return -1; // Desconhecidos no final
+      return indexA - indexB; // Ordena pela ordem definida
+  });
+
+
+  for (const tipo of tiposOrdenados) {
     const equipesDoTipo = equipesPorTipo[tipo];
     texto += linhaSeparadora;
     texto += `          EQUIPES DE ${tipo.toUpperCase()} (${equipesDoTipo.length})\n`;
@@ -1730,16 +2035,20 @@ function gerarTextoRelatorioLocal(relatorio) {
         texto += `  - Defeito/Medidas: ${equipe.defeito || 'N/A'}\n`;
         if (equipe.placaNova) texto += `  - Placa Nova: ${equipe.placaNova}\n`;
         if (equipe.dataHoraTroca) texto += `  - Início Troca: ${formatarDataHora(equipe.dataHoraTroca)}\n`;
-        if (equipe.dataHoraFimTroca) texto += `  - Fim Troca: ${formatarDataHora(equipe.dataHoraFimTroca)}\n`; // NOVO: Fim
+        // ======================= EXIBE FIM DA TROCA =======================
+        if (equipe.dataHoraFimTroca) texto += `  - Fim Troca: ${formatarDataHora(equipe.dataHoraFimTroca)}\n`;
+        // ==================================================================
         // Tenta calcular tempo para exibição local
         if (equipe.dataHoraTroca && equipe.dataHoraFimTroca) {
             try {
                 const inicio = new Date(equipe.dataHoraTroca); const fim = new Date(equipe.dataHoraFimTroca);
                 if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
                    const diffMins = Math.round((fim - inicio) / 60000); const h = Math.floor(diffMins / 60); const m = diffMins % 60;
-                   texto += `  - Tempo Indisp.: ${h}h${m < 10 ? '0' : ''}${m}min\n`; // NOVO: Tempo
+                   // ======================= EXIBE TEMPO CALCULADO ====================
+                   texto += `  - Tempo Indisp.: ${h}h${m < 10 ? '0' : ''}${m}min\n`;
+                   // ==================================================================
                 }
-            } catch(e) {}
+            } catch(e) { console.warn("Erro ao calcular tempo de troca local:", e); }
         }
       }
 
@@ -1747,11 +2056,18 @@ function gerarTextoRelatorioLocal(relatorio) {
       texto += '\n> Implementos:\n';
       if (isAltaPressao) {
          texto += `  - Pistola: ${equipe.materiais?.pistola ?? 'N/A'}\n`;
-         // ... outros AP ...
+         texto += `  - Pistola C.L.: ${equipe.materiais?.pistolaCanoLongo ?? 'N/A'}\n`;
+         texto += `  - Mang. Torpedo: ${equipe.materiais?.mangueiraTorpedo ?? 'N/A'}\n`;
+         texto += `  - Pedal: ${equipe.materiais?.pedal ?? 'N/A'}\n`;
+         texto += `  - Varetas: ${equipe.materiais?.varetas ?? 'N/A'}\n`;
+         texto += `  - Rabicho: ${equipe.materiais?.rabicho ?? 'N/A'}\n`;
+         texto += `  - Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}\n`;
          texto += `  - Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}\n`;
-      } else {
+      } else { // Vácuo / Hiper
          texto += `  - Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
-         // ... outros Vacuo ...
+         texto += `  - Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
+         texto += `  - Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}\n`;
+         texto += `  - Mangotes 4": ${equipe.mangotes4Polegadas ?? 'N/A'}\n`;
          texto += `  - Mangotes 6": ${equipe.mangotes6Polegadas ?? 'N/A'}\n`;
       }
       if (equipe.justificativa) { texto += `\n> Justificativa Implementos Falta:\n  ${equipe.justificativa}\n`; }
@@ -1768,7 +2084,7 @@ function gerarTextoRelatorioLocal(relatorio) {
   }
 
   texto += linhaSeparadora;
-  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.1'} (Relatório Local)\n`;
+  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'} (Relatório Local)\n`; // Versão Atualizada
   texto += linhaSeparadora;
   return texto;
 }
@@ -1785,17 +2101,21 @@ async function gerarPDFExistente(id, origem = 'servidor') {
   mostrarLoading('Gerando PDF...');
   try {
     let dadosParaPDF = { dadosTurno: null, equipes: null };
-     const result = await callAPI('obterDadosRelatorio', { turnoId: id });
+     const result = await callAPI('obterDadosRelatorio', { turnoId: id }); // Chama API para obter dados brutos
      if (result && result.success && result.dadosTurno && result.equipes) {
-         dadosParaPDF.dadosTurno = mapearChavesObjeto(result.dadosTurno, { /* ... mapeamento turno ... */ 'ID': 'id', 'Data': 'data', 'Horário': 'horario', 'Letra': 'letra', 'Supervisor': 'supervisor', 'Timestamp': 'timestamp', 'Status': 'status', 'UltimaModificacao': 'ultimaModificacao' });
+         // Mapeia os dados brutos da API para a estrutura JS esperada
+         dadosParaPDF.dadosTurno = mapearChavesObjeto(result.dadosTurno, {
+              'ID': 'id', 'Data': 'data', 'Horário': 'horario', 'Letra': 'letra', 'Supervisor': 'supervisor', 'Timestamp': 'timestamp', 'Status': 'status', 'UltimaModificacao': 'ultimaModificacao'
+         });
          dadosParaPDF.equipes = result.equipes.map(eq => mapearChavesObjeto(eq, {
-              /* ... mapeamento equipes existente ... */
               'Turno_ID': 'turnoId', 'Tipo_Equipe': 'tipo', 'Numero_Equipe': 'numero', 'Integrantes': 'integrantes', 'Motorista': 'motorista', 'Operadores': 'operadores', 'Area': 'area', 'Atividade': 'atividade',
               'TipoAtividade': 'tipoAtividade', 'StatusAtividade': 'statusAtividade', 'Pendencia': 'pendencia',
               'Vaga': 'vaga', 'Vaga_Personalizada': 'vagaPersonalizada', 'Equipamento': 'equipamento', 'Equipamento_Personalizada': 'equipamentoPersonalizado', 'Identificacao_Usiminas': 'identificacaoUsiminas', 'Troca_Equipamento': 'trocaEquipamento', 'Motivo_Troca': 'motivoTroca', 'Motivo_Outro': 'motivoOutro', 'Defeito': 'defeito', 'Placa_Nova': 'placaNova',
-              'Data_Hora_Troca': 'dataHoraTroca',          // Início
-              'Data_Hora_Fim_Troca': 'dataHoraFimTroca',    // <<< NOVO: Fim >>>
-              'Tempo_Troca': 'tempoTroca',                  // <<< NOVO: Tempo >>>
+              // ======================= MAPEAMENTO CAMPOS NOVOS =======================
+              'Data_Hora_Troca': 'dataHoraTroca',          // Início (já existia)
+              'Data_Hora_Fim_Troca': 'dataHoraFimTroca',    // Fim da Troca
+              'Tempo_Troca': 'tempoTroca',                  // Tempo calculado (string do GAS)
+              // ========================================================================
               // Materiais AP
               'Pistola': 'pistola', 'Pistola_Cano_Longo': 'pistolaCanoLongo', 'Mangueira_Torpedo': 'mangueiraTorpedo', 'Pedal': 'pedal', 'Varetas': 'varetas', 'Rabicho': 'rabicho', 'Lances_Mangueira': 'lancesMangueira', 'Lances_Varetas': 'lancesVaretas',
               // Materiais Vacuo
@@ -1803,26 +2123,40 @@ async function gerarPDFExistente(id, origem = 'servidor') {
               // Segurança e Obs
               'Justificativa': 'justificativa', 'Caixa_Bloqueio': 'caixaBloqueio', 'Cadeados': 'cadeados', 'Plaquetas': 'plaquetas', 'Observacoes': 'observacoes'
          }));
-          dadosParaPDF.equipes.forEach(eq => { // Agrupa materiais
+          // Agrupa materiais dentro de cada equipe após mapeamento
+          dadosParaPDF.equipes.forEach(eq => {
               if(eq.tipo === 'Alta Pressão') { eq.materiais = { pistola: eq.pistola, pistolaCanoLongo: eq.pistolaCanoLongo, mangueiraTorpedo: eq.mangueiraTorpedo, pedal: eq.pedal, varetas: eq.varetas, rabicho: eq.rabicho }; }
               else { eq.materiaisVacuo = { mangotes: eq.mangotes, reducoes: eq.reducoes }; }
+               // Remove chaves individuais de material se agrupadas (opcional, para limpar)
+              delete eq.pistola; delete eq.pistolaCanoLongo; // ...etc para AP e Vácuo
+              delete eq.mangotes; delete eq.reducoes;
           });
+          // Chama a função que realmente gera o PDF com os dados mapeados
           await gerarPDF(dadosParaPDF.dadosTurno, dadosParaPDF.equipes, id);
-     } else { throw new Error(result?.message || 'Erro ao buscar dados do relatório.'); }
+     } else {
+         console.error("Erro ao obter dados para PDF:", result);
+         throw new Error(result?.message || 'Erro ao buscar dados do relatório para gerar PDF.');
+      }
   } catch (error) { console.error('Erro ao gerar PDF:', error); mostrarNotificacao('Erro ao gerar PDF: ' + error.message, 'danger'); }
   finally { ocultarLoading(); }
 }
 
-/** Função auxiliar para mapear chaves de um objeto */
-function mapearChavesObjeto(obj, mapa) {
+/** Função auxiliar para mapear chaves de um objeto (case-insensitive opcional) */
+function mapearChavesObjeto(obj, mapa, caseInsensitive = false) {
     if (!obj) return {}; const novoObj = {};
+    const mapaLookup = caseInsensitive ? new Map(Object.entries(mapa).map(([k, v]) => [k.toLowerCase(), v])) : new Map(Object.entries(mapa));
+
     for (const chaveOriginal in obj) {
         if (Object.hasOwnProperty.call(obj, chaveOriginal)) {
-            const chaveJsMapeada = mapa[chaveOriginal];
-            const chaveFinal = chaveJsMapeada !== undefined ? chaveJsMapeada : chaveOriginal;
+            const chaveLookup = caseInsensitive ? chaveOriginal.toLowerCase() : chaveOriginal;
+            const chaveJsMapeada = mapaLookup.get(chaveLookup);
+            // Usa a chave mapeada se existir, senão usa a original convertida para camelCase (tentativa)
+            const chaveFinal = chaveJsMapeada !== undefined ? chaveJsMapeada
+                             : chaveOriginal.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase()); // Converte snake_case para camelCase
             novoObj[chaveFinal] = obj[chaveOriginal];
         }
     }
+    // Garante que todas as chaves esperadas no mapa existam no novo objeto (com valor null se ausente)
     Object.values(mapa).forEach(chaveJsEsperada => { if (novoObj[chaveJsEsperada] === undefined) novoObj[chaveJsEsperada] = null; });
     return novoObj;
 }
@@ -1832,103 +2166,169 @@ function mapearChavesObjeto(obj, mapa) {
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Troca
  */
 async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
-    if (!window.jspdf || !window.jspdf.jsPDF) { mostrarNotificacao('Erro: jsPDF não carregada.', 'danger'); return; }
-    if (!dadosTurnoPDF || !equipesPDF) { mostrarNotificacao('Erro: Dados insuficientes.', 'danger'); return; }
+    if (!window.jspdf || !window.jspdf.jsPDF) { mostrarNotificacao('Erro: Biblioteca jsPDF não carregada.', 'danger'); return; }
+    if (!dadosTurnoPDF || !equipesPDF) { mostrarNotificacao('Erro: Dados insuficientes para gerar PDF.', 'danger'); return; }
 
-    const { jsPDF } = window.jspdf; const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    let y = 15; const margin = 10; const pageHeight = doc.internal.pageSize.height; const pageWidth = doc.internal.pageSize.width;
-    const contentWidth = pageWidth - margin * 2; const lineHeight = 5; const smallLineHeight = 4;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    let y = 15; // Posição Y inicial
+    const margin = 10;
+    const pageHeight = doc.internal.pageSize.height;
+    const pageWidth = doc.internal.pageSize.width;
+    const contentWidth = pageWidth - margin * 2;
+    const lineHeight = 5;       // Altura de linha padrão
+    const smallLineHeight = 4;  // Altura de linha menor
 
-    const addWrappedText = (label, value, indent = 5, isBold = false) => {
-      if (value === null || value === undefined || value === '') value = 'N/A';
-      const fullText = `${label ? label + ': ' : ''}${value}`; // Label opcional
-      const textWidth = contentWidth - indent - (label ? 5 : 0); // Ajusta largura baseada no label
+    /** Adiciona texto com quebra de linha automática */
+    const addWrappedText = (label, value, indent = 5, isBold = false, fontSize = 9) => {
+      if (value === null || value === undefined || String(value).trim() === '') value = 'N/A'; // Trata nulos e vazios
+      const fullText = `${label ? label + ': ' : ''}${String(value).trim()}`;
+      const textWidth = contentWidth - indent - (label ? margin : 0); // Ajusta largura
+
+      doc.setFontSize(fontSize);
       doc.setFont(undefined, isBold ? 'bold' : 'normal');
-      const lines = doc.splitTextToSize(fullText, textWidth);
-      checkAddPage(lines.length * lineHeight);
-      doc.text(lines, margin + indent, y); y += lines.length * lineHeight;
-      doc.setFont(undefined, 'normal');
-    };
-    function checkAddPage(alturaNecessaria = 20) { if (y + alturaNecessaria > pageHeight - margin) { doc.addPage(); y = margin; } }
 
-    // Cabeçalho
+      const lines = doc.splitTextToSize(fullText, textWidth);
+      checkAddPage(lines.length * (fontSize / 2.5)); // Estima altura baseada no tamanho da fonte
+      doc.text(lines, margin + indent, y);
+      y += lines.length * (fontSize / 2.5); // Avança Y baseado no número de linhas e tamanho
+      doc.setFont(undefined, 'normal'); // Reseta estilo
+    };
+
+    /** Verifica se precisa adicionar nova página */
+    function checkAddPage(alturaNecessaria = 20) {
+      if (y + alturaNecessaria > pageHeight - margin) { // Verifica se conteúdo cabe
+        doc.addPage();
+        y = margin; // Reseta Y para margem superior
+        // Adicionar cabeçalho/rodapé repetido se necessário aqui
+      }
+    }
+
+    // --- Desenhar PDF ---
+
+    // Cabeçalho da Página
     doc.setFontSize(16); doc.setFont(undefined, 'bold'); doc.text("RELATÓRIO DE TURNO", pageWidth / 2, y, { align: 'center' }); y += lineHeight * 1.5;
     doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.text("GRUPO GPS - MECANIZADA", pageWidth / 2, y, { align: 'center' }); y += lineHeight * 2;
-    // Informações Gerais
+
+    // Informações Gerais do Turno
     doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text("INFORMAÇÕES GERAIS", margin, y); y += lineHeight * 0.8; doc.setLineWidth(0.2); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.2;
     doc.setFontSize(9); doc.setFont(undefined, 'normal');
     doc.text(`Data: ${formatarData(dadosTurnoPDF.data)}`, margin, y); doc.text(`Horário: ${dadosTurnoPDF.horario || 'N/A'}`, margin + 70, y); y += lineHeight;
     doc.text(`Letra: ${dadosTurnoPDF.letra || 'N/A'}`, margin, y); doc.text(`Supervisor: ${dadosTurnoPDF.supervisor || 'N/A'}`, margin + 70, y); y += lineHeight;
-    doc.text(`ID Relatório: ${relatorioId || 'N/A'}`, margin, y); y += lineHeight * 1.5;
+    doc.text(`ID Relatório: ${relatorioId || 'N/A'}`, margin, y);
+    if (dadosTurnoPDF.timestamp) doc.text(`Gerado em: ${formatarDataHora(dadosTurnoPDF.timestamp)}`, margin + 70, y); y += lineHeight * 1.5;
 
-    // Equipes
+    // Detalhes das Equipes
     const equipesPorTipo = equipesPDF.reduce((acc, eq) => { const tipo = eq.tipo || 'Outro'; if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(eq); return acc; }, {});
-     for (const tipo in equipesPorTipo) {
-        checkAddPage(30); doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text(`EQUIPES ${tipo.toUpperCase()} (${equipesPorTipo[tipo].length})`, margin, y); y += lineHeight * 0.8; doc.setLineWidth(0.2); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.2;
+    const ordemTiposPDF = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo']; // Ordem desejada
+    const tiposOrdenadosPDF = Object.keys(equipesPorTipo).sort((a, b) => { const idxA = ordemTiposPDF.indexOf(a); const idxB = ordemTiposPDF.indexOf(b); if(idxA===-1 && idxB===-1) return a.localeCompare(b); if(idxA===-1) return 1; if(idxB===-1) return -1; return idxA - idxB; });
+
+     for (const tipo of tiposOrdenadosPDF) {
+        checkAddPage(30); // Espaço para título da seção
+        doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text(`EQUIPES ${tipo.toUpperCase()} (${equipesPorTipo[tipo].length})`, margin, y); y += lineHeight * 0.8; doc.setLineWidth(0.2); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.2;
+
         equipesPorTipo[tipo].forEach((equipe, index) => {
-            checkAddPage(90); // Aumentar estimativa para incluir tempo
+            checkAddPage(100); // Estimativa de altura por equipe (ajustar conforme necessário)
             doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.text(`Equipe ${index + 1}: ${equipe.numero || 'N/A'}`, margin, y); y += lineHeight * 1.2;
             doc.setFontSize(9); doc.setFont(undefined, 'normal');
+
             const vagaDisp = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga; const equipDisp = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
             const motivoTrocaDisp = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca; const isAP = equipe.tipo === 'Alta Pressão';
-            addWrappedText('Motorista', equipe.motorista); addWrappedText('Operador(es)', equipe.operadores); addWrappedText('Área', equipe.area); addWrappedText('Atividade', equipe.atividade);
+
+            addWrappedText('Motorista', equipe.motorista, 5); addWrappedText('Operador(es)', equipe.operadores, 5); addWrappedText('Área', equipe.area, 5); addWrappedText('Atividade', equipe.atividade, 5);
             addWrappedText('Tipo Atividade', equipe.tipoAtividade || 'Rotineira', 5, true); addWrappedText('Status', equipe.statusAtividade || 'Concluído', 5, true); if (equipe.statusAtividade !== 'Concluído' && equipe.pendencia) addWrappedText('Pendência', equipe.pendencia, 10);
-            addWrappedText('Vaga', vagaDisp); addWrappedText('Equipamento', equipDisp); if (equipe.identificacaoUsiminas) addWrappedText('ID Usiminas', equipe.identificacaoUsiminas);
+            addWrappedText('Vaga', vagaDisp, 5); addWrappedText('Equipamento', equipDisp, 5); if (equipe.identificacaoUsiminas) addWrappedText('ID Usiminas', equipe.identificacaoUsiminas, 5);
+
             // Troca (com Fim e Tempo)
-            checkAddPage(25); doc.setFont(undefined, 'bold'); doc.text(`Troca Equip.:`, margin + 5, y); doc.setFont(undefined, 'normal'); doc.text(`${equipe.trocaEquipamento || 'Não'}`, margin + 45, y); y += lineHeight;
+            checkAddPage(30); // Mais espaço para detalhes da troca
+            addWrappedText('Troca Equip.', equipe.trocaEquipamento || 'Não', 5, true);
             if (equipe.trocaEquipamento === 'Sim') {
-                addWrappedText('- Motivo', motivoTrocaDisp || 'N/A', 10); addWrappedText('- Defeito/Medidas', equipe.defeito || 'N/A', 10);
-                if (equipe.placaNova) addWrappedText('- Placa Nova', equipe.placaNova, 10);
-                if (equipe.dataHoraTroca) addWrappedText('- Início Troca', formatarDataHora(equipe.dataHoraTroca), 10);
-                if (equipe.dataHoraFimTroca) addWrappedText('- Fim Troca', formatarDataHora(equipe.dataHoraFimTroca), 10); // <<< NOVO: Fim >>>
-                if (equipe.tempoTroca) addWrappedText('- Tempo Indisp.', equipe.tempoTroca, 10); // <<< NOVO: Tempo >>>
+                addWrappedText('Motivo', motivoTrocaDisp || 'N/A', 10); addWrappedText('Defeito/Medidas', equipe.defeito || 'N/A', 10);
+                if (equipe.placaNova) addWrappedText('Placa Nova', equipe.placaNova, 10);
+                if (equipe.dataHoraTroca) addWrappedText('Início Troca', formatarDataHora(equipe.dataHoraTroca), 10);
+                // ======================= ADICIONA FIM E TEMPO AO PDF =======================
+                if (equipe.dataHoraFimTroca) addWrappedText('Fim Troca', formatarDataHora(equipe.dataHoraFimTroca), 10);
+                if (equipe.tempoTroca && !equipe.tempoTroca.includes('Erro') && !equipe.tempoTroca.includes('Ausente')) addWrappedText('Tempo Indisp.', equipe.tempoTroca, 10);
+                 // Poderia adicionar cálculo local como fallback se tempoTroca for nulo/inválido e as datas existirem
+                // =========================================================================
             }
+
             // Implementos
-            checkAddPage(30); doc.setFont(undefined, 'bold'); doc.text(`Implementos:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
-            if (isAP) { /* ... materiais AP ... */ } else { /* ... materiais Vacuo ... */ } if (equipe.justificativa) addWrappedText('Justificativa Falta', equipe.justificativa, 10);
+            checkAddPage(35); // Espaço para implementos
+            doc.setFont(undefined, 'bold'); doc.text(`Implementos:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
+            if (isAP && equipe.materiais) {
+                addWrappedText('- Pistola', equipe.materiais.pistola ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Pistola C.L.', equipe.materiais.pistolaCanoLongo ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Mang. Torpedo', equipe.materiais.mangueiraTorpedo ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Pedal', equipe.materiais.pedal ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Varetas', equipe.materiais.varetas ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Rabicho', equipe.materiais.rabicho ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Lances Mang.', equipe.lancesMangueira ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Lances Var.', equipe.lancesVaretas ?? 'N/A', 10, false, smallLineHeight);
+            } else if (!isAP && equipe.materiaisVacuo) {
+                addWrappedText('- Mangotes', equipe.materiaisVacuo.mangotes ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Reduções', equipe.materiaisVacuo.reducoes ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Mangotes 3"', equipe.mangotes3Polegadas ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Mangotes 4"', equipe.mangotes4Polegadas ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Mangotes 6"', equipe.mangotes6Polegadas ?? 'N/A', 10, false, smallLineHeight);
+            }
+            if (equipe.justificativa) addWrappedText('Justificativa Falta', equipe.justificativa, 10, false, smallLineHeight);
+
             // Segurança
-            checkAddPage(15); doc.setFont(undefined, 'bold'); doc.text(`Segurança:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal'); addWrappedText('- Caixa Bloqueio', equipe.caixaBloqueio ?? 'N/A', 10); addWrappedText('- Cadeados', equipe.cadeados ?? 'N/A', 10); addWrappedText('- Plaquetas', equipe.plaquetas ?? 'N/A', 10);
+            checkAddPage(20); // Espaço para segurança
+            doc.setFont(undefined, 'bold'); doc.text(`Segurança:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
+            addWrappedText('- Caixa Bloqueio', equipe.caixaBloqueio ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Cadeados', equipe.cadeados ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Plaquetas', equipe.plaquetas ?? 'N/A', 10, false, smallLineHeight);
+
             // Observações
             if (equipe.observacoes) { checkAddPage(15); doc.setFont(undefined, 'bold'); doc.text(`Observações:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal'); addWrappedText('', equipe.observacoes, 10); }
-            y += lineHeight * 0.5; doc.setLineWidth(0.1); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.5;
+
+            y += lineHeight * 0.5; // Pequeno espaço antes da linha
+            doc.setLineWidth(0.1); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.5; // Espaço após a linha
         });
     }
-    // Rodapé
+
+    // Rodapé em todas as páginas
     const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) { doc.setPage(i); let footerY = pageHeight - margin; doc.setLineWidth(0.2); doc.line(margin, footerY - smallLineHeight * 1.5, pageWidth - margin, footerY - smallLineHeight * 1.5); doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.text(`Sistema v${window.CONFIG?.VERSAO_APP || '3.1'}`, margin, footerY); doc.text(`Página ${i}/${pageCount}`, pageWidth - margin, footerY, { align: 'right' }); }
-    // Salvar
-    const sup = dadosTurnoPDF.supervisor || 'Sup'; const letra = dadosTurnoPDF.letra || 'X'; const dataFmt = formatarData(dadosTurnoPDF.data).replace(/\//g, '-');
-    doc.save(`${sup}_${letra}_${dataFmt}.pdf`);
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        let footerY = pageHeight - margin / 2; // Posição do rodapé
+        // Linha acima do rodapé
+        doc.setLineWidth(0.2); doc.line(margin, footerY - smallLineHeight * 1.5, pageWidth - margin, footerY - smallLineHeight * 1.5);
+        doc.setFontSize(8); doc.setFont(undefined, 'italic');
+        // Texto do rodapé
+        doc.text(`Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'}`, margin, footerY); // Versão Atualizada
+        doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, footerY, { align: 'right' });
+    }
+
+    // Salvar o PDF
+    const sup = (dadosTurnoPDF.supervisor || 'Sup').replace(/[^a-z0-9]/gi, '_'); // Limpa nome supervisor
+    const letra = dadosTurnoPDF.letra || 'X';
+    const dataFmt = formatarData(dadosTurnoPDF.data).replace(/\//g, '-') || 'data'; // Formata data
+    const nomeArquivo = `Relatorio_${sup}_${letra}_${dataFmt}.pdf`;
+
+    doc.save(nomeArquivo);
     mostrarNotificacao('PDF gerado com sucesso!', 'success');
 }
 
 /** Formatar WhatsApp de relatório existente (Local ou Servidor) */
 async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'formatarWhatsApp') {
    if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-   setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepSucesso');
+   setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume origem da pesquisa
    mostrarLoading('Formatando para WhatsApp...');
    try {
      let textoWhatsApp = ''; let relatorioCompleto = null;
      if (origem === 'local') {
        relatorioCompleto = obterRelatorioLocal(id); if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
-       textoWhatsApp = gerarTextoWhatsAppLocal(relatorioCompleto); // Usa a função que chama a principal
-     } else {
-       const result = await callAPI(apiAction, { turnoId: id });
+       // Usa a função principal de formatação com os dados locais
+       textoWhatsApp = formatarRelatorioParaCompartilhamentoFormal(relatorioCompleto.dadosTurno, relatorioCompleto.equipes);
+     } else { // Origem 'servidor'
+       const result = await callAPI(apiAction, { turnoId: id }); // API já retorna formatado
        if (result && result.success && result.relatorio) { textoWhatsApp = result.relatorio; }
-       else { throw new Error(result?.message || `Erro ao formatar (${apiAction}).`); }
+       else { throw new Error(result?.message || `Erro ao formatar WhatsApp via API (${apiAction}).`); }
      }
-     if(window.AppState) AppState.update('ultimoRelatorioId', id); else ultimoRelatorioId = id;
+
+     if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id); // Atualiza último ID visualizado
+
      navegarParaEtapa('stepWhatsApp');
      const el = document.getElementById('whatsAppTexto'); if (el) el.textContent = textoWhatsApp;
      const btn = document.getElementById('btnVoltarWhatsApp'); if (btn) btn.onclick = voltarDoWhatsApp;
-   } catch (error) { console.error('Erro ao formatar WhatsApp:', error); mostrarNotificacao('Erro: ' + error.message, 'danger'); }
+   } catch (error) { console.error('Erro ao formatar WhatsApp:', error); mostrarNotificacao('Erro ao formatar para WhatsApp: ' + error.message, 'danger'); }
    finally { ocultarLoading(); }
 }
 
 /** Gerar texto WhatsApp para relatório local (usa a função principal de formatação) */
 function gerarTextoWhatsAppLocal(relatorio) {
-  if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) { return 'Erro: Dados locais inválidos.'; }
-  // A função formatarRelatorioParaCompartilhamentoFormal agora lida com ambos os formatos
+  if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) { return 'Erro: Dados locais inválidos para formatação WhatsApp.'; }
+  // Reutiliza a função principal de formatação
   return formatarRelatorioParaCompartilhamentoFormal(relatorio.dadosTurno, relatorio.equipes);
 }
 
@@ -1938,15 +2338,15 @@ function gerarTextoWhatsAppLocal(relatorio) {
  */
 function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
   var texto = ""; const nl = "\n"; const sepPrincipal = "====================================" + nl; const sepSecao = "------------------------------------" + nl;
-  if (!dadosTurno || !Array.isArray(equipes)) return "Erro: Dados inválidos.";
+  if (!dadosTurno || !Array.isArray(equipes)) return "Erro: Dados inválidos para formatação WhatsApp.";
 
-  // Função auxiliar para pegar campo (GAS ou Local)
-  const getField = (eq, fieldGas, fieldLocal, defaultVal = 'N/A') => {
-      let val = eq[fieldGas]; // Tenta GAS primeiro
-      if (val !== undefined && val !== null && val !== '') return val;
-      val = eq[fieldLocal]; // Tenta Local
-      if (val !== undefined && val !== null && val !== '') return val;
-      return defaultVal; // Retorna padrão
+  // Função auxiliar para pegar campo (prioriza GAS, depois Local)
+  const getField = (obj, fieldGas, fieldLocal, defaultVal = 'N/A') => {
+      let val = obj[fieldGas]; // Tenta chave GAS (se obj for do GAS)
+      if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+      val = obj[fieldLocal]; // Tenta chave Local (se obj for local ou GAS falhou)
+      if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+      return defaultVal; // Retorna padrão se ambos falharem ou forem vazios
   }
 
   // Cabeçalho
@@ -1958,9 +2358,11 @@ function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
 
   // Agrupar equipes
   var equipesPorTipo = equipes.reduce((acc, eq) => { var tipo = getField(eq, 'Tipo_Equipe', 'tipo', 'Desconhecido'); if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(eq); return acc; }, {});
-  const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo']; const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => (ordemTipos.indexOf(a) === -1 ? 99 : ordemTipos.indexOf(a)) - (ordemTipos.indexOf(b) === -1 ? 99 : ordemTipos.indexOf(b)));
+  const ordemTiposWpp = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo']; // Ordem desejada
+  const tiposOrdenadosWpp = Object.keys(equipesPorTipo).sort((a, b) => { const idxA = ordemTiposWpp.indexOf(a); const idxB = ordemTiposWpp.indexOf(b); if(idxA===-1 && idxB===-1) return a.localeCompare(b); if(idxA===-1) return 1; if(idxB===-1) return -1; return idxA - idxB; });
 
-  for (const tipo of tiposOrdenados) {
+
+  for (const tipo of tiposOrdenadosWpp) {
       const equipesDoTipo = equipesPorTipo[tipo];
       texto += `*EQUIPES ${tipo.toUpperCase()} (${equipesDoTipo.length})*` + nl + sepSecao + nl;
       equipesDoTipo.forEach((equipe, index) => {
@@ -1971,42 +2373,60 @@ function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
           texto += `  Motorista: ${getField(equipe, 'Motorista', 'motorista')}` + nl; texto += `  Operador(es): ${getField(equipe, 'Operadores', 'operadores')}` + nl; texto += `  Área: ${getField(equipe, 'Area', 'area')}` + nl; texto += `  Atividade: ${getField(equipe, 'Atividade', 'atividade')}` + nl;
           texto += `  Tipo Ativ.: ${getField(equipe, 'TipoAtividade', 'tipoAtividade', 'Rotineira')}` + nl; texto += `  Status: ${status}${pend && status !== 'Concluído' ? ` (${pend})` : ''}` + nl;
           texto += `  Vaga: ${vagaD || 'N/A'}` + nl; texto += `  Equipamento: ${equipD || 'N/A'}` + nl;
-          const idUsiminas = getField(equipe, 'Identificacao_Usiminas', 'identificacaoUsiminas', ''); if (idUsiminas) texto += `  ID Usiminas: ${idUsiminas}` + nl;
-          // Materiais
-          if (tipo === 'Alta Pressão') { /* ... Lógica materiais AP ... */ } else if (tipo === 'Auto Vácuo / Hiper Vácuo') { /* ... Lógica materiais Vacuo ... */ }
+          const idUsiminas = getField(equipe, 'Identificacao_Usiminas', 'identificacaoUsiminas', ''); if (idUsiminas !== 'N/A') texto += `  ID Usiminas: ${idUsiminas}` + nl;
+
+          // Materiais (Simplificado para WhatsApp)
+           if (tipo === 'Alta Pressão') {
+               const lancesM = getField(equipe, 'Lances_Mangueira', 'lancesMangueira', '0');
+               const lancesV = getField(equipe, 'Lances_Varetas', 'lancesVaretas', '0');
+               texto += `  Materiais AP: L.Mang: ${lancesM}, L.Var: ${lancesV}` + nl; // Exemplo simplificado
+           } else if (tipo === 'Auto Vácuo / Hiper Vácuo') {
+               const mang3 = getField(equipe, 'Mangotes_3_Polegadas', 'mangotes3Polegadas', '0');
+               const mang4 = getField(equipe, 'Mangotes_4_Polegadas', 'mangotes4Polegadas', '0');
+               const mang6 = getField(equipe, 'Mangotes_6_Polegadas', 'mangotes6Polegadas', '0');
+               texto += `  Materiais Vácuo: M(3"): ${mang3}, M(4"): ${mang4}, M(6"): ${mang6}` + nl; // Exemplo simplificado
+           }
+           const justif = getField(equipe, 'Justificativa', 'justificativa', '');
+           if (justif !== 'N/A') texto += `    Just. Falta: ${justif}`+nl;
+
+
           // Troca (com Fim e Tempo)
           const troca = getField(equipe, 'Troca_Equipamento', 'trocaEquipamento', 'Não');
           if (troca === 'Sim') {
               texto += nl + "  *Troca de Equipamento: Sim*" + nl;
               const motivo = getField(equipe, 'Motivo_Troca', 'motivoTroca', ''); const motivoO = getField(equipe, 'Motivo_Outro', 'motivoOutro', ''); let motivoD = (motivo === 'Outros Motivos (Justificar)' || motivo === 'Defeitos Em Geral (Justificar)') ? motivoO : motivo;
               texto += `    Motivo: ${motivoD || 'Não especificado'}` + nl;
-              const defeito = getField(equipe, 'Defeito', 'defeito', ''); if (defeito) texto += `    Defeito/Medidas: ${defeito}` + nl;
-              const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); if (placa) texto += `    Placa Nova: ${placa}` + nl;
-              const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); if (inicioT) texto += `    Início: ${formatarDataHora(inicioT)}` + nl;
-              const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); if (fimT) texto += `    Fim: ${formatarDataHora(fimT)}` + nl; // <<< NOVO: Fim >>>
+              const defeito = getField(equipe, 'Defeito', 'defeito', ''); if (defeito !== 'N/A') texto += `    Defeito/Medidas: ${defeito}` + nl;
+              const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); if (placa !== 'N/A') texto += `    Placa Nova: ${placa}` + nl;
+              const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); if (inicioT !== 'N/A') texto += `    Início: ${formatarDataHora(inicioT)}` + nl;
+               // ======================= ADICIONA FIM E TEMPO AO WHATSAPP =======================
+              const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); if (fimT !== 'N/A') texto += `    Fim: ${formatarDataHora(fimT)}` + nl;
               const tempoT = getField(equipe, 'Tempo_Troca', '', ''); // Tenta pegar Tempo_Troca do GAS
-              if (tempoT && !tempoT.includes('Erro') && !tempoT.includes('Ausente')) { texto += `    Tempo Indisp.: ${tempoT}` + nl; } // <<< NOVO: Tempo >>>
-              else if (inicioT && fimT) { // Tenta calcular se Tempo_Troca não veio pronto (ex: relatório local)
-                  try { const inicio = new Date(inicioT); const fim = new Date(fimT); if (!isNaN(inicio) && !isNaN(fim) && fim > inicio) { const dM = Math.round((fim-inicio)/60000); const h = Math.floor(dM/60); const m = dM%60; texto += `    Tempo Indisp.: ${h}h${m<10?'0':''}${m}min`+nl; } } catch(e){}
+              if (tempoT && !tempoT.includes('Erro') && !tempoT.includes('Ausente') && tempoT !== 'N/A') { texto += `    Tempo Indisp.: ${tempoT}` + nl; }
+              else if (inicioT !== 'N/A' && fimT !== 'N/A') { // Tenta calcular se Tempo_Troca não veio pronto (ex: relatório local)
+                  try { const inicio = new Date(inicioT); const fim = new Date(fimT); if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) { const dM = Math.round((fim-inicio)/60000); const h = Math.floor(dM/60); const m = dM%60; texto += `    Tempo Indisp.: ${h}h${m<10?'0':''}${m}min`+nl; } } catch(e){}
               }
+              // ==============================================================================
           }
           // Observações
-          const obs = getField(equipe, 'Observacoes', 'observacoes', ''); if (obs) texto += nl + `  *Observações:* ${obs}` + nl;
-          texto += nl;
+          const obs = getField(equipe, 'Observacoes', 'observacoes', ''); if (obs !== 'N/A') texto += nl + `  *Observações:* ${obs}` + nl;
+          texto += nl; // Espaço entre equipes
       });
   }
   // Rodapé
-  texto += sepPrincipal + `Sistema v${window.CONFIG?.VERSAO_APP || '3.1'}`;
+  texto += sepPrincipal + `Sistema v${window.CONFIG?.VERSAO_APP || '3.2'}`; // Versão Atualizada
   return texto;
 }
 
-/** Voltar da pesquisa */
+/** Voltar da visualização/WhatsApp para a tela de pesquisa */
 function voltarDaVisualizacaoParaPesquisa() { navegarParaEtapa('stepPesquisa'); }
-function voltarDaPesquisa() { navegarParaEtapa('stepTurno'); atualizarIndicadoresEtapa(1); }
+/** Voltar da tela de pesquisa para o início */
+function voltarDaPesquisa() { novoRelatorio(); } // Volta para a etapa 1 e reseta
 
 
 // ========== FUNÇÕES DE DASHBOARD ==========
 function mostrarDashboard() {
+  setOrigemNavegacao('dashboard'); // Define a origem
   if (window.ModuleLoader && ModuleLoader.isInitialized('dashboard')) {
     const Dashboard = ModuleLoader.get('dashboard');
     if (Dashboard && typeof Dashboard.mostrarDashboard === 'function') Dashboard.mostrarDashboard();
@@ -2017,7 +2437,10 @@ function mostrarDashboard() {
      else { mostrarNotificacao('Dashboard não disponível.', 'warning'); voltarDoDashboard(); }
   }
 }
-function voltarDoDashboard() { navegarParaEtapa('stepTurno'); atualizarIndicadoresEtapa(1); }
+// Volta do dashboard para a etapa inicial (Turno)
+function voltarDoDashboard() { novoRelatorio(); }
+
+// Mostrar modal de ajuda
 function mostrarHelp() { if (modalHelp) modalHelp.show(); else mostrarNotificacao("Ajuda não encontrada.", "warning"); }
 
 
@@ -2027,26 +2450,52 @@ function formatarData(dataInput) {
   if (!dataInput) return 'N/A';
   try {
     let dataObj;
-    if (dataInput instanceof Date) dataObj = dataInput;
-    else { const dataStr = String(dataInput); if (/^\d{4}-\d{2}-\d{2}/.test(dataStr)) { const parts = dataStr.substring(0, 10).split('-'); dataObj = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]))); } else if (dataStr.includes('/')) { const parts = dataStr.split('/'); if(parts.length === 3) dataObj = new Date(Date.UTC(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))); else dataObj = new Date(dataStr); } else dataObj = new Date(dataStr); }
-    if (isNaN(dataObj.getTime())) return String(dataInput);
-    const dia = String(dataObj.getUTCDate()).padStart(2, '0'); const mes = String(dataObj.getUTCMonth() + 1).padStart(2, '0'); const ano = dataObj.getUTCFullYear();
+    const dataStr = String(dataInput);
+    // Tenta identificar AAAA-MM-DD (com ou sem T...)
+    if (/^\d{4}-\d{2}-\d{2}/.test(dataStr)) {
+      const parts = dataStr.substring(0, 10).split('-');
+      // Usa UTC para evitar problemas de timezone ao criar a data apenas com ano, mês, dia
+      dataObj = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+    } else if (dataInput instanceof Date) {
+        dataObj = dataInput; // Já é um objeto Date
+    } else {
+      // Tenta outras formas (DD/MM/YYYY, etc.) ou fallback para o construtor padrão
+      // Cuidado: new Date(string) pode ter comportamento inconsistente entre navegadores
+      dataObj = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1')); // Tenta converter DD/MM/YYYY para YYYY-MM-DD
+       if (isNaN(dataObj.getTime())) dataObj = new Date(dataStr); // Última tentativa
+    }
+
+    // Verifica se a data resultante é válida
+    if (isNaN(dataObj.getTime())) return String(dataInput); // Retorna original se inválida
+
+    // Formata usando UTC para consistência
+    const dia = String(dataObj.getUTCDate()).padStart(2, '0');
+    const mes = String(dataObj.getUTCMonth() + 1).padStart(2, '0');
+    const ano = dataObj.getUTCFullYear();
     return `${dia}/${mes}/${ano}`;
   } catch (e) { console.error("Erro formatarData:", dataInput, e); return String(dataInput); }
 }
+
 /** Formatar data e hora (DD/MM/YYYY HH:mm) */
 function formatarDataHora(dataHoraInput) {
   if (!dataHoraInput) return 'N/A';
   try {
-    let dataObj; if (dataHoraInput instanceof Date) dataObj = dataHoraInput; else dataObj = new Date(dataHoraInput);
-    if (isNaN(dataObj.getTime())) return String(dataHoraInput);
-    const dia = String(dataObj.getDate()).padStart(2, '0'); const mes = String(dataObj.getMonth() + 1).padStart(2, '0'); const ano = dataObj.getFullYear(); const hora = String(dataObj.getHours()).padStart(2, '0'); const minutos = String(dataObj.getMinutes()).padStart(2, '0');
+    let dataObj; if (dataHoraInput instanceof Date) dataObj = dataHoraInput; else dataObj = new Date(dataHoraInput); // Tenta converter string
+    if (isNaN(dataObj.getTime())) return String(dataHoraInput); // Retorna original se inválida
+
+    // Formata usando o timezone local do navegador
+    const dia = String(dataObj.getDate()).padStart(2, '0');
+    const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
+    const ano = dataObj.getFullYear();
+    const hora = String(dataObj.getHours()).padStart(2, '0');
+    const minutos = String(dataObj.getMinutes()).padStart(2, '0');
     return `${dia}/${mes}/${ano} ${hora}:${minutos}`;
   } catch (e) { console.error("Erro formatarDataHora:", dataHoraInput, e); return String(dataHoraInput); }
 }
 
 
 // --- Exportar funções para o escopo global (necessário para onclick no HTML) ---
+// Mantém a exportação para compatibilidade, mas idealmente os eventos seriam adicionados via JS
 window.inicializarFormulario = inicializarFormulario;
 window.avancarParaEquipes = avancarParaEquipes;
 window.voltarParaTurno = voltarParaTurno;
@@ -2082,11 +2531,28 @@ window.mostrarDashboard = mostrarDashboard;
 window.voltarDoDashboard = voltarDoDashboard;
 window.mostrarHelp = mostrarHelp;
 
-// Flags para evitar múltiplos salvamentos
+// Flags para evitar múltiplos salvamentos/submissões rápidas
 let salvandoEquipe = false;
 let salvandoRelatorio = false;
 
 // --- Inicializar listeners específicos do formulário após o carregamento inicial ---
+// Garante que os listeners para os toggles do modal sejam adicionados corretamente
 document.addEventListener('DOMContentLoaded', () => {
-    setupEventListeners(); // Garante que todos os listeners sejam adicionados
+    setupEventListeners();
+    // Adiciona listener para atualizar lista de equipes se AppState for usado
+    if (window.AppState) {
+        AppState.subscribe('equipes', (newState) => {
+            console.log("Estado 'equipes' atualizado, renderizando lista.");
+            atualizarListaEquipes();
+            atualizarBotaoAvancar();
+        });
+         AppState.subscribe('dadosTurno', (newState) => {
+            console.log("Estado 'dadosTurno' atualizado.");
+            // Poderia pré-preencher o form de turno se necessário ao voltar
+        });
+        AppState.subscribe('currentStep', (newState) => {
+            console.log("Estado 'currentStep' atualizado para:", newState);
+             // Poderia adicionar lógica aqui baseada na etapa atual
+        });
+    }
 });
