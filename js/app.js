@@ -897,6 +897,10 @@ function editarEquipe(index) {
     function setRadioValue(name, value) { const radio = document.querySelector(`input[name="${name}"][value="${value}"]`); if (radio) radio.checked = true; else { const firstRadio = document.querySelector(`input[name="${name}"]`); if(firstRadio) firstRadio.checked = true; } } // Seleciona o primeiro se valor não encontrado
 
     setSelectValue('equipeNumero', equipe.numero);
+    setSelectValue('equipeTipoAtividade', equipe.tipoAtividade);
+    setSelectValue('equipeStatusAtividade', equipe.statusAtividade);
+    setFieldValue('equipePendencia', equipe.pendencia);
+    togglePendencia(); // Atualizar visibilidade do campo de pendência
     setFieldValue('equipeMotorista', equipe.motorista);
     setFieldValue('equipeOperadores', equipe.operadores);
     setFieldValue('equipeArea', equipe.area);
