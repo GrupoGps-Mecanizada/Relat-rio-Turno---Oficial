@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
+  <!-- Cabeçalhos de Segurança -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-XSS-Protection" content="1; mode=block">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <!-- Política de Segurança de Conteúdo (Ajustada para incluir Google APIs e CDN) -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self';
     script-src 'self' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://apis.google.com https://accounts.google.com 'unsafe-inline';
@@ -30,6 +32,7 @@
   </head>
 <body>
   <div class="container app-container">
+    <!-- Header -->
     <div class="card mb-4 shadow-lg app-header">
       <div class="card-header d-flex justify-content-between align-items-center barra-superior">
         <h2 class="h5 mb-0"><i class="bi bi-clipboard-check-fill me-2"></i>Sistema de Relatório de Turno</h2>
@@ -47,6 +50,7 @@
       </div>
     </div>
 
+    <!-- Indicador de Etapas (Desktop) -->
     <div class="step-indicator d-none d-md-flex mb-4">
       <div id="step1Indicator" class="step-item active">
         <div class="step-number">1</div>
@@ -62,6 +66,7 @@
       </div>
     </div>
 
+    <!-- Etapa 1: Informações do Turno -->
     <div id="stepTurno" class="content-step" style="display: block;">
       <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo">
@@ -84,7 +89,8 @@
                 <label for="horario" class="form-label">Horário do turno <span class="text-danger">*</span></label>
                 <select class="form-select enhanced-input" id="horario" required>
                   <option value="" selected disabled>Selecione o horário...</option>
-                  </select>
+                  <!-- Opções carregadas via JS -->
+                </select>
                 <div class="invalid-feedback">Por favor, selecione o horário do turno.</div>
               </div>
             </div>
@@ -94,14 +100,16 @@
                 <label for="letra" class="form-label">Letra do turno <span class="text-danger">*</span></label>
                 <select class="form-select enhanced-input" id="letra" required>
                   <option value="" selected disabled>Selecione a letra...</option>
-                  </select>
+                  <!-- Opções carregadas via JS -->
+                </select>
                 <div class="invalid-feedback">Por favor, selecione a letra do turno.</div>
               </div>
               <div class="col-md-6">
                 <label for="supervisor" class="form-label">Supervisor responsável <span class="text-danger">*</span></label>
                 <select class="form-select enhanced-input" id="supervisor" required>
                   <option value="" selected disabled>Selecione o supervisor...</option>
-                  </select>
+                  <!-- Opções carregadas via JS -->
+                </select>
                 <div class="invalid-feedback">Por favor, selecione o supervisor responsável.</div>
               </div>
             </div>
@@ -116,6 +124,7 @@
       </div>
     </div>
 
+    <!-- Etapa 2: Detalhes das Equipes -->
     <div id="stepEquipes" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo d-flex justify-content-between align-items-center">
@@ -131,11 +140,13 @@
         </div>
         <div class="card-body">
             <div id="listaEquipes" class="teams-container">
+                <!-- Mensagem de Equipes Vazias -->
                 <div id="semEquipes" class="alert alert-secondary text-center empty-teams">
                     <i class="bi bi-exclamation-circle mb-3 empty-icon"></i>
                     <p>Nenhuma equipe adicionada ainda.</p>
                     <p class="mb-0">Clique nos botões acima para adicionar.</p>
                 </div>
+                <!-- Cards das equipes serão adicionados aqui via JS -->
             </div>
              <hr class="section-divider">
              <div class="d-flex justify-content-between mt-4 navigation-buttons">
@@ -150,6 +161,7 @@
       </div>
     </div>
 
+    <!-- Etapa 3: Revisão -->
     <div id="stepRevisao" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo">
@@ -163,11 +175,13 @@
 
             <h4 class="section-title mb-3">Resumo do Turno</h4>
             <div id="resumoTurno" class="info-grid mb-4 summary-section">
-                </div>
+                <!-- Conteúdo preenchido via JS -->
+            </div>
 
             <h4 class="section-title mb-3">Resumo das Equipes</h4>
             <div id="resumoEquipes" class="mb-4 summary-section">
-                </div>
+                <!-- Conteúdo preenchido via JS -->
+            </div>
 
              <hr class="section-divider">
              <div class="d-flex justify-content-between mt-4 navigation-buttons">
@@ -182,6 +196,7 @@
       </div>
     </div>
 
+     <!-- Etapa 4: Sucesso -->
      <div id="stepSucesso" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 text-center content-card success-card">
         <div class="card-header bg-success text-white">
@@ -211,6 +226,7 @@
       </div>
     </div>
 
+     <!-- Etapa 5: Visualização do Relatório -->
      <div id="stepRelatorio" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
@@ -231,6 +247,7 @@
        </div>
      </div>
 
+     <!-- Etapa 6: Formatação WhatsApp -->
      <div id="stepWhatsApp" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
@@ -257,6 +274,7 @@
        </div>
     </div>
 
+    <!-- Etapa 7: Pesquisa -->
     <div id="stepPesquisa" class="content-step" style="display: none;">
       <div class="card shadow-lg mb-4 content-card">
          <div class="card-header card-titulo d-flex justify-content-between align-items-center">
@@ -312,7 +330,8 @@
                              </tr>
                          </thead>
                          <tbody id="tabelaResultados">
-                             </tbody>
+                             <!-- Resultados da pesquisa preenchidos via JS -->
+                         </tbody>
                      </table>
                  </div>
              </div>
@@ -320,6 +339,7 @@
       </div>
     </div>
 
+     <!-- Etapa 8: Dashboard -->
      <div id="dashboard" class="content-step" style="display: none;">
        <div class="card shadow-lg mb-4 content-card">
         <div class="card-header card-titulo d-flex justify-content-between align-items-center">
@@ -330,9 +350,11 @@
         </div>
         <div class="card-body">
             <p class="dashboard-intro">Visão geral e estatísticas do sistema.</p>
+            <!-- Container para Estatísticas Gerais (preenchido pelo dashboard.js) -->
             <div id="estatisticasGerais" class="mb-4 stats-container">
                 <div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Carregando...</span></div></div>
             </div>
+            <!-- Container para Gráficos (preenchido pelo dashboard.js) -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <div class="card chart-card">
@@ -347,15 +369,17 @@
                     </div>
                 </div>
             </div>
+             <!-- Container para Últimos Relatórios (preenchido pelo dashboard.js) -->
              <div id="ultimosRelatorios" class="mb-4 recent-reports">
                   <h5 class="mb-3">Últimos Relatórios Registrados</h5>
                   <div class="text-center p-3"><div class="spinner-border text-secondary" role="status"><span class="visually-hidden">Carregando...</span></div></div>
-                  </div>
+            </div>
         </div>
       </div>
     </div>
 
 
+    <!-- Footer -->
     <footer class="text-center mt-4 mb-3 text-muted small app-footer">
       <hr class="my-3">
       <p class="mb-0">
@@ -364,12 +388,13 @@
         <span class="mx-1">•</span>
         v3.2 </p> <!-- Versão Atualizada -->
     </footer>
-  </div>
+  </div> <!-- Fim do container principal -->
 
+  <!-- Modal Adicionar/Editar Equipe -->
   <div class="modal fade" id="modalEquipe" tabindex="-1" aria-labelledby="modalEquipeLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
       <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content enhanced-modal">
-              <form id="formEquipe" class="needs-validation" novalidate onsubmit="event.preventDefault(); salvarEquipe();">
+              <form id="formEquipe" class="needs-validation" novalidate onsubmit="event.preventDefault(); /* A validação e salvamento são chamados pelo listener em app.js */">
                   <div class="modal-header" id="modalEquipeHeader">
                       <h5 class="modal-title" id="modalEquipeLabel">Adicionar/Editar Equipe</h5>
                       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -379,16 +404,17 @@
                       <input type="hidden" id="equipeTipo" value="">
 
                       <div class="row">
+                          <!-- Coluna Esquerda: Informações Gerais -->
                           <div class="col-md-6 border-end">
                               <h5 class="form-section-title">Informações da Equipe</h5>
                               <div class="mb-3">
                                   <label for="equipeNumero" class="form-label">Número/Nome da Equipe <span class="text-danger">*</span></label>
                                   <select class="form-select enhanced-input" id="equipeNumero" required>
                                       <option value="" selected disabled>Selecione...</option>
-                                      </select>
+                                      <!-- Opções carregadas via JS -->
+                                  </select>
                                   <div class="invalid-feedback">Campo obrigatório.</div>
                               </div>
-                              <!-- Campos de Motorista e Operador(es) -->
                               <div class="mb-3">
                                 <label for="equipeMotorista" class="form-label">Motorista <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control enhanced-input" id="equipeMotorista" required minlength="3" placeholder="Nome do motorista">
@@ -410,8 +436,7 @@
                                    <div class="invalid-feedback">Informe a atividade (mín. 3 caracteres).</div>
                               </div>
 
-                              <!-- ======================= INÍCIO DA INSERÇÃO ======================= -->
-                              <!-- NOVO: Tipo de Atividade -->
+                              <!-- Tipo de Atividade -->
                               <div class="mb-3">
                                 <label for="equipeTipoAtividade" class="form-label">Tipo de Atividade <span class="text-danger">*</span></label>
                                 <select class="form-select enhanced-input" id="equipeTipoAtividade" required>
@@ -420,10 +445,10 @@
                                   <option value="Programada">📅 Programada</option>
                                   <option value="Preventiva">🛠️ Preventiva</option>
                                 </select>
-                                <div class="invalid-feedback">Selecione o tipo da atividade.</div> <!-- Feedback adicionado -->
+                                <div class="invalid-feedback">Selecione o tipo da atividade.</div>
                               </div>
 
-                              <!-- NOVO: Status da Atividade e Pendência -->
+                              <!-- Status da Atividade e Pendência -->
                               <div class="mb-3">
                                 <label for="equipeStatusAtividade" class="form-label">Status da Atividade <span class="text-danger">*</span></label>
                                 <select class="form-select enhanced-input" id="equipeStatusAtividade" required onchange="togglePendencia()">
@@ -431,22 +456,21 @@
                                   <option value="Em andamento">Em andamento</option>
                                   <option value="Não Iniciado">Não Iniciado</option>
                                 </select>
-                                <div class="invalid-feedback">Selecione o status da atividade.</div> <!-- Feedback adicionado -->
+                                <div class="invalid-feedback">Selecione o status da atividade.</div>
                               </div>
-
                               <div class="mb-3" id="pendenciaContainer" style="display: none;">
                                 <label for="equipePendencia" class="form-label">Justificativa/Pendência <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control enhanced-input" id="equipePendencia" placeholder="Informe o motivo da pendência ou não início">
                                 <div class="invalid-feedback">Por favor, informe a justificativa.</div>
                               </div>
-                              <!-- ======================= FIM DA INSERÇÃO ========================= -->
 
-                              <!-- Campo de Vaga (Parte Diária) -->
+                              <!-- Vaga -->
                               <div class="row mb-3">
                                 <div class="col-sm-8">
                                   <label for="equipeVaga" class="form-label">Vaga (Parte Diária) <span class="text-danger">*</span></label>
                                   <select class="form-select enhanced-input" id="equipeVaga" required onchange="toggleVagaPersonalizada()">
                                     <option value="" selected disabled>Selecione a vaga...</option>
+                                    <!-- Opções carregadas via JS -->
                                   </select>
                                   <div class="invalid-feedback">Selecione a vaga.</div>
                                 </div>
@@ -457,11 +481,13 @@
                                 </div>
                               </div>
 
+                              <!-- Equipamento -->
                                <div class="row mb-3">
                                   <div class="col-sm-8">
                                       <label for="equipeEquipamento" class="form-label">Equipamento <span class="text-danger">*</span></label>
                                       <select class="form-select enhanced-input" id="equipeEquipamento" required onchange="toggleEquipamentoPersonalizado()">
                                           <option value="" selected disabled>Selecione o equipamento...</option>
+                                          <!-- Opções carregadas via JS -->
                                          </select>
                                       <div class="invalid-feedback">Selecione o equipamento.</div>
                                   </div>
@@ -477,7 +503,9 @@
                               </div>
                           </div>
 
+                          <!-- Coluna Direita: Status, Implementos, Segurança -->
                           <div class="col-md-6">
+                               <!-- Status do Equipamento (Troca) -->
                                <h5 class="form-section-title">Status do Equipamento</h5>
                                <div class="mb-3 equipment-status-section">
                                     <label class="form-label">Houve troca de equipamento?</label><br>
@@ -492,7 +520,7 @@
                                 </div>
                                 <div id="trocaDetalhes" style="display: none;" class="p-3 border rounded bg-light mb-3 equipment-change-details">
                                     <p class="fw-bold mb-2">Detalhes da Troca:</p>
-                                    <!-- Opções para Status do Equipamento -->
+                                    <!-- Motivo da Troca -->
                                     <div class="mb-3">
                                       <label class="form-label d-block">Motivo <span class="text-danger">*</span></label>
                                       <div class="form-check form-check-inline">
@@ -532,19 +560,28 @@
                                         <input type="text" class="form-control form-control-sm enhanced-input" id="equipePlacaNova" placeholder="AAA-0000 ou AAA0A00">
                                          <div class="invalid-feedback">Formato de placa inválido.</div>
                                     </div>
+                                    <!-- Campo Data/Hora INÍCIO -->
                                     <div class="mb-3">
-                                        <label for="equipeDataHoraTroca" class="form-label">Data/Hora da Troca (se aplicável)</label>
+                                        <label for="equipeDataHoraTroca" class="form-label">Data/Hora INÍCIO da Troca</label> <!-- Label Ajustado -->
                                         <input type="datetime-local" class="form-control form-control-sm enhanced-input" id="equipeDataHoraTroca">
                                     </div>
-                                </div>
+                                    <!-- ======================= INÍCIO DA INSERÇÃO ======================= -->
+                                    <!-- NOVO CAMPO: Data/Hora FIM da Troca -->
+                                    <div class="mb-3">
+                                        <label for="equipeDataHoraFimTroca" class="form-label">Data/Hora FIM da Troca</label>
+                                        <input type="datetime-local" class="form-control form-control-sm enhanced-input" id="equipeDataHoraFimTroca">
+                                        <!-- Adicionar validação JS se necessário (ex: fim > início) -->
+                                    </div>
+                                    <!-- ======================= FIM DA INSERÇÃO ========================= -->
+                                </div> <!-- Fim #trocaDetalhes -->
 
                                 <hr class="section-divider">
-                                <!-- Renomear para "Implementos e Segurança" -->
+
                                 <h5 class="form-section-title">Implementos e Segurança</h5>
 
+                                <!-- Materiais Alta Pressão -->
                                 <div id="materiaisAltaPressao" style="display: none;" class="implements-container">
                                     <div class="row mb-3">
-                                        <!-- Valor padrão "N/A" -->
                                         <div class="col-sm-6"><label for="equipePistola" class="form-label"><small>Pistola</small></label><select class="form-select form-select-sm enhanced-input" id="equipePistola"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                         <div class="col-sm-6"><label for="equipePistolaCanoLongo" class="form-label"><small>Pistola C.L.</small></label><select class="form-select form-select-sm enhanced-input" id="equipePistolaCanoLongo"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
@@ -557,24 +594,25 @@
                                         <div class="col-sm-6"><label for="equipeRabicho" class="form-label"><small>Rabicho</small></label><select class="form-select form-select-sm enhanced-input" id="equipeRabicho"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                      <div class="row mb-3">
-                                        <div class="col-sm-6"><label for="equipeLancesMangueira" class="form-label"><small>Lances Mangueira</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesMangueira"></select></div>
-                                        <div class="col-sm-6"><label for="equipeLancesVaretas" class="form-label"><small>Lances Varetas</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesVaretas"></select></div>
+                                        <div class="col-sm-6"><label for="equipeLancesMangueira" class="form-label"><small>Lances Mangueira</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesMangueira"><!-- Opções via JS --></select></div>
+                                        <div class="col-sm-6"><label for="equipeLancesVaretas" class="form-label"><small>Lances Varetas</small></label><select class="form-select form-select-sm enhanced-input" id="equipeLancesVaretas"><!-- Opções via JS --></select></div>
                                     </div>
                                 </div>
 
+                                <!-- Materiais Vácuo -->
                                 <div id="materiaisVacuo" style="display: none;" class="implements-container">
                                     <div class="row mb-3">
-                                         <!-- Remover a palavra "Check" dos labels -->
                                          <div class="col-sm-6"><label for="equipeMangotes" class="form-label"><small>Mangotes</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                         <div class="col-sm-6"><label for="equipeReducoes" class="form-label"><small>Reduções</small></label><select class="form-select form-select-sm enhanced-input" id="equipeReducoes"><option value="N/A" selected>N/A</option><option value="OK">OK</option><option value="Falta">Falta</option></select></div>
                                     </div>
                                     <div class="row mb-3">
-                                         <div class="col-sm-4"><label for="equipeMangotes3Polegadas" class="form-label"><small>Mangotes 3"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes3Polegadas"></select></div>
-                                         <div class="col-sm-4"><label for="equipeMangotes4Polegadas" class="form-label"><small>Mangotes 4"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes4Polegadas"></select></div>
-                                         <div class="col-sm-4"><label for="equipeMangotes6Polegadas" class="form-label"><small>Mangotes 6"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes6Polegadas"></select></div>
+                                         <div class="col-sm-4"><label for="equipeMangotes3Polegadas" class="form-label"><small>Mangotes 3"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes3Polegadas"><!-- Opções via JS --></select></div>
+                                         <div class="col-sm-4"><label for="equipeMangotes4Polegadas" class="form-label"><small>Mangotes 4"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes4Polegadas"><!-- Opções via JS --></select></div>
+                                         <div class="col-sm-4"><label for="equipeMangotes6Polegadas" class="form-label"><small>Mangotes 6"</small></label><select class="form-select form-select-sm enhanced-input" id="equipeMangotes6Polegadas"><!-- Opções via JS --></select></div>
                                     </div>
                                 </div>
 
+                                <!-- Justificativa Materiais -->
                                 <div class="mb-3">
                                     <label for="equipeJustificativa" class="form-label"><small>Justificativa (se algum material em Falta)</small></label>
                                     <textarea class="form-control form-control-sm enhanced-input" id="equipeJustificativa" rows="1"></textarea>
@@ -582,6 +620,7 @@
 
                                 <hr class="section-divider my-3">
 
+                                 <!-- Segurança -->
                                  <div class="row mb-3 security-equipment">
                                     <div class="col-sm-4">
                                          <label class="form-label d-block"><small>Caixa Bloqueio</small></label>
@@ -596,31 +635,34 @@
                                     </div>
                                     <div class="col-sm-4">
                                          <label for="equipeCadeados" class="form-label"><small>Cadeados</small></label>
-                                         <select class="form-select form-select-sm enhanced-input" id="equipeCadeados"></select>
+                                         <select class="form-select form-select-sm enhanced-input" id="equipeCadeados"><!-- Opções via JS --></select>
                                     </div>
                                     <div class="col-sm-4">
                                          <label for="equipePlaquetas" class="form-label"><small>Plaquetas</small></label>
-                                         <select class="form-select form-select-sm enhanced-input" id="equipePlaquetas"></select>
+                                         <select class="form-select form-select-sm enhanced-input" id="equipePlaquetas"><!-- Opções via JS --></select>
                                     </div>
                                 </div>
 
+                               <!-- Observações -->
                                <div class="mb-3">
                                   <label for="equipeObservacoes" class="form-label">Observações Adicionais</label>
                                   <textarea class="form-control enhanced-input" id="equipeObservacoes" rows="3"></textarea>
                                </div>
 
-                          </div>
-                      </div>
-                  </div>
+                          </div> <!-- Fim Coluna Direita -->
+                      </div> <!-- Fim .row -->
+                  </div> <!-- Fim .modal-body -->
                   <div class="modal-footer">
                       <button type="button" class="btn btn-secondary action-button" data-bs-dismiss="modal">Cancelar</button>
+                      <!-- O onsubmit do form chama a validação e salvarEquipe -->
                       <button type="submit" class="btn btn-primary action-button pulse-effect">Salvar Equipe</button>
                   </div>
               </form>
           </div>
       </div>
-  </div>
+  </div> <!-- Fim #modalEquipe -->
 
+  <!-- Modal Ajuda -->
   <div class="modal fade" id="modalHelp" tabindex="-1" aria-labelledby="modalHelpLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered">
           <div class="modal-content enhanced-modal">
@@ -637,7 +679,7 @@
                           <li>Adicione as equipes de Alta Pressão e/ou Vácuo/Hiper Vácuo clicando nos botões correspondentes.</li>
                           <li>Preencha os detalhes de cada equipe no formulário que aparecerá (incluindo Tipo e Status da Atividade).</li>
                           <li>Se o Status não for "Concluído", preencha a Justificativa/Pendência.</li>
-                          <li>Se houver troca de equipamento, marque "Sim" e preencha os detalhes obrigatórios.</li>
+                          <li>Se houver troca de equipamento, marque "Sim" e preencha os detalhes obrigatórios (incluindo Data/Hora FIM da Troca, se souber).</li>
                           <li>Após adicionar todas as equipes, clique em "Próximo: Revisão".</li>
                           <li>Confira todos os dados no resumo.</li>
                           <li>Clique em "Salvar Relatório".</li>
@@ -653,7 +695,7 @@
                       </ul>
                       <h6 class="help-section-title">Dicas:</h6>
                       <ul class="help-tips">
-                          <li>Use o botão "Modo Escuro" para alternar o tema visual.</li>
+                          <li>Use o botão "Modo Escuro" para alternar o tema visual (se implementado).</li>
                           <li>Relatórios salvos localmente só ficam disponíveis neste navegador.</li>
                       </ul>
                   </div>
@@ -663,9 +705,10 @@
               </div>
           </div>
       </div>
-  </div>
+  </div> <!-- Fim #modalHelp -->
 
 
+  <!-- Overlay de Carregamento -->
   <div class="loading" style="display: none;">
     <div class="d-flex flex-column justify-content-center align-items-center">
          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
@@ -675,8 +718,10 @@
      </div>
   </div>
 
+  <!-- Container para Notificações (Módulo Notifications) -->
   <div id="notifications-container" class="notifications-container"></div>
 
+  <!-- Toast Fallback (se o módulo falhar) -->
   <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
     <div id="toastNotificacao" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="4000">
       <div class="d-flex">
@@ -689,9 +734,11 @@
   </div>
 
 
+<!-- Scripts JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Scripts da Aplicação -->
 <script src="js/config.js"></script>
 <script src="js/core/module-loader.js"></script>
 <script src="js/core/state.js"></script>
@@ -704,7 +751,7 @@
 <script src="js/features/dashboard.js"></script>
 <script src="js/auth/google-auth.js"></script>
 <script src="js/api.js"></script>
-<script src="js/app.js"></script> <!-- Este já foi atualizado -->
+<script src="js/app.js"></script> <!-- Assumindo que você também atualizará este -->
 <script src="js/main.js"></script>
 
 </body>
