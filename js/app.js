@@ -1946,6 +1946,11 @@ async function executarPesquisa() {
 
   try {
     let resultados = [];
+    
+    if (tipoPesquisa === 'status') {
+      match = linha[statusAtividadeIndex] && 
+              linha[statusAtividadeIndex].toString().toLowerCase().includes(termoLower);
+    }
 
     if (tipoPesquisa === 'local') {
       resultados = pesquisarRelatoriosLocais(termoPesquisa.trim());
