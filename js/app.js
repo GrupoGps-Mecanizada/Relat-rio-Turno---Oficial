@@ -2,6 +2,7 @@
  * Sistema de Relatório de Turno v3.2
  * Arquivo principal de lógica da aplicação (app.js)
  * ATUALIZADO para incluir Data/Hora FIM da Troca e validações associadas.
+ * ATUALIZADO COM NOVAS FUNÇÕES DE TELA DE SUCESSO E CÓPIA.
  */
 
 // Variáveis globais (Considerar mover para AppState no futuro)
@@ -1545,7 +1546,7 @@ async function salvarRelatorioComFallback() {
         else ultimoRelatorioId = idRelatorioSalvo;
     }
     // Mostra a tela de sucesso, indicando se foi salvo localmente ou não
-     mostrarTelaSucesso(idRelatorioSalvo, salvoLocalmente);
+     mostrarTelaSucesso(idRelatorioSalvo, salvoLocalmente); // Esta função agora chamará configurarBotoesSucesso
     return true;
   } catch (error) {
     console.error('Erro final ao salvar relatório:', error);
@@ -1562,7 +1563,10 @@ async function salvarRelatorioComFallback() {
  * Mostrar tela de sucesso e atualizar mensagem
  */
 function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
-  navegarParaEtapa('stepSucesso');
+  AppState.set('currentStep', 'stepSucesso'); // Atualizado da função de atualização
+  AppState.set('ultimoRelatorioId', idSalvo); // Atualizado da função de atualização
+
+  navegarParaEtapa('stepSucesso'); // Mantido para navegação visual
 
   const mensagemSucessoStatus = document.getElementById('mensagemSucessoStatus');
   if (mensagemSucessoStatus) {
@@ -1574,25 +1578,130 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
        mensagemSucessoStatus.classList.toggle('text-success', !foiLocal);
   }
 
-  // Habilita/desabilita botões na tela de sucesso com base no ID e origem
+  // A lógica original de habilitar/desabilitar botões como btnWhatsApp e btnPDF ainda pode ser relevante
+  // se esses botões ainda existirem na tela de sucesso junto com os novos.
+  // Se os únicos botões são btnVisualizar, btnCopiar, btnNovo, então configurarBotoesSucesso cuidará deles.
   const idAtual = idSalvo || (window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId);
   const origemAtual = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
 
-  const btnVisualizar = document.querySelector('#stepSucesso button[onclick^="visualizarRelatorio"]');
-  const btnWhatsApp = document.querySelector('#stepSucesso button[onclick^="formatarWhatsApp"]');
-  const btnPDF = document.querySelector('#stepSucesso button[onclick^="gerarPDFExistente"]');
-  const btnNovo = document.querySelector('#stepSucesso button[onclick^="novoRelatorio"]');
+  // Exemplo de como lidar com botões antigos se eles ainda estiverem lá:
+  const btnWhatsAppOriginal = document.querySelector('#stepSucesso button[onclick^="formatarWhatsApp"]');
+  const btnPDFOriginal = document.querySelector('#stepSucesso button[onclick^="gerarPDFExistente"]');
 
-  if (btnVisualizar) btnVisualizar.disabled = !idAtual;
-  if (btnWhatsApp) btnWhatsApp.disabled = !idAtual;
-  if (btnNovo) btnNovo.disabled = false; // Botão Novo sempre habilitado
-
-  if (btnPDF) {
-      btnPDF.disabled = (origemAtual !== 'servidor'); // PDF só funciona para servidor
-      btnPDF.title = (origemAtual === 'servidor') ? "Gerar PDF do último relatório salvo" : "PDF não disponível para relatórios locais.";
-      if (idAtual && origemAtual) { // Atualiza o onclick apenas se houver ID
-          btnPDF.onclick = () => gerarPDFExistente(idAtual, origemAtual);
+  if (btnWhatsAppOriginal) btnWhatsAppOriginal.disabled = !idAtual;
+  if (btnPDFOriginal) {
+      btnPDFOriginal.disabled = (origemAtual !== 'servidor');
+      btnPDFOriginal.title = (origemAtual === 'servidor') ? "Gerar PDF do último relatório salvo" : "PDF não disponível para relatórios locais.";
+      if (idAtual && origemAtual) {
+          btnPDFOriginal.onclick = () => gerarPDFExistente(idAtual, origemAtual);
       }
+  }
+  // Botões btnVisualizar, btnCopiar, btnNovo serão tratados por configurarBotoesSucesso.
+
+  // Chame a função de configuração após renderizar a tela
+  setTimeout(function() {
+    configurarBotoesSucesso();
+  }, 200);
+}
+
+/**
+ * Função para configurar os botões da tela de sucesso
+ * Esta função deve ser chamada quando a tela de sucesso é exibida
+ */
+function configurarBotoesSucesso() {
+  console.log("Configurando botões da tela de sucesso...");
+  
+  const btnVisualizarEl = document.getElementById('btnVisualizar');
+  const btnCopiarEl = document.getElementById('btnCopiar');
+  const btnNovoEl = document.getElementById('btnNovo');
+
+  if (!btnVisualizarEl && !btnCopiarEl && !btnNovoEl) { // Modificado para &&, só avisa se NENHUM for encontrado
+      console.warn("Botões da tela de sucesso (btnVisualizar, btnCopiar, btnNovo) não encontrados. A configuração pode falhar.");
+      // Mesmo que alguns botões não existam, tenta configurar os que existem.
+  }
+
+  // Desvincula eventos anteriores para evitar duplicações
+  $('#btnVisualizar').off('click');
+  $('#btnCopiar').off('click');
+  $('#btnNovo').off('click');
+  
+  const relatorioId = AppState.get('ultimoRelatorioId');
+
+  // Configura o botão Visualizar
+  $('#btnVisualizar').on('click', function() {
+    console.log("Botão Visualizar clicado");
+    if (relatorioId) {
+      visualizarRelatorio(); // Usa a função global que já lida com origem, etc.
+    } else {
+      mostrarNotificacao('ID do relatório não encontrado para visualização.', 'error');
+    }
+  }).prop('disabled', !relatorioId); // Desabilita se não houver ID
+  
+  // Configura o botão Copiar
+  $('#btnCopiar').on('click', function() {
+    console.log("Botão Copiar clicado");
+    if (relatorioId) {
+      const origem = String(relatorioId).startsWith('local_') ? 'local' : 'servidor';
+      setOrigemNavegacao('stepSucesso'); // Garante que voltará para cá
+      visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true);
+    } else {
+      mostrarNotificacao('ID do relatório não encontrado para cópia.', 'error');
+    }
+  }).prop('disabled', !relatorioId); // Desabilita se não houver ID
+  
+  // Configura o botão Novo Relatório
+  $('#btnNovo').on('click', function() {
+    console.log("Botão Novo Relatório clicado");
+    novoRelatorio(); // Função original para criar novo relatório
+  }).prop('disabled', false); // Botão Novo sempre habilitado
+  
+  console.log("Botões da tela de sucesso configurados com sucesso!");
+}
+
+/**
+ * Função para copiar o relatório visualizado para a área de transferência
+ */
+function copiarRelatorioParaAreaDeTransferencia() {
+  console.log("Tentando copiar relatório para área de transferência...");
+  const relatorioText = $('#relatorioTexto').text(); // ID do elemento que contém o texto do relatório
+  
+  if (!relatorioText || relatorioText.trim() === '') {
+    mostrarNotificacao('Nenhum texto de relatório encontrado para copiar.', 'error');
+    console.warn("Elemento #relatorioTexto não tem conteúdo ou não foi encontrado.");
+    return;
+  }
+  
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = relatorioText;
+  document.body.appendChild(tempTextArea);
+  
+  tempTextArea.select();
+  let copiadoComSucesso = false;
+  try {
+    copiadoComSucesso = document.execCommand('copy');
+  } catch (err) {
+    console.error("Erro ao executar document.execCommand('copy'):", err);
+    copiadoComSucesso = false;
+  }
+  
+  document.body.removeChild(tempTextArea);
+  
+  if (copiadoComSucesso) {
+    mostrarNotificacao('Relatório copiado para a área de transferência!', 'success');
+    
+    const dicaContainer = $('#dicaPosCopiaCont'); // Este elemento deve existir na tela de visualização
+    if (dicaContainer.length) {
+        dicaContainer.html(`
+            <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle-fill me-2"></i> Relatório copiado! 
+            <strong>Dica:</strong> Abra seu aplicativo de mensagens para colar o relatório.
+            </div>
+        `);
+    } else {
+        console.warn("#dicaPosCopiaCont não encontrado no DOM para exibir dica.");
+    }
+  } else {
+    mostrarNotificacao('Falha ao copiar relatório. Tente manualmente (Ctrl+C).', 'error');
   }
 }
 
@@ -1690,7 +1799,7 @@ async function visualizarRelatorio() {
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
   if (!idAtual) { mostrarNotificacao("ID do relatório não encontrado.", "warning"); return; }
   const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
-  await visualizarRelatorioExistente(idAtual, origem, 'gerarRelatorioTexto');
+  await visualizarRelatorioExistente(idAtual, origem, 'gerarRelatorioTexto', false); // copiarAutomaticamente é false
 }
 
 /**
@@ -1710,7 +1819,7 @@ async function formatarWhatsApp() {
 function voltarParaSucesso() {
     const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
     const origem = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
-    mostrarTelaSucesso(idAtual, origem === 'local');
+    mostrarTelaSucesso(idAtual, origem === 'local'); // Esta função chama configurarBotoesSucesso novamente
 }
 
 /**
@@ -1754,44 +1863,6 @@ function copiarTextoParaClipboard(elementId, tipoTexto) {
 function copiarRelatorio() { copiarTextoParaClipboard('relatorioTexto', 'Relatório'); }
 /** Copiar texto formatado para WhatsApp */
 function copiarWhatsApp() { copiarTextoParaClipboard('whatsAppTexto', 'Texto WhatsApp'); }
-
-// ======================= INÍCIO DA ATUALIZAÇÃO =======================
-/**
- * Configura o botão para copiar o relatório para a área de transferência
- */
-function configurarBotaoCopiar() {
-  if (typeof $ === 'function') { // Verifica se jQuery está disponível
-    $('#btnCopiar').on('click', function() {
-      const relatorioText = $('#relatorioContainer').text();
-      
-      // Cria um elemento temporário para copiar o texto
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = relatorioText;
-      document.body.appendChild(tempTextArea);
-      
-      // Seleciona e copia o texto
-      tempTextArea.select();
-      document.execCommand('copy');
-      
-      // Remove o elemento temporário
-      document.body.removeChild(tempTextArea);
-      
-      // Feedback visual para o usuário
-      mostrarNotificacao('Relatório copiado para a área de transferência!', 'success');
-      
-      // Opcional: sugestão de colagem em apps de mensagem
-      $('#dicaPosCopiaCont').html(`
-        <div class="alert alert-info mt-3">
-          <i class="fa fa-info-circle"></i> Relatório copiado! 
-          <strong>Dica:</strong> Abra seu aplicativo de mensagens para colar o relatório.
-        </div>
-      `);
-    });
-  } else {
-    console.error("jQuery não disponível para configurar o botão de copiar.");
-  }
-}
-// ======================= FIM DA ATUALIZAÇÃO =======================
 
 
 // ========== FUNÇÕES DE PESQUISA ==========
@@ -1866,9 +1937,8 @@ async function executarPesquisa() {
     } else {
         mostrarNotificacao(`${resultados.length} relatório(s) encontrado(s).`, 'success');
     }
-  } catch (error) {
-    console.error('Erro ao executar pesquisa:', error); mostrarNotificacao('Erro ao pesquisar: ' + error.message, 'danger'); exibirResultadosPesquisa([]);
-  } finally { ocultarLoading(); }
+  } catch (error) { console.error('Erro ao executar pesquisa:', error); mostrarNotificacao('Erro ao pesquisar: ' + error.message, 'danger'); exibirResultadosPesquisa([]); }
+  finally { ocultarLoading(); }
 }
 
 /** Pesquisar relatórios salvos localmente */
@@ -1943,7 +2013,7 @@ function exibirResultadosPesquisa(resultados) {
           <td>${r.supervisor || 'N/A'}</td>
           <td class="text-center">
             <div class="action-buttons btn-group btn-group-sm" role="group" aria-label="Ações do Relatório">
-              <button type="button" class="btn btn-primary btn-action-sm" onclick="visualizarRelatorioExistente('${r.id}', '${r.origem}', 'gerarRelatorioTexto')" title="Visualizar Relatório">
+              <button type="button" class="btn btn-primary btn-action-sm" onclick="visualizarRelatorioExistente('${r.id}', '${r.origem}', 'gerarRelatorioTexto', false)" title="Visualizar Relatório">
                 <i class="bi bi-eye"></i> <span class="d-none d-md-inline">Ver</span>
               </button>
               <button type="button" class="btn btn-danger btn-action-sm" onclick="gerarPDFExistente('${r.id}', '${r.origem}')" title="${podePDF ? 'Gerar PDF' : 'PDF não disponível para relatórios locais'}" ${!podePDF ? 'disabled' : ''}>
@@ -1960,10 +2030,13 @@ function exibirResultadosPesquisa(resultados) {
 }
 
 /** Visualizar um relatório específico (local ou servidor) */
-async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction = 'gerarRelatorioTexto') {
+async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction = 'gerarRelatorioTexto', copiarAutomaticamente = false) {
   if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-  // Armazena a etapa atual como origem para poder voltar
-  setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume stepPesquisa se não houver AppState
+  // Armazena a etapa atual como origem para poder voltar (a menos que já venha da tela de sucesso, nesse caso setOrigemNavegacao já foi chamado)
+  if (getOrigemNavegacao() !== 'stepSucesso') {
+    setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume stepPesquisa se não houver AppState
+  }
+  
   mostrarLoading('Carregando relatório...');
   try {
     let textoRelatorio = ''; let relatorioCompleto = null;
@@ -1980,9 +2053,30 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
     if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
 
     navegarParaEtapa('stepRelatorio'); // Vai para a tela de visualização
-    const el = document.getElementById('relatorioTexto'); if (el) el.textContent = textoRelatorio;
+    const el = document.getElementById('relatorioTexto'); 
+    if (el) {
+        el.textContent = textoRelatorio;
+        // Limpa dica de cópia anterior ao visualizar novo relatório
+        const dicaContainer = $('#dicaPosCopiaCont');
+        if (dicaContainer.length) dicaContainer.html('');
+    }
     const btn = document.getElementById('btnVoltarRelatorio'); if (btn) btn.onclick = voltarDoRelatorio; // Configura botão voltar
-  } catch (error) { console.error('Erro ao visualizar relatório:', error); mostrarNotificacao('Erro ao carregar relatório: ' + error.message, 'danger'); }
+
+    // Após mostrar o relatório, copiar se solicitado
+    if (copiarAutomaticamente) {
+      setTimeout(function() {
+        copiarRelatorioParaAreaDeTransferencia();
+      }, 500); // Pequeno atraso para garantir que o conteúdo foi renderizado
+    }
+
+  } catch (error) { 
+      console.error('Erro ao visualizar relatório:', error); 
+      mostrarNotificacao('Erro ao carregar relatório: ' + error.message, 'danger'); 
+      // Se falhar ao carregar, e a origem era 'stepSucesso', talvez volte para lá para não ficar preso
+      if (getOrigemNavegacao() === 'stepSucesso') {
+          voltarParaSucesso();
+      }
+    }
   finally { ocultarLoading(); }
 }
 
@@ -2568,9 +2662,9 @@ window.voltarDaPesquisa = voltarDaPesquisa;
 window.mostrarDashboard = mostrarDashboard;
 window.voltarDoDashboard = voltarDoDashboard;
 window.mostrarHelp = mostrarHelp;
-// ======================= INÍCIO DA ATUALIZAÇÃO - EXPORTAÇÃO =======================
-window.configurarBotaoCopiar = configurarBotaoCopiar;
-// ======================= FIM DA ATUALIZAÇÃO - EXPORTAÇÃO =======================
+// Funções novas (se precisarem ser chamadas externamente, mas configurarBotoesSucesso é chamada internamente)
+// window.configurarBotoesSucesso = configurarBotoesSucesso;
+// window.copiarRelatorioParaAreaDeTransferencia = copiarRelatorioParaAreaDeTransferencia;
 
 
 // Flags para evitar múltiplos salvamentos/submissões rápidas
@@ -2598,22 +2692,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ======================= INÍCIO DA ATUALIZAÇÃO - INICIALIZAÇÃO =======================
-    // Verifica se jQuery e a função configurarBotaoCopiar estão disponíveis
-    if (typeof $ === 'function') {
-        $(document).ready(function() {
-            // Chamar a função de configuração do botão de copiar
-            if (typeof configurarBotaoCopiar === 'function') {
-                configurarBotaoCopiar();
-            } else {
-                console.error("Erro: Função configurarBotaoCopiar não foi encontrada para inicialização.");
-            }
-
-            // Modificação para o novo fluxo simplificado
-            $('#btnGerarWhatsApp, #btnGerarPDF').hide(); // Esconder botões não necessários
-        });
-    } else {
-        console.error("jQuery não está disponível. Algumas funcionalidades de inicialização podem não funcionar.");
+    // jQuery está sendo usado pelas novas funções, então o if (typeof $ === 'function') pode ser útil.
+    if (typeof $ !== 'function') {
+        console.error("jQuery não está disponível. Algumas funcionalidades podem não funcionar como esperado.");
     }
-    // ======================= FIM DA ATUALIZAÇÃO - INICIALIZAÇÃO =======================
 });
