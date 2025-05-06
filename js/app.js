@@ -1563,41 +1563,28 @@ async function salvarRelatorioComFallback() {
  * Mostrar tela de sucesso e atualizar mensagem
  */
 function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
-  AppState.set('currentStep', 'stepSucesso'); // Atualizado da função de atualização
-  AppState.set('ultimoRelatorioId', idSalvo); // Atualizado da função de atualização
-
+  if (window.AppState) {
+    AppState.update('currentStep', 'stepSucesso');
+    AppState.update('ultimoRelatorioId', idSalvo);
+  } else {
+    ultimoRelatorioId = idSalvo; // Fallback para variável global
+  }
+  
   navegarParaEtapa('stepSucesso'); // Mantido para navegação visual
 
+  // O resto da função permanece igual...
   const mensagemSucessoStatus = document.getElementById('mensagemSucessoStatus');
   if (mensagemSucessoStatus) {
       mensagemSucessoStatus.textContent = foiLocal
           ? `Relatório salvo localmente. ID: ${idSalvo || 'N/A'}`
           : `Relatório #${idSalvo || 'N/A'} registrado com sucesso no servidor!`;
-       // Adiciona classe visual para diferenciar
-       mensagemSucessoStatus.classList.toggle('text-warning', foiLocal);
-       mensagemSucessoStatus.classList.toggle('text-success', !foiLocal);
+      // Adiciona classe visual para diferenciar
+      mensagemSucessoStatus.classList.toggle('text-warning', foiLocal);
+      mensagemSucessoStatus.classList.toggle('text-success', !foiLocal);
   }
 
-  // A lógica original de habilitar/desabilitar botões como btnWhatsApp e btnPDF ainda pode ser relevante
-  // se esses botões ainda existirem na tela de sucesso junto com os novos.
-  // Se os únicos botões são btnVisualizar, btnCopiar, btnNovo, então configurarBotoesSucesso cuidará deles.
-  const idAtual = idSalvo || (window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId);
-  const origemAtual = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
-
-  // Exemplo de como lidar com botões antigos se eles ainda estiverem lá:
-  const btnWhatsAppOriginal = document.querySelector('#stepSucesso button[onclick^="formatarWhatsApp"]');
-  const btnPDFOriginal = document.querySelector('#stepSucesso button[onclick^="gerarPDFExistente"]');
-
-  if (btnWhatsAppOriginal) btnWhatsAppOriginal.disabled = !idAtual;
-  if (btnPDFOriginal) {
-      btnPDFOriginal.disabled = (origemAtual !== 'servidor');
-      btnPDFOriginal.title = (origemAtual === 'servidor') ? "Gerar PDF do último relatório salvo" : "PDF não disponível para relatórios locais.";
-      if (idAtual && origemAtual) {
-          btnPDFOriginal.onclick = () => gerarPDFExistente(idAtual, origemAtual);
-      }
-  }
-  // Botões btnVisualizar, btnCopiar, btnNovo serão tratados por configurarBotoesSucesso.
-
+  // Resto da função...
+  
   // Chame a função de configuração após renderizar a tela
   setTimeout(function() {
     configurarBotoesSucesso();
