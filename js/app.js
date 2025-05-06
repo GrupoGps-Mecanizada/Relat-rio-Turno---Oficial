@@ -1755,6 +1755,44 @@ function copiarRelatorio() { copiarTextoParaClipboard('relatorioTexto', 'Relató
 /** Copiar texto formatado para WhatsApp */
 function copiarWhatsApp() { copiarTextoParaClipboard('whatsAppTexto', 'Texto WhatsApp'); }
 
+// ======================= INÍCIO DA ATUALIZAÇÃO =======================
+/**
+ * Configura o botão para copiar o relatório para a área de transferência
+ */
+function configurarBotaoCopiar() {
+  if (typeof $ === 'function') { // Verifica se jQuery está disponível
+    $('#btnCopiar').on('click', function() {
+      const relatorioText = $('#relatorioContainer').text();
+      
+      // Cria um elemento temporário para copiar o texto
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = relatorioText;
+      document.body.appendChild(tempTextArea);
+      
+      // Seleciona e copia o texto
+      tempTextArea.select();
+      document.execCommand('copy');
+      
+      // Remove o elemento temporário
+      document.body.removeChild(tempTextArea);
+      
+      // Feedback visual para o usuário
+      mostrarNotificacao('Relatório copiado para a área de transferência!', 'success');
+      
+      // Opcional: sugestão de colagem em apps de mensagem
+      $('#dicaPosCopiaCont').html(`
+        <div class="alert alert-info mt-3">
+          <i class="fa fa-info-circle"></i> Relatório copiado! 
+          <strong>Dica:</strong> Abra seu aplicativo de mensagens para colar o relatório.
+        </div>
+      `);
+    });
+  } else {
+    console.error("jQuery não disponível para configurar o botão de copiar.");
+  }
+}
+// ======================= FIM DA ATUALIZAÇÃO =======================
+
 
 // ========== FUNÇÕES DE PESQUISA ==========
 
@@ -2530,6 +2568,10 @@ window.voltarDaPesquisa = voltarDaPesquisa;
 window.mostrarDashboard = mostrarDashboard;
 window.voltarDoDashboard = voltarDoDashboard;
 window.mostrarHelp = mostrarHelp;
+// ======================= INÍCIO DA ATUALIZAÇÃO - EXPORTAÇÃO =======================
+window.configurarBotaoCopiar = configurarBotaoCopiar;
+// ======================= FIM DA ATUALIZAÇÃO - EXPORTAÇÃO =======================
+
 
 // Flags para evitar múltiplos salvamentos/submissões rápidas
 let salvandoEquipe = false;
@@ -2555,4 +2597,23 @@ document.addEventListener('DOMContentLoaded', () => {
              // Poderia adicionar lógica aqui baseada na etapa atual
         });
     }
+
+    // ======================= INÍCIO DA ATUALIZAÇÃO - INICIALIZAÇÃO =======================
+    // Verifica se jQuery e a função configurarBotaoCopiar estão disponíveis
+    if (typeof $ === 'function') {
+        $(document).ready(function() {
+            // Chamar a função de configuração do botão de copiar
+            if (typeof configurarBotaoCopiar === 'function') {
+                configurarBotaoCopiar();
+            } else {
+                console.error("Erro: Função configurarBotaoCopiar não foi encontrada para inicialização.");
+            }
+
+            // Modificação para o novo fluxo simplificado
+            $('#btnGerarWhatsApp, #btnGerarPDF').hide(); // Esconder botões não necessários
+        });
+    } else {
+        console.error("jQuery não está disponível. Algumas funcionalidades de inicialização podem não funcionar.");
+    }
+    // ======================= FIM DA ATUALIZAÇÃO - INICIALIZAÇÃO =======================
 });
