@@ -4,6 +4,7 @@
  * ATUALIZADO para incluir Data/Hora FIM da Troca e validações associadas.
  * ATUALIZADO COM NOVAS FUNÇÕES DE TELA DE SUCESSO E CÓPIA.
  * ATUALIZADO para remover jQuery de visualizarRelatorioExistente e copiarRelatorioParaAreaDeTransferencia.
+ * ATUALIZADO para incluir normalização de texto e tratamento consistente de status.
  */
 
 // Variáveis globais (Considerar mover para AppState no futuro)
@@ -248,6 +249,7 @@ function configureFormValidation() {
  * Valida campos que são obrigatórios condicionalmente no modal de equipe
  * Retorna true se válido, false caso contrário e mostra notificações/feedback visual.
  * ATUALIZADO: Inclui validação para Data/Hora FIM da Troca.
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function validarCamposCondicionaisEquipe() {
     let isValid = true;
@@ -263,7 +265,7 @@ function validarCamposCondicionaisEquipe() {
     // Vaga Personalizada
     const vagaSelect = document.getElementById('equipeVaga');
     const vagaPersonalizadaInput = document.getElementById('equipeVagaPersonalizada');
-    if (vagaSelect && vagaSelect.value === 'OUTRA VAGA' && vagaPersonalizadaInput && !vagaPersonalizadaInput.value.trim()) {
+    if (vagaSelect && normalizarTexto(vagaSelect.value) === 'outra vaga' && vagaPersonalizadaInput && !vagaPersonalizadaInput.value.trim()) {
         mostrarNotificacao('Por favor, especifique a "Outra Vaga".', 'warning');
         vagaPersonalizadaInput.classList.add('is-invalid');
         focarPrimeiroErro(vagaPersonalizadaInput);
@@ -275,7 +277,7 @@ function validarCamposCondicionaisEquipe() {
     // Equipamento Personalizado
     const equipSelect = document.getElementById('equipeEquipamento');
     const equipPersonalizadoInput = document.getElementById('equipeEquipamentoPersonalizado');
-     if (equipSelect && equipSelect.value === 'OUTRO EQUIPAMENTO' && equipPersonalizadoInput && !equipPersonalizadoInput.value.trim()) {
+     if (equipSelect && normalizarTexto(equipSelect.value) === 'outro equipamento' && equipPersonalizadoInput && !equipPersonalizadoInput.value.trim()) {
         mostrarNotificacao('Por favor, especifique o "Outro Equipamento".', 'warning');
         equipPersonalizadoInput.classList.add('is-invalid');
         focarPrimeiroErro(equipPersonalizadoInput);
@@ -291,13 +293,11 @@ function validarCamposCondicionaisEquipe() {
     const motivoOutroInput = document.getElementById('equipeMotivoOutro');
     const defeitoInput = document.getElementById('equipeDefeito');
     const motivoTrocaFeedback = document.getElementById('motivoTrocaFeedback');
-    // <<< NOVO: Inputs de Data/Hora Início e Fim >>>
     const dataHoraInicioInput = document.getElementById('equipeDataHoraTroca');
     const dataHoraFimInput = document.getElementById('equipeDataHoraFimTroca');
-    // <<< FIM NOVO >>>
 
 
-    if (trocaEquipamento === 'Sim') {
+    if (normalizarTexto(trocaEquipamento) === 'sim') {
         // Validação Motivo Troca
         if (!motivoTroca) {
             if (motivoTrocaFeedback) motivoTrocaFeedback.style.display = 'block';
@@ -310,7 +310,8 @@ function validarCamposCondicionaisEquipe() {
         }
 
         // Validação Motivo Outro
-        if ((motivoTroca === 'Outros Motivos (Justificar)' || motivoTroca === 'Defeitos Em Geral (Justificar)') && motivoOutroInput && !motivoOutroInput.value.trim()) {
+        const motivoTrocaNormalizado = normalizarTexto(motivoTroca);
+        if ((motivoTrocaNormalizado === normalizarTexto('Outros Motivos (Justificar)') || motivoTrocaNormalizado === normalizarTexto('Defeitos Em Geral (Justificar)')) && motivoOutroInput && !motivoOutroInput.value.trim()) {
             mostrarNotificacao('Por favor, especifique o "Motivo" da troca.', 'warning');
             motivoOutroInput.classList.add('is-invalid');
              focarPrimeiroErro(motivoOutroInput);
@@ -329,45 +330,38 @@ function validarCamposCondicionaisEquipe() {
             defeitoInput.classList.remove('is-invalid');
         }
 
-        // <<< INÍCIO: Validação Data/Hora Fim >>>
-        // Tornar Data/Hora FIM obrigatório se a troca for Sim
+        // Validação Data/Hora FIM
         if (dataHoraFimInput && !dataHoraFimInput.value) {
             mostrarNotificacao('Por favor, informe a Data/Hora de FIM da troca.', 'warning');
             dataHoraFimInput.classList.add('is-invalid');
             focarPrimeiroErro(dataHoraFimInput);
             isValid = false;
         } else if (dataHoraFimInput) {
-            dataHoraFimInput.classList.remove('is-invalid'); // Limpa se preenchido
+            dataHoraFimInput.classList.remove('is-invalid');
 
-            // Opcional: Validar se FIM é maior que INÍCIO (somente se FIM foi preenchido)
             if (dataHoraInicioInput && dataHoraInicioInput.value && dataHoraFimInput.value) {
                  try {
                      const inicio = new Date(dataHoraInicioInput.value);
                      const fim = new Date(dataHoraFimInput.value);
-                     // Adiciona uma pequena tolerância (1 minuto) para evitar problemas com segundos
                      if (fim.getTime() <= inicio.getTime()) {
                          mostrarNotificacao('A Data/Hora de FIM da troca deve ser posterior à Data/Hora de INÍCIO.', 'warning');
-                         dataHoraFimInput.classList.add('is-invalid'); // Marca o campo FIM como inválido
+                         dataHoraFimInput.classList.add('is-invalid');
                          focarPrimeiroErro(dataHoraFimInput);
                          isValid = false;
                      } else {
-                         // Se a data for válida, remove a classe (caso tenha sido adicionada antes)
                           dataHoraFimInput.classList.remove('is-invalid');
                      }
                  } catch (e) {
-                     // Se houver erro ao converter as datas, ignora essa validação específica
                      console.warn("Erro ao comparar datas de troca:", e);
                  }
             }
         }
-        // <<< FIM: Validação Data/Hora Fim >>>
-
-    } // Fim if (trocaEquipamento === 'Sim')
+    }
 
     // Validação de Pendência (se Status não for Concluído)
     const statusSelect = document.getElementById('equipeStatusAtividade');
     const pendenciaInput = document.getElementById('equipePendencia');
-    if (statusSelect && statusSelect.value !== 'Concluído' && pendenciaInput && !pendenciaInput.value.trim()) {
+    if (statusSelect && normalizarTexto(statusSelect.value) !== 'concluido' && pendenciaInput && !pendenciaInput.value.trim()) {
         mostrarNotificacao('Por favor, informe a justificativa/pendência para o status selecionado.', 'warning');
         pendenciaInput.classList.add('is-invalid');
         focarPrimeiroErro(pendenciaInput);
@@ -613,6 +607,7 @@ function atualizarIndicadoresEtapa(numeroEtapaAtiva) {
 /**
  * Preenche os resumos na tela de revisão
  * ATUALIZADO: Mostra Data/Hora Fim da Troca
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function preencherResumosRevisao() {
   const dadosTurnoAtual = window.AppState?.get('dadosTurno') || dadosTurno;
@@ -649,12 +644,19 @@ function preencherResumosRevisao() {
         html = '<div class="alert alert-secondary">Nenhuma equipe adicionada.</div>';
     } else {
         equipesAtuais.forEach((equipe, index) => {
-          const isAltaPressao = equipe.tipo === 'Alta Pressão';
+          const isAltaPressao = normalizarTexto(equipe.tipo) === normalizarTexto('Alta Pressão');
           const borderClass = isAltaPressao ? 'border-primary' : 'border-danger';
           const bgClass = isAltaPressao ? 'bg-primary' : 'bg-danger';
-          const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-          const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-          const motivoTrocaDisplay = equipe.motivoTroca === 'Defeitos Em Geral (Justificar)' || equipe.motivoTroca === 'Outros Motivos (Justificar)' ? equipe.motivoOutro : equipe.motivoTroca;
+          const equipDisplay = normalizarTexto(equipe.equipamento) === 'outro equipamento' ? equipe.equipamentoPersonalizado : equipe.equipamento;
+          const vagaDisplay = normalizarTexto(equipe.vaga) === 'outra vaga' ? equipe.vagaPersonalizada : equipe.vaga;
+          
+          const equipeMotivoTrocaNorm = normalizarTexto(equipe.motivoTroca);
+          const motivoTrocaDisplay = (equipeMotivoTrocaNorm === normalizarTexto('Defeitos Em Geral (Justificar)') || equipeMotivoTrocaNorm === normalizarTexto('Outros Motivos (Justificar)')) ? equipe.motivoOutro : equipe.motivoTroca;
+
+          const statusNormalizado = normalizarTexto(equipe.statusAtividade);
+          const statusClasse = statusNormalizado === 'concluido' ? 'text-success' : (statusNormalizado === 'em andamento' ? 'text-warning' : 'text-danger');
+          const statusIcone = statusNormalizado === 'concluido' ? 'bi-check-circle-fill' : (statusNormalizado === 'em andamento' ? 'bi-arrow-repeat' : 'bi-exclamation-octagon-fill');
+
 
           html += `
             <div class="card mb-3 equipe-card-revisao ${borderClass}"> <!-- Classe CSS ajustada -->
@@ -673,7 +675,7 @@ function preencherResumosRevisao() {
                 </div>
                 <div class="row mb-2">
                     <div class="col-md-6"><strong>Tipo Ativ.:</strong> ${equipe.tipoAtividade || 'Rotineira'}</div>
-                    <div class="col-md-6"><strong>Status:</strong> ${equipe.statusAtividade || 'Concluído'} ${equipe.pendencia ? `<span class="text-muted">(${equipe.pendencia})</span>` : ''}</div>
+                    <div class="col-md-6"><strong class="${statusClasse}"><i class="bi ${statusIcone} me-1"></i>Status:</strong> <span class="${statusClasse}">${equipe.statusAtividade || 'Concluído'}</span> ${equipe.pendencia ? `<span class="text-muted">(${equipe.pendencia})</span>` : ''}</div>
                 </div>
                 <div class="row mb-2">
                   <div class="col-md-6"><strong>Vaga:</strong> ${vagaDisplay || 'N/A'}</div>
@@ -684,20 +686,18 @@ function preencherResumosRevisao() {
                   <div class="col-md-6"><strong>Troca Equip.:</strong> ${equipe.trocaEquipamento || 'N/A'}</div>
                 </div>
 
-                <!-- ======================= INÍCIO BLOCO ATUALIZADO ======================= -->
-                ${equipe.trocaEquipamento === 'Sim' ? `
-                <div class="alert alert-warning p-2 mt-2 mb-3"> <!-- Adicionado mt-2 mb-3 -->
+                ${normalizarTexto(equipe.trocaEquipamento) === 'sim' ? `
+                <div class="alert alert-warning p-2 mt-2 mb-3">
                   <small>
                     <strong>Detalhes da Troca:</strong><br>
                     Motivo: ${motivoTrocaDisplay || 'N/A'}<br>
                     Defeito/Medidas: ${equipe.defeito || 'N/A'}<br>
                     ${equipe.placaNova ? `Nova Placa: ${equipe.placaNova}<br>` : ''}
                     ${equipe.dataHoraTroca ? `Início: ${formatarDataHora(equipe.dataHoraTroca)}<br>` : ''}
-                    ${equipe.dataHoraFimTroca ? `Fim: ${formatarDataHora(equipe.dataHoraFimTroca)}` : ''} <!-- EXIBIÇÃO DO NOVO CAMPO -->
+                    ${equipe.dataHoraFimTroca ? `Fim: ${formatarDataHora(equipe.dataHoraFimTroca)}` : ''}
                   </small>
                 </div>
                 ` : ''}
-                <!-- ======================= FIM BLOCO ATUALIZADO ========================= -->
 
                 <h6 class="mt-3">Implementos e Segurança</h6>
                 <div class="row">
@@ -788,7 +788,7 @@ function adicionarEquipe(tipo) {
   // Configurar cabeçalho e título do modal
   const modalHeader = document.getElementById('modalEquipeHeader');
   const modalTitle = document.getElementById('modalEquipeLabel');
-  const isAltaPressao = tipo === 'Alta Pressão';
+  const isAltaPressao = normalizarTexto(tipo) === normalizarTexto('Alta Pressão');
 
   if (modalHeader) {
     modalHeader.className = `modal-header text-white ${isAltaPressao ? 'bg-primary' : 'bg-danger'}`;
@@ -910,6 +910,7 @@ function adicionarEquipe(tipo) {
 /**
  * Editar equipe (Preenche e abre o Modal)
  * ATUALIZADO: Preenche Data/Hora Fim Troca
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function editarEquipe(index) {
    if (!modalEquipe) {
@@ -950,7 +951,7 @@ function editarEquipe(index) {
   // Configurar cabeçalho e título
   const modalHeader = document.getElementById('modalEquipeHeader');
   const modalTitle = document.getElementById('modalEquipeLabel');
-  const isAltaPressao = equipe.tipo === 'Alta Pressão';
+  const isAltaPressao = normalizarTexto(equipe.tipo) === normalizarTexto('Alta Pressão');
 
    if (modalHeader) {
     modalHeader.className = `modal-header text-white ${isAltaPressao ? 'bg-primary' : 'bg-danger'}`;
@@ -1022,26 +1023,25 @@ function editarEquipe(index) {
     // Vaga e Equipamento
     setSelectValue('equipeVaga', equipe.vaga);
     toggleVagaPersonalizada(); // Mostra/oculta e aplica required
-    if (equipe.vaga === 'OUTRA VAGA') { setFieldValue('equipeVagaPersonalizada', equipe.vagaPersonalizada); }
+    if (normalizarTexto(equipe.vaga) === 'outra vaga') { setFieldValue('equipeVagaPersonalizada', equipe.vagaPersonalizada); }
     setSelectValue('equipeEquipamento', equipe.equipamento);
     toggleEquipamentoPersonalizado(); // Mostra/oculta e aplica required
-    if (equipe.equipamento === 'OUTRO EQUIPAMENTO') { setFieldValue('equipeEquipamentoPersonalizado', equipe.equipamentoPersonalizado); }
+    if (normalizarTexto(equipe.equipamento) === 'outro equipamento') { setFieldValue('equipeEquipamentoPersonalizado', equipe.equipamentoPersonalizado); }
 
     // Troca de equipamento
     setRadioValue('equipeTroca', equipe.trocaEquipamento || 'Não');
     toggleTrocaEquipamento(); // Mostra/oculta os detalhes e aplica required
-    if (equipe.trocaEquipamento === 'Sim') {
+    if (normalizarTexto(equipe.trocaEquipamento) === 'sim') {
         setRadioValue('equipeMotivoTroca', equipe.motivoTroca);
         toggleMotivoOutro(); // Mostra/oculta o campo "outro" e aplica required
-        if (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') {
+        const equipeMotivoTrocaNorm = normalizarTexto(equipe.motivoTroca);
+        if (equipeMotivoTrocaNorm === normalizarTexto('Outros Motivos (Justificar)') || equipeMotivoTrocaNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) {
             setFieldValue('equipeMotivoOutro', equipe.motivoOutro);
         }
         setFieldValue('equipeDefeito', equipe.defeito);
         setFieldValue('equipePlacaNova', equipe.placaNova);
         setFieldValue('equipeDataHoraTroca', equipe.dataHoraTroca);
-        // ======================= PREENCHER CAMPO FIM =======================
         setFieldValue('equipeDataHoraFimTroca', equipe.dataHoraFimTroca);
-        // ===================================================================
     }
 
     // Materiais (Usa ?? 'N/A' para selects e ?? '0' para numéricos como padrão se valor for null/undefined)
@@ -1106,6 +1106,7 @@ function removerEquipe(index) {
 /**
  * Salvar equipe (Lê dados do modal e atualiza o estado)
  * ATUALIZADO: Lê Data/Hora Fim Troca e chama validação primeiro.
+ * ATUALIZADO: Trata status "Em andamento" e usa normalizarTexto para comparações.
  */
 function salvarEquipe() {
   // Evitar dupla submissão
@@ -1145,7 +1146,17 @@ function salvarEquipe() {
 
   const tipo = getFieldValue('equipeTipo');
   const index = parseInt(getFieldValue('equipeIndex') ?? '-1');
-  const isAltaPressao = tipo === 'Alta Pressão';
+  const isAltaPressao = normalizarTexto(tipo) === normalizarTexto('Alta Pressão');
+
+  const equipeStatusAtividadeValor = getFieldValue('equipeStatusAtividade');
+  let statusAtividadeFinal = equipeStatusAtividadeValor;
+
+  // Garantir consistência no formato do status se for "Em andamento"
+  if (statusAtividadeFinal &&
+      statusAtividadeFinal.toLowerCase().includes('andamento')) {
+    statusAtividadeFinal = 'Em andamento'; // Formato padronizado
+  }
+
 
   const novaEquipe = {
     tipo: tipo,
@@ -1155,12 +1166,12 @@ function salvarEquipe() {
     area: getFieldValue('equipeArea'),
     atividade: getFieldValue('equipeAtividade'),
     tipoAtividade: getFieldValue('equipeTipoAtividade'),
-    statusAtividade: getFieldValue('equipeStatusAtividade'),
-    pendencia: getFieldValue('equipeStatusAtividade') !== 'Concluído' ? getFieldValue('equipePendencia') : '',
+    statusAtividade: statusAtividadeFinal, // Usa o valor tratado
+    pendencia: normalizarTexto(statusAtividadeFinal) !== 'concluido' ? getFieldValue('equipePendencia') : '',
     vaga: getFieldValue('equipeVaga'),
-    vagaPersonalizada: getFieldValue('equipeVaga') === 'OUTRA VAGA' ? getFieldValue('equipeVagaPersonalizada') : '',
+    vagaPersonalizada: normalizarTexto(getFieldValue('equipeVaga')) === 'outra vaga' ? getFieldValue('equipeVagaPersonalizada') : '',
     equipamento: getFieldValue('equipeEquipamento'),
-    equipamentoPersonalizado: getFieldValue('equipeEquipamento') === 'OUTRO EQUIPAMENTO' ? getFieldValue('equipeEquipamentoPersonalizado') : '',
+    equipamentoPersonalizado: normalizarTexto(getFieldValue('equipeEquipamento')) === 'outro equipamento' ? getFieldValue('equipeEquipamentoPersonalizado') : '',
     identificacaoUsiminas: getFieldValue('equipeIdentificacaoUsiminas'),
     trocaEquipamento: getRadioValue('equipeTroca'),
     caixaBloqueio: getRadioValue('equipeCaixaBloqueio'),
@@ -1168,7 +1179,6 @@ function salvarEquipe() {
     cadeados: getFieldValue('equipeCadeados'),
     plaquetas: getFieldValue('equipePlaquetas'),
     observacoes: getFieldValue('equipeObservacoes'),
-    // Inicializar objetos/propriedades aninhados
     materiais: {},
     materiaisVacuo: {},
     lancesMangueira: null,
@@ -1181,26 +1191,21 @@ function salvarEquipe() {
     defeito: null,
     placaNova: null,
     dataHoraTroca: null,
-    // ======================= INICIALIZA CAMPO FIM =======================
     dataHoraFimTroca: null
-    // ===================================================================
   };
 
-  // Adicionar detalhes da troca se aplicável
-  if (novaEquipe.trocaEquipamento === 'Sim') {
+  if (normalizarTexto(novaEquipe.trocaEquipamento) === 'sim') {
     novaEquipe.motivoTroca = getRadioValue('equipeMotivoTroca');
-    if (novaEquipe.motivoTroca === 'Outros Motivos (Justificar)' || novaEquipe.motivoTroca === 'Defeitos Em Geral (Justificar)') {
+    const motivoTrocaNormalizado = normalizarTexto(novaEquipe.motivoTroca);
+    if (motivoTrocaNormalizado === normalizarTexto('Outros Motivos (Justificar)') || motivoTrocaNormalizado === normalizarTexto('Defeitos Em Geral (Justificar)')) {
       novaEquipe.motivoOutro = getFieldValue('equipeMotivoOutro');
     }
     novaEquipe.defeito = getFieldValue('equipeDefeito');
     novaEquipe.placaNova = getFieldValue('equipePlacaNova');
     novaEquipe.dataHoraTroca = getFieldValue('equipeDataHoraTroca');
-    // ======================= LÊ O CAMPO FIM DO FORM =====================
     novaEquipe.dataHoraFimTroca = getFieldValue('equipeDataHoraFimTroca');
-    // ====================================================================
   }
 
-  // Adicionar materiais específicos por tipo
   if (isAltaPressao) {
     novaEquipe.materiais = {
       pistola: getFieldValue('equipePistola'),
@@ -1222,7 +1227,6 @@ function salvarEquipe() {
     novaEquipe.mangotes6Polegadas = getFieldValue('equipeMangotes6Polegadas');
   }
 
-  // Obter lista atual e atualizar
   let equipesAtuais = window.AppState?.get('equipes') || [...equipes];
   let equipesAtualizadas;
 
@@ -1234,22 +1238,18 @@ function salvarEquipe() {
     mostrarNotificacao('Equipe adicionada com sucesso.', 'success');
   }
 
-  // Atualizar estado
   if (window.AppState) {
     AppState.update('equipes', equipesAtualizadas);
-    // O listener do AppState deve chamar atualizarListaEquipes e atualizarBotaoAvancar
   } else {
     equipes = equipesAtualizadas;
     atualizarListaEquipes();
     atualizarBotaoAvancar();
   }
 
-  // Fechar modal
   if (modalEquipe) {
     modalEquipe.hide();
   }
 
-  // Resetar flag de salvamento após um pequeno delay para permitir que o modal feche
   setTimeout(() => {
     salvandoEquipe = false;
   }, 300);
@@ -1258,6 +1258,7 @@ function salvarEquipe() {
 
 /**
  * Atualizar lista de equipes na UI (Etapa 2)
+ * ATUALIZADO: Usa normalizarTexto para classes de status e ícones.
  */
 function atualizarListaEquipes() {
   const listaEquipesDiv = document.getElementById('listaEquipes');
@@ -1275,11 +1276,13 @@ function atualizarListaEquipes() {
   listaEquipesDiv.querySelectorAll('.equipe-card').forEach(card => card.remove());
 
   equipesAtuais.forEach((equipe, index) => {
-    const isAltaPressao = equipe.tipo === 'Alta Pressão';
+    const isAltaPressao = normalizarTexto(equipe.tipo) === normalizarTexto('Alta Pressão');
     const cardClass = isAltaPressao ? 'equipe-card card border-primary' : 'equipe-card card equipe-vacuo border-danger';
     const badgeClass = isAltaPressao ? 'bg-primary' : 'bg-danger';
-    const statusClass = equipe.statusAtividade === 'Concluído' ? 'text-success' : (equipe.statusAtividade === 'Em andamento' ? 'text-warning' : 'text-danger');
-    const statusIcon = equipe.statusAtividade === 'Concluído' ? 'bi-check-circle-fill' : (equipe.statusAtividade === 'Em andamento' ? 'bi-arrow-repeat' : 'bi-exclamation-octagon-fill');
+    
+    const statusNormalizado = normalizarTexto(equipe.statusAtividade);
+    const statusClass = statusNormalizado === 'concluido' ? 'text-success' : (statusNormalizado === 'em andamento' ? 'text-warning' : 'text-danger');
+    const statusIcon = statusNormalizado === 'concluido' ? 'bi-check-circle-fill' : (statusNormalizado === 'em andamento' ? 'bi-arrow-repeat' : 'bi-exclamation-octagon-fill');
 
     const card = document.createElement('div');
     card.className = `${cardClass} mb-3 shadow-sm`; // Adiciona sombra leve
@@ -1308,7 +1311,6 @@ function atualizarListaEquipes() {
       </div>
     `;
 
-    // Adiciona o card antes da div #semEquipes (se ela existir) ou no final
     if (semEquipesDiv) {
         listaEquipesDiv.insertBefore(card, semEquipesDiv);
     } else {
@@ -1333,6 +1335,7 @@ function atualizarBotaoAvancar() {
 
 /**
  * Mostrar/ocultar campo de vaga personalizada
+ * ATUALIZADO: Usa normalizarTexto.
  */
 function toggleVagaPersonalizada() {
   const equipeVaga = document.getElementById('equipeVaga');
@@ -1340,7 +1343,7 @@ function toggleVagaPersonalizada() {
   const input = document.getElementById('equipeVagaPersonalizada');
 
   if (equipeVaga && container && input) {
-    const show = equipeVaga.value === 'OUTRA VAGA';
+    const show = normalizarTexto(equipeVaga.value) === 'outra vaga';
     container.style.display = show ? 'block' : 'none';
     input.required = show;
     if (!show) {
@@ -1352,6 +1355,7 @@ function toggleVagaPersonalizada() {
 
 /**
  * Mostrar/ocultar campo de equipamento personalizado
+ * ATUALIZADO: Usa normalizarTexto.
  */
 function toggleEquipamentoPersonalizado() {
   const equipeEquipamento = document.getElementById('equipeEquipamento');
@@ -1359,7 +1363,7 @@ function toggleEquipamentoPersonalizado() {
   const input = document.getElementById('equipeEquipamentoPersonalizado');
 
   if (equipeEquipamento && container && input) {
-     const show = equipeEquipamento.value === 'OUTRO EQUIPAMENTO';
+     const show = normalizarTexto(equipeEquipamento.value) === 'outro equipamento';
     container.style.display = show ? 'block' : 'none';
     input.required = show;
      if (!show) {
@@ -1381,20 +1385,18 @@ function toggleTrocaEquipamento() {
     const show = trocaSimRadio.checked;
     detalhesDiv.style.display = show ? 'block' : 'none';
 
-    // Limpar campos e validações dentro de #trocaDetalhes se escondido
     detalhesDiv.querySelectorAll('input[type="text"], input[type="datetime-local"], textarea').forEach(el => {
-        el.required = show && el.id !== 'equipePlacaNova'; // Torna obrigatório se visível (exceto placa)
+        el.required = show && el.id !== 'equipePlacaNova';
         if (!show) {
             el.value = '';
-            el.classList.remove('is-invalid'); // Remove validação visual
+            el.classList.remove('is-invalid');
         }
     });
-    // Limpar radios e feedback de motivo se escondido
     detalhesDiv.querySelectorAll('input[type="radio"][name="equipeMotivoTroca"]').forEach(radio => {
-         radio.required = show; // Torna o grupo de radios obrigatório
+         radio.required = show;
          if (!show) radio.checked = false;
     });
-    toggleMotivoOutro(); // Garante que o campo outro seja tratado
+    toggleMotivoOutro();
     const motivoFeedback = document.getElementById('motivoTrocaFeedback');
     if(motivoFeedback && !show) motivoFeedback.style.display = 'none';
   }
@@ -1409,9 +1411,8 @@ function toggleMotivoOutro() {
   const motivoDefeitosRadio = document.getElementById('motivoDefeitos');
   const container = document.getElementById('motivoOutroContainer');
   const input = document.getElementById('equipeMotivoOutro');
-  const motivoFeedback = document.getElementById('motivoTrocaFeedback'); // Para esconder o feedback geral
+  const motivoFeedback = document.getElementById('motivoTrocaFeedback');
 
-  // Esconde feedback geral se um motivo foi selecionado
   if (motivoFeedback && document.querySelector('input[name="equipeMotivoTroca"]:checked')) {
     motivoFeedback.style.display = 'none';
   }
@@ -1420,16 +1421,17 @@ function toggleMotivoOutro() {
     const show = (motivoOutroRadio && motivoOutroRadio.checked) ||
                  (motivoDefeitosRadio && motivoDefeitosRadio.checked);
     container.style.display = show ? 'block' : 'none';
-    input.required = show; // Torna obrigatório apenas se visível
+    input.required = show;
     if (!show) {
       input.value = '';
-      input.classList.remove('is-invalid'); // Remove validação se oculto
+      input.classList.remove('is-invalid');
     }
   }
 }
 
 /**
  * Mostrar/ocultar campo de pendência baseado no status da atividade
+ * ATUALIZADO: Usa normalizarTexto.
  */
 function togglePendencia() {
     const statusSelect = document.getElementById('equipeStatusAtividade');
@@ -1437,12 +1439,12 @@ function togglePendencia() {
     const pendenciaInput = document.getElementById('equipePendencia');
 
     if (statusSelect && pendenciaContainer && pendenciaInput) {
-        const show = statusSelect.value !== 'Concluído';
+        const show = normalizarTexto(statusSelect.value) !== 'concluido';
         pendenciaContainer.style.display = show ? 'block' : 'none';
-        pendenciaInput.required = show; // Torna obrigatório apenas se visível
+        pendenciaInput.required = show;
         if (!show) {
             pendenciaInput.value = '';
-            pendenciaInput.classList.remove('is-invalid'); // Remove validação se oculto
+            pendenciaInput.classList.remove('is-invalid');
         }
     }
 }
@@ -1458,7 +1460,6 @@ function salvarRelatorioLocal() {
     const dadosTurnoAtual = window.AppState?.get('dadosTurno') || dadosTurno;
     const equipesAtuais = window.AppState?.get('equipes') || equipes;
 
-    // Validação mínima antes de salvar localmente
     if (equipesAtuais.length === 0) {
        mostrarNotificacao('Não é possível salvar localmente: Adicione pelo menos uma equipe.', 'warning'); return false;
     }
@@ -1476,7 +1477,6 @@ function salvarRelatorioLocal() {
     } catch (e) { console.error('Erro ao carregar relatórios locais:', e); relatoriosLocais = []; }
 
     relatoriosLocais.push(relatorio);
-    // Limitar o número de relatórios locais armazenados
     if(relatoriosLocais.length > (window.CONFIG?.MAX_LOCAL_REPORTS || 20)) {
          relatoriosLocais = relatoriosLocais.slice(relatoriosLocais.length - (window.CONFIG?.MAX_LOCAL_REPORTS || 20));
          console.log("Histórico local truncado para os últimos " + (window.CONFIG?.MAX_LOCAL_REPORTS || 20) + " relatórios.");
@@ -1486,13 +1486,12 @@ function salvarRelatorioLocal() {
     const idParaEstado = localId;
     if (window.AppState) { AppState.update('ultimoRelatorioId', idParaEstado); } else { ultimoRelatorioId = idParaEstado; }
 
-    // Não mostra tela de sucesso aqui, pois é chamado como fallback
     mostrarNotificacao('Relatório salvo localmente com sucesso!', 'success');
-    return true; // Indica sucesso no salvamento local
+    return true;
   } catch (error) {
     console.error('Erro ao salvar relatório localmente:', error);
     mostrarNotificacao('Erro ao salvar localmente: ' + error.message, 'danger');
-    return false; // Indica falha no salvamento local
+    return false;
   }
 }
 
@@ -1508,7 +1507,6 @@ async function salvarRelatorioComFallback() {
      const dadosTurnoAtual = window.AppState?.get('dadosTurno') || dadosTurno;
      const equipesAtuais = window.AppState?.get('equipes') || equipes;
 
-    // Validações antes de tentar salvar
     if (equipesAtuais.length === 0) throw new Error('Adicione pelo menos uma equipe.');
     if (!dadosTurnoAtual.data || !dadosTurnoAtual.horario || !dadosTurnoAtual.letra || !dadosTurnoAtual.supervisor) throw new Error('Dados do turno incompletos.');
 
@@ -1523,31 +1521,25 @@ async function salvarRelatorioComFallback() {
         console.log(`Relatório salvo na API com ID: ${idRelatorioSalvo}`);
         mostrarNotificacao('Relatório salvo com sucesso no servidor!', 'success');
       } else {
-        // Log detalhado do erro da API
         console.error("Falha ao salvar na API:", result);
         throw new Error(result?.message || 'Erro desconhecido ao salvar na API. Verifique o console para detalhes.');
       }
     } catch (apiError) {
       console.error('Erro ao salvar na API:', apiError);
       mostrarNotificacao('Falha ao salvar no servidor. Tentando salvar localmente...', 'warning');
-      // Tenta salvar localmente como fallback
       if (salvarRelatorioLocal()) {
-          idRelatorioSalvo = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId; // Pega o ID local gerado
+          idRelatorioSalvo = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
           salvoLocalmente = true;
-           // Notificação de sucesso local já foi mostrada por salvarRelatorioLocal
       } else {
-        // Se falhar localmente também, lança um erro final
         throw new Error('Falha ao salvar remotamente e localmente. Verifique os dados e a conexão.');
       }
     }
 
-    // Atualiza o ID do último relatório no estado, seja ele local ou do servidor
     if (idRelatorioSalvo) {
         if (window.AppState) AppState.update('ultimoRelatorioId', idRelatorioSalvo);
         else ultimoRelatorioId = idRelatorioSalvo;
     }
-    // Mostra a tela de sucesso, indicando se foi salvo localmente ou não
-     mostrarTelaSucesso(idRelatorioSalvo, salvoLocalmente); // Esta função agora chamará configurarBotoesSucesso
+     mostrarTelaSucesso(idRelatorioSalvo, salvoLocalmente);
     return true;
   } catch (error) {
     console.error('Erro final ao salvar relatório:', error);
@@ -1555,7 +1547,6 @@ async function salvarRelatorioComFallback() {
     return false;
   } finally {
     ocultarLoading();
-    // Aumenta um pouco o delay para garantir que a UI atualize
     setTimeout(() => { salvandoRelatorio = false; }, 500);
   }
 }
@@ -1568,25 +1559,20 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
     AppState.update('currentStep', 'stepSucesso');
     AppState.update('ultimoRelatorioId', idSalvo);
   } else {
-    ultimoRelatorioId = idSalvo; // Fallback para variável global
+    ultimoRelatorioId = idSalvo;
   }
   
-  navegarParaEtapa('stepSucesso'); // Mantido para navegação visual
+  navegarParaEtapa('stepSucesso');
 
-  // O resto da função permanece igual...
   const mensagemSucessoStatus = document.getElementById('mensagemSucessoStatus');
   if (mensagemSucessoStatus) {
       mensagemSucessoStatus.textContent = foiLocal
           ? `Relatório salvo localmente. ID: ${idSalvo || 'N/A'}`
           : `Relatório #${idSalvo || 'N/A'} registrado com sucesso no servidor!`;
-      // Adiciona classe visual para diferenciar
       mensagemSucessoStatus.classList.toggle('text-warning', foiLocal);
       mensagemSucessoStatus.classList.toggle('text-success', !foiLocal);
   }
-
-  // Resto da função...
   
-  // Chame a função de configuração após renderizar a tela
   setTimeout(function() {
     configurarBotoesSucesso();
   }, 200);
@@ -1594,7 +1580,6 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
 
 /**
  * Função para configurar os botões da tela de sucesso
- * Esta função deve ser chamada quando a tela de sucesso é exibida
  */
 function configurarBotoesSucesso() {
   console.log("Configurando botões da tela de sucesso...");
@@ -1608,7 +1593,6 @@ function configurarBotoesSucesso() {
     return;
   }
 
-  // Remover event listeners anteriores (versão sem jQuery)
   if (btnVisualizarEl) {
     const oldBtnVisualizar = btnVisualizarEl.cloneNode(true);
     if (btnVisualizarEl.parentNode) {
@@ -1630,14 +1614,12 @@ function configurarBotoesSucesso() {
     }
   }
   
-  // É necessário pegar a referência dos botões NOVOS após o cloneNode
   const newBtnVisualizarEl = document.getElementById('btnVisualizar');
   const newBtnCopiarEl = document.getElementById('btnCopiar');
   const newBtnNovoEl = document.getElementById('btnNovo');
   
   const relatorioId = window.AppState ? AppState.get('ultimoRelatorioId') : window.ultimoRelatorioId;
 
-  // Configurar o botão Visualizar
   if (newBtnVisualizarEl) {
     newBtnVisualizarEl.addEventListener('click', function() {
       console.log("Botão Visualizar clicado");
@@ -1650,14 +1632,13 @@ function configurarBotoesSucesso() {
     newBtnVisualizarEl.disabled = !relatorioId;
   }
   
-  // Configurar o botão Copiar
   if (newBtnCopiarEl) {
     newBtnCopiarEl.addEventListener('click', function() {
       console.log("Botão Copiar clicado");
       if (relatorioId) {
         const origem = String(relatorioId).startsWith('local_') ? 'local' : 'servidor';
         setOrigemNavegacao('stepSucesso');
-        visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true); // copiarAutomaticamente = true
+        visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true);
       } else {
         mostrarNotificacao('ID do relatório não encontrado para cópia.', 'error');
       }
@@ -1665,7 +1646,6 @@ function configurarBotoesSucesso() {
     newBtnCopiarEl.disabled = !relatorioId;
   }
   
-  // Configurar o botão Novo Relatório
   if (newBtnNovoEl) {
     newBtnNovoEl.addEventListener('click', function() {
       console.log("Botão Novo Relatório clicado");
@@ -1734,17 +1714,14 @@ function novoRelatorio() {
     AppState.update('dadosTurno', {});
     AppState.update('equipes', []);
     AppState.update('ultimoRelatorioId', null);
-    // O listener do AppState deve chamar atualizarListaEquipes e atualizarBotaoAvancar
   } else {
       dadosTurno = {}; equipes = []; ultimoRelatorioId = null;
       atualizarListaEquipes(); atualizarBotaoAvancar();
   }
 
-  // Limpar formulário de turno e validação
   const formTurno = document.getElementById('formTurno');
    if(formTurno) { formTurno.reset(); formTurno.classList.remove('was-validated'); }
 
-  // Definir data atual como padrão
   const dataInput = document.getElementById('data');
   if (dataInput) {
     try {
@@ -1752,18 +1729,16 @@ function novoRelatorio() {
       dataInput.value = new Date(today.getTime() - offset).toISOString().split('T')[0];
     } catch (e) { console.error("Erro ao definir data padrão:", e); dataInput.value = ''; }
   }
-  // Resetar selects do turno para placeholder
   ['horario', 'letra', 'supervisor'].forEach(id => {
       const sel = document.getElementById(id); if (sel) sel.selectedIndex = 0;
   });
 
-  // Limpar lista de equipes na UI (caso não use AppState)
    if (!window.AppState) {
         const listaEquipesDiv = document.getElementById('listaEquipes');
         const semEquipesDiv = document.getElementById('semEquipes');
         if (listaEquipesDiv) listaEquipesDiv.querySelectorAll('.equipe-card').forEach(card => card.remove());
         if (semEquipesDiv) semEquipesDiv.style.display = 'flex';
-        atualizarBotaoAvancar(); // Garante que o botão de avançar seja desabilitado
+        atualizarBotaoAvancar();
    }
 
 
@@ -1783,8 +1758,7 @@ function setOrigemNavegacao(origem) {
  * Função para obter origem da navegação
  */
 function getOrigemNavegacao() {
-  // Prioriza AppState se disponível
-  return (window.AppState ? AppState.get('origemNavegacao') : window.origemNavegacao) || 'stepTurno'; // Fallback para stepTurno
+  return (window.AppState ? AppState.get('origemNavegacao') : window.origemNavegacao) || 'stepTurno';
 }
 
 /**
@@ -1792,19 +1766,15 @@ function getOrigemNavegacao() {
  */
 function voltarParaTelaOrigem() {
   const origem = getOrigemNavegacao();
-  // Se a origem for a tela de sucesso, volta para lá
   if (origem === 'stepSucesso') {
       voltarParaSucesso();
   }
-  // Se a origem for a tela de pesquisa, volta para lá
   else if (origem === 'stepPesquisa') {
       voltarDaVisualizacaoParaPesquisa();
   }
-  // Se a origem for a tela de dashboard (visualizando relatório de lá)
   else if (origem === 'dashboard') {
-        voltarDoDashboard(); // Ou talvez para uma view específica do dashboard? Ajustar se necessário.
+        voltarDoDashboard();
   }
-  // Fallback: Volta para a tela de sucesso (pode acontecer se a origem não for definida corretamente)
   else {
       console.warn("Origem de navegação desconhecida ou não definida, voltando para tela de Sucesso como fallback.");
       voltarParaSucesso();
@@ -1815,18 +1785,18 @@ function voltarParaTelaOrigem() {
  * Visualizar relatório (usa ID salvo no estado da tela de Sucesso)
  */
 async function visualizarRelatorio() {
-  setOrigemNavegacao('stepSucesso'); // Define que veio da tela de sucesso
+  setOrigemNavegacao('stepSucesso');
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
   if (!idAtual) { mostrarNotificacao("ID do relatório não encontrado.", "warning"); return; }
   const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
-  await visualizarRelatorioExistente(idAtual, origem, 'gerarRelatorioTexto', false); // copiarAutomaticamente é false
+  await visualizarRelatorioExistente(idAtual, origem, 'gerarRelatorioTexto', false);
 }
 
 /**
  * Formatar relatório para WhatsApp (usa ID salvo no estado da tela de Sucesso)
  */
 async function formatarWhatsApp() {
-  setOrigemNavegacao('stepSucesso'); // Define que veio da tela de sucesso
+  setOrigemNavegacao('stepSucesso');
   const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
    if (!idAtual) { mostrarNotificacao("ID do relatório não encontrado.", "warning"); return; }
   const origem = String(idAtual).startsWith('local_') ? 'local' : 'servidor';
@@ -1839,7 +1809,7 @@ async function formatarWhatsApp() {
 function voltarParaSucesso() {
     const idAtual = window.AppState?.get('ultimoRelatorioId') || ultimoRelatorioId;
     const origem = idAtual && String(idAtual).startsWith('local_') ? 'local' : (idAtual ? 'servidor' : null);
-    mostrarTelaSucesso(idAtual, origem === 'local'); // Esta função chama configurarBotoesSucesso novamente
+    mostrarTelaSucesso(idAtual, origem === 'local');
 }
 
 /**
@@ -1855,7 +1825,6 @@ function voltarDoRelatorio() { voltarParaTelaOrigem(); }
 function copiarTextoParaClipboard(elementId, tipoTexto) {
   const elemento = document.getElementById(elementId);
   if (!elemento) { mostrarNotificacao(`Erro: Elemento ${elementId} não encontrado.`, "danger"); return; }
-  // Usa textContent para <pre>, value para <textarea>/<input>
   const textoParaCopiar = elemento.textContent || elemento.value || '';
 
   if (!textoParaCopiar) {
@@ -1864,7 +1833,6 @@ function copiarTextoParaClipboard(elementId, tipoTexto) {
   }
 
   if (!navigator.clipboard) {
-    // Fallback para navegadores antigos ou contextos inseguros
     try {
       const ta = document.createElement('textarea'); ta.value = textoParaCopiar;
       ta.style.position = 'absolute'; ta.style.left = '-9999px'; document.body.appendChild(ta);
@@ -1873,7 +1841,6 @@ function copiarTextoParaClipboard(elementId, tipoTexto) {
     } catch (err) { console.error('Falha ao copiar (fallback):', err); mostrarNotificacao(`Não foi possível copiar automaticamente. Selecione e copie manualmente (Ctrl+C).`, 'warning'); }
     return;
   }
-  // Método moderno (requer HTTPS ou localhost)
   navigator.clipboard.writeText(textoParaCopiar).then(() => {
     mostrarNotificacao(`${tipoTexto} copiado para a área de transferência!`, 'success');
   }).catch(err => { console.error(`Erro ao copiar ${tipoTexto}:`, err); mostrarNotificacao(`Falha ao copiar ${tipoTexto}. Verifique as permissões do navegador.`, 'danger'); });
@@ -1904,17 +1871,17 @@ function ajustarCampoPesquisa() {
   const tipoPesquisaSelect = document.getElementById('tipoPesquisa'); const termoPesquisaInput = document.getElementById('termoPesquisa'); const labelPesquisaLabel = document.getElementById('labelPesquisa');
   if (!tipoPesquisaSelect || !termoPesquisaInput || !labelPesquisaLabel) return;
   const tipo = tipoPesquisaSelect.value;
-  termoPesquisaInput.value = ''; // Limpa valor ao trocar tipo
-  termoPesquisaInput.required = true; // Campo é sempre obrigatório
+  termoPesquisaInput.value = '';
+  termoPesquisaInput.required = true;
 
   switch (tipo) {
     case 'data': labelPesquisaLabel.textContent = 'Data (AAAA-MM-DD)'; termoPesquisaInput.type = 'date'; termoPesquisaInput.placeholder = ''; break;
     case 'mes_ano': labelPesquisaLabel.textContent = 'Mês/Ano (AAAA-MM)'; termoPesquisaInput.type = 'month'; termoPesquisaInput.placeholder = ''; break;
     case 'supervisor': labelPesquisaLabel.textContent = 'Nome do Supervisor'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'Digite o nome'; break;
-    case 'letra': labelPesquisaLabel.textContent = 'Letra do Turno'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'A, B, C...'; termoPesquisaInput.maxLength = 1; break; // Limita a 1 caractere
-    case 'local': labelPesquisaLabel.textContent = 'Pesquisar em Relatórios Locais'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Termo, data, supervisor...'; break; // Usa 'search' para UX
-    case 'geral': // Termo Geral ou ID
-    default: labelPesquisaLabel.textContent = 'Termo de Pesquisa ou ID'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Digite ID ou termo geral'; termoPesquisaInput.maxLength = 50; break; // Limita tamanho
+    case 'letra': labelPesquisaLabel.textContent = 'Letra do Turno'; termoPesquisaInput.type = 'text'; termoPesquisaInput.placeholder = 'A, B, C...'; termoPesquisaInput.maxLength = 1; break;
+    case 'local': labelPesquisaLabel.textContent = 'Pesquisar em Relatórios Locais'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Termo, data, supervisor...'; break;
+    case 'geral':
+    default: labelPesquisaLabel.textContent = 'Termo de Pesquisa ou ID'; termoPesquisaInput.type = 'search'; termoPesquisaInput.placeholder = 'Digite ID ou termo geral'; termoPesquisaInput.maxLength = 50; break;
   }
 }
 
@@ -1932,7 +1899,6 @@ async function executarPesquisa() {
   const tipoPesquisa = document.getElementById('tipoPesquisa').value; let termoPesquisa = document.getElementById('termoPesquisa').value;
   let termoParaAPI = termoPesquisa.trim();
 
-  // Formatar Mês/Ano para MM/AAAA se necessário (ajustar se API esperar outro formato)
   if (tipoPesquisa === 'mes_ano' && /^\d{4}-\d{2}$/.test(termoParaAPI)) { const [ano, mes] = termoParaAPI.split('-'); termoParaAPI = `${mes}/${ano}`; }
 
   mostrarLoading('Pesquisando relatórios...');
@@ -1944,7 +1910,6 @@ async function executarPesquisa() {
       const result = await callAPI('pesquisarRelatorios', { termo: termoParaAPI, tipo: tipoPesquisa });
       if (result && result.success) {
           resultados = result.resultados || [];
-          // Adiciona origem 'servidor' para cada resultado da API
           resultados.forEach(r => { r.origem = 'servidor'; });
        } else {
            console.error("Erro da API de pesquisa:", result);
@@ -1967,30 +1932,26 @@ function pesquisarRelatoriosLocais(termo) {
   try { const json = localStorage.getItem('relatorios_locais'); if (json) { relatoriosLocais = JSON.parse(json); if (!Array.isArray(relatoriosLocais)) relatoriosLocais = []; } }
   catch (e) { console.error('Erro ao carregar relatórios locais para pesquisa:', e); return []; }
 
-  if (!termo) return []; // Retorna vazio se termo for vazio
+  if (!termo) return [];
 
-  const termoLower = termo.toLowerCase();
+  const termoLower = normalizarTexto(termo); // Usa normalizarTexto para a busca
 
-  // Função auxiliar para verificar se um valor contém o termo
-  const check = (v) => v && String(v).toLowerCase().includes(termoLower);
+  const check = (v) => v && normalizarTexto(String(v)).includes(termoLower); // Usa normalizarTexto
 
   return relatoriosLocais.filter(relatorio => {
-    // Verifica ID, dados do turno e dados das equipes
     const { dadosTurno, equipes = [], id } = relatorio; if (!dadosTurno) return false;
 
     if (check(id)) return true;
     if (check(dadosTurno.letra)) return true;
     if (check(dadosTurno.supervisor)) return true;
-    if (check(dadosTurno.data)) return true; // Verifica AAAA-MM-DD
-    if (check(formatarData(dadosTurno.data))) return true; // Verifica DD/MM/AAAA
+    if (check(dadosTurno.data)) return true;
+    if (check(formatarData(dadosTurno.data))) return true;
     if (check(dadosTurno.horario)) return true;
 
-    // Verifica cada campo relevante dentro de cada equipe
     return equipes.some(eq =>
-        check(eq.numero) || check(eq.motorista) || check(eq.operadores) || check(eq.area) || check(eq.atividade) || check(eq.tipoAtividade) || check(eq.statusAtividade) || check(eq.pendencia) || check(eq.vaga) || check(eq.vagaPersonalizada) || check(eq.equipamento) || check(eq.equipamentoPersonalizado) || check(eq.identificacaoUsiminas) || check(eq.motivoTroca) || check(eq.motivoOutro) || check(eq.defeito) || check(eq.placaNova) || check(eq.observacoes) || check(formatarDataHora(eq.dataHoraTroca)) || check(formatarDataHora(eq.dataHoraFimTroca)) // Inclui datas de troca formatadas
+        check(eq.numero) || check(eq.motorista) || check(eq.operadores) || check(eq.area) || check(eq.atividade) || check(eq.tipoAtividade) || check(eq.statusAtividade) || check(eq.pendencia) || check(eq.vaga) || check(eq.vagaPersonalizada) || check(eq.equipamento) || check(eq.equipamentoPersonalizado) || check(eq.identificacaoUsiminas) || check(eq.motivoTroca) || check(eq.motivoOutro) || check(eq.defeito) || check(eq.placaNova) || check(eq.observacoes) || check(formatarDataHora(eq.dataHoraTroca)) || check(formatarDataHora(eq.dataHoraFimTroca))
     );
   })
-  // Mapeia para o formato esperado pela tabela de resultados
   .map(relatorio => ({
       id: relatorio.id,
       data: formatarData(relatorio.dadosTurno.data),
@@ -1999,13 +1960,12 @@ function pesquisarRelatoriosLocais(termo) {
       supervisor: relatorio.dadosTurno.supervisor || 'N/A',
       origem: 'local'
   }))
-  // Ordena por data decrescente (mais recente primeiro)
     .sort((a, b) => {
         try {
-            let dA = a.data.split('/').reverse().join('-'); // Converte DD/MM/YYYY para YYYY-MM-DD
+            let dA = a.data.split('/').reverse().join('-');
             let dB = b.data.split('/').reverse().join('-');
-            return dB.localeCompare(dA); // Compara YYYY-MM-DD
-        } catch (e) { return 0; } // Fallback se data inválida
+            return dB.localeCompare(dA);
+        } catch (e) { return 0; }
     });
 }
 
@@ -2015,15 +1975,15 @@ function exibirResultadosPesquisa(resultados) {
   const resDiv = document.getElementById('resultadosPesquisa'); const tbody = document.getElementById('tabelaResultados'); const semResDiv = document.getElementById('semResultados');
   if (!resDiv || !tbody || !semResDiv) return;
 
-  resDiv.style.display = 'block'; // Mostra a área de resultados
-  semResDiv.style.display = (!resultados || resultados.length === 0) ? 'block' : 'none'; // Mostra/oculta mensagem "sem resultados"
-  tbody.innerHTML = ''; // Limpa resultados anteriores
+  resDiv.style.display = 'block';
+  semResDiv.style.display = (!resultados || resultados.length === 0) ? 'block' : 'none';
+  tbody.innerHTML = '';
 
   if (resultados && resultados.length > 0) {
       resultados.forEach(r => {
         const linha = document.createElement('tr');
-        const badgeClass = r.origem === 'local' ? 'bg-secondary' : 'bg-info text-dark'; // Badge para servidor com texto escuro
-        const podePDF = r.origem === 'servidor'; // PDF só para servidor
+        const badgeClass = r.origem === 'local' ? 'bg-secondary' : 'bg-info text-dark';
+        const podePDF = r.origem === 'servidor';
 
         linha.innerHTML = `
           <td><span class="badge ${badgeClass}">${r.origem}</span></td>
@@ -2054,7 +2014,6 @@ function exibirResultadosPesquisa(resultados) {
  */
 async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction = 'gerarRelatorioTexto', copiarAutomaticamente = false) {
   if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-  // Armazena a etapa atual como origem para poder voltar
   if (getOrigemNavegacao() !== 'stepSucesso') {
     setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa');
   }
@@ -2068,7 +2027,7 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
       relatorioCompleto = obterRelatorioLocal(id); 
       if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
       textoRelatorio = gerarTextoRelatorioLocal(relatorioCompleto);
-    } else { // Origem 'servidor'
+    } else {
       const result = await callAPI(apiAction, { turnoId: id });
       if (result && result.success && result.relatorio) { 
         textoRelatorio = result.relatorio; 
@@ -2077,7 +2036,6 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
       }
     }
 
-    // Atualiza o ID do último relatório visualizado
     if (window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
 
     navegarParaEtapa('stepRelatorio');
@@ -2086,7 +2044,6 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
     if (elRelatorioTexto) {
         elRelatorioTexto.textContent = textoRelatorio;
         
-        // Limpa dica de cópia anterior ao visualizar novo relatório
         const dicaContainer = document.getElementById('dicaPosCopiaCont');
         if (dicaContainer) dicaContainer.innerHTML = '';
     }
@@ -2094,7 +2051,6 @@ async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction =
     const btnVoltar = document.getElementById('btnVoltarRelatorio'); 
     if (btnVoltar) btnVoltar.onclick = voltarDoRelatorio;
 
-    // Após mostrar o relatório, copiar se solicitado
     if (copiarAutomaticamente) {
       setTimeout(function() {
         copiarRelatorioParaAreaDeTransferencia();
@@ -2124,6 +2080,7 @@ function obterRelatorioLocal(id) {
 /**
  * Gerar texto de relatório local (Melhorado e mais detalhado)
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Calculado
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function gerarTextoRelatorioLocal(relatorio) {
   if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) {
@@ -2154,15 +2111,14 @@ function gerarTextoRelatorioLocal(relatorio) {
     const tipo = equipe.tipo || 'Outro'; if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(equipe); return acc;
   }, {});
 
-  // Ordenar tipos (Alta Pressão primeiro, depois Vácuo/Hiper)
   const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
   const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => {
       const indexA = ordemTipos.indexOf(a);
       const indexB = ordemTipos.indexOf(b);
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b); // Alfabético para tipos desconhecidos
-      if (indexA === -1) return 1; // Desconhecidos no final
-      if (indexB === -1) return -1; // Desconhecidos no final
-      return indexA - indexB; // Ordena pela ordem definida
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
   });
 
 
@@ -2173,10 +2129,12 @@ function gerarTextoRelatorioLocal(relatorio) {
     texto += linhaSeparadora + '\n';
 
     equipesDoTipo.forEach((equipe, index) => {
-      const vagaDisplay = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga;
-      const equipDisplay = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-      const motivoTrocaDisplay = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca;
-      const isAltaPressao = tipo === 'Alta Pressão';
+      const vagaDisplay = normalizarTexto(equipe.vaga) === 'outra vaga' ? equipe.vagaPersonalizada : equipe.vaga;
+      const equipDisplay = normalizarTexto(equipe.equipamento) === 'outro equipamento' ? equipe.equipamentoPersonalizado : equipe.equipamento;
+      
+      const equipeMotivoTrocaNorm = normalizarTexto(equipe.motivoTroca);
+      const motivoTrocaDisplay = (equipeMotivoTrocaNorm === normalizarTexto('Outros Motivos (Justificar)') || equipeMotivoTrocaNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) ? equipe.motivoOutro : equipe.motivoTroca;
+      const isAltaPressao = normalizarTexto(tipo) === normalizarTexto('Alta Pressão');
 
       texto += `EQUIPE ${index + 1} | ${equipe.numero || 'N/A'}\n`;
       texto += subLinha;
@@ -2186,37 +2144,30 @@ function gerarTextoRelatorioLocal(relatorio) {
       texto += `Atividade: ${equipe.atividade || 'N/A'}\n`;
       texto += `> Tipo de Atividade: ${equipe.tipoAtividade || 'Rotineira'}\n`;
       texto += `> Status: ${equipe.statusAtividade || 'Concluído'}\n`;
-      if (equipe.statusAtividade && equipe.statusAtividade !== 'Concluído' && equipe.pendencia) { texto += `  - Pendência: ${equipe.pendencia}\n`; }
+      if (equipe.statusAtividade && normalizarTexto(equipe.statusAtividade) !== 'concluido' && equipe.pendencia) { texto += `  - Pendência: ${equipe.pendencia}\n`; }
       texto += `Vaga: ${vagaDisplay || 'N/A'}\n`;
       texto += `Equipamento: ${equipDisplay || 'N/A'}\n`;
       if (equipe.identificacaoUsiminas) texto += `Identificação Usiminas: ${equipe.identificacaoUsiminas}\n`;
 
-      // Detalhes da Troca (com Fim e Tempo)
       texto += '\n> Status Equipamento:\n';
       texto += `  Houve troca: ${equipe.trocaEquipamento || 'Não'}\n`;
-      if (equipe.trocaEquipamento === 'Sim') {
+      if (normalizarTexto(equipe.trocaEquipamento) === 'sim') {
         texto += `  - Motivo: ${motivoTrocaDisplay || 'Não especificado'}\n`;
         texto += `  - Defeito/Medidas: ${equipe.defeito || 'N/A'}\n`;
         if (equipe.placaNova) texto += `  - Placa Nova: ${equipe.placaNova}\n`;
         if (equipe.dataHoraTroca) texto += `  - Início Troca: ${formatarDataHora(equipe.dataHoraTroca)}\n`;
-        // ======================= EXIBE FIM DA TROCA =======================
         if (equipe.dataHoraFimTroca) texto += `  - Fim Troca: ${formatarDataHora(equipe.dataHoraFimTroca)}\n`;
-        // ==================================================================
-        // Tenta calcular tempo para exibição local
         if (equipe.dataHoraTroca && equipe.dataHoraFimTroca) {
             try {
                 const inicio = new Date(equipe.dataHoraTroca); const fim = new Date(equipe.dataHoraFimTroca);
                 if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
                    const diffMins = Math.round((fim - inicio) / 60000); const h = Math.floor(diffMins / 60); const m = diffMins % 60;
-                   // ======================= EXIBE TEMPO CALCULADO ====================
                    texto += `  - Tempo Indisp.: ${h}h${m < 10 ? '0' : ''}${m}min\n`;
-                   // ==================================================================
                 }
             } catch(e) { console.warn("Erro ao calcular tempo de troca local:", e); }
         }
       }
 
-      // Implementos
       texto += '\n> Implementos:\n';
       if (isAltaPressao) {
          texto += `  - Pistola: ${equipe.materiais?.pistola ?? 'N/A'}\n`;
@@ -2227,7 +2178,7 @@ function gerarTextoRelatorioLocal(relatorio) {
          texto += `  - Rabicho: ${equipe.materiais?.rabicho ?? 'N/A'}\n`;
          texto += `  - Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}\n`;
          texto += `  - Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}\n`;
-      } else { // Vácuo / Hiper
+      } else {
          texto += `  - Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
          texto += `  - Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
          texto += `  - Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}\n`;
@@ -2236,7 +2187,6 @@ function gerarTextoRelatorioLocal(relatorio) {
       }
       if (equipe.justificativa) { texto += `\n> Justificativa Implementos Falta:\n  ${equipe.justificativa}\n`; }
 
-      // Segurança
       texto += '\n> Segurança:\n';
       texto += `  - Caixa Bloqueio: ${equipe.caixaBloqueio ?? 'N/A'}\n`;
       texto += `  - Cadeados: ${equipe.cadeados ?? 'N/A'}\n`;
@@ -2248,7 +2198,7 @@ function gerarTextoRelatorioLocal(relatorio) {
   }
 
   texto += linhaSeparadora;
-  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'} (Relatório Local)\n`; // Versão Atualizada
+  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'} (Relatório Local)\n`;
   texto += linhaSeparadora;
   return texto;
 }
@@ -2265,9 +2215,8 @@ async function gerarPDFExistente(id, origem = 'servidor') {
   mostrarLoading('Gerando PDF...');
   try {
     let dadosParaPDF = { dadosTurno: null, equipes: null };
-     const result = await callAPI('obterDadosRelatorio', { turnoId: id }); // Chama API para obter dados brutos
+     const result = await callAPI('obterDadosRelatorio', { turnoId: id });
      if (result && result.success && result.dadosTurno && result.equipes) {
-         // Mapeia os dados brutos da API para a estrutura JS esperada
          dadosParaPDF.dadosTurno = mapearChavesObjeto(result.dadosTurno, {
               'ID': 'id', 'Data': 'data', 'Horário': 'horario', 'Letra': 'letra', 'Supervisor': 'supervisor', 'Timestamp': 'timestamp', 'Status': 'status', 'UltimaModificacao': 'ultimaModificacao'
          });
@@ -2275,27 +2224,19 @@ async function gerarPDFExistente(id, origem = 'servidor') {
               'Turno_ID': 'turnoId', 'Tipo_Equipe': 'tipo', 'Numero_Equipe': 'numero', 'Integrantes': 'integrantes', 'Motorista': 'motorista', 'Operadores': 'operadores', 'Area': 'area', 'Atividade': 'atividade',
               'TipoAtividade': 'tipoAtividade', 'StatusAtividade': 'statusAtividade', 'Pendencia': 'pendencia',
               'Vaga': 'vaga', 'Vaga_Personalizada': 'vagaPersonalizada', 'Equipamento': 'equipamento', 'Equipamento_Personalizada': 'equipamentoPersonalizado', 'Identificacao_Usiminas': 'identificacaoUsiminas', 'Troca_Equipamento': 'trocaEquipamento', 'Motivo_Troca': 'motivoTroca', 'Motivo_Outro': 'motivoOutro', 'Defeito': 'defeito', 'Placa_Nova': 'placaNova',
-              // ======================= MAPEAMENTO CAMPOS NOVOS =======================
-              'Data_Hora_Troca': 'dataHoraTroca',          // Início (já existia)
-              'Data_Hora_Fim_Troca': 'dataHoraFimTroca',    // Fim da Troca
-              'Tempo_Troca': 'tempoTroca',                  // Tempo calculado (string do GAS)
-              // ========================================================================
-              // Materiais AP
+              'Data_Hora_Troca': 'dataHoraTroca',
+              'Data_Hora_Fim_Troca': 'dataHoraFimTroca',
+              'Tempo_Troca': 'tempoTroca',
               'Pistola': 'pistola', 'Pistola_Cano_Longo': 'pistolaCanoLongo', 'Mangueira_Torpedo': 'mangueiraTorpedo', 'Pedal': 'pedal', 'Varetas': 'varetas', 'Rabicho': 'rabicho', 'Lances_Mangueira': 'lancesMangueira', 'Lances_Varetas': 'lancesVaretas',
-              // Materiais Vacuo
               'Mangotes': 'mangotes', 'Reducoes': 'reducoes', 'Mangotes_3_Polegadas': 'mangotes3Polegadas', 'Mangotes_4_Polegadas': 'mangotes4Polegadas', 'Mangotes_6_Polegadas': 'mangotes6Polegadas',
-              // Segurança e Obs
               'Justificativa': 'justificativa', 'Caixa_Bloqueio': 'caixaBloqueio', 'Cadeados': 'cadeados', 'Plaquetas': 'plaquetas', 'Observacoes': 'observacoes'
          }));
-          // Agrupa materiais dentro de cada equipe após mapeamento
           dadosParaPDF.equipes.forEach(eq => {
-              if(eq.tipo === 'Alta Pressão') { eq.materiais = { pistola: eq.pistola, pistolaCanoLongo: eq.pistolaCanoLongo, mangueiraTorpedo: eq.mangueiraTorpedo, pedal: eq.pedal, varetas: eq.varetas, rabicho: eq.rabicho }; }
+              if(normalizarTexto(eq.tipo) === normalizarTexto('Alta Pressão')) { eq.materiais = { pistola: eq.pistola, pistolaCanoLongo: eq.pistolaCanoLongo, mangueiraTorpedo: eq.mangueiraTorpedo, pedal: eq.pedal, varetas: eq.varetas, rabicho: eq.rabicho }; }
               else { eq.materiaisVacuo = { mangotes: eq.mangotes, reducoes: eq.reducoes }; }
-               // Remove chaves individuais de material se agrupadas (opcional, para limpar)
-              delete eq.pistola; delete eq.pistolaCanoLongo; // ...etc para AP e Vácuo
+              delete eq.pistola; delete eq.pistolaCanoLongo; delete eq.mangueiraTorpedo; delete eq.pedal; delete eq.varetas; delete eq.rabicho;
               delete eq.mangotes; delete eq.reducoes;
           });
-          // Chama a função que realmente gera o PDF com os dados mapeados
           await gerarPDF(dadosParaPDF.dadosTurno, dadosParaPDF.equipes, id);
      } else {
          console.error("Erro ao obter dados para PDF:", result);
@@ -2314,13 +2255,11 @@ function mapearChavesObjeto(obj, mapa, caseInsensitive = false) {
         if (Object.hasOwnProperty.call(obj, chaveOriginal)) {
             const chaveLookup = caseInsensitive ? chaveOriginal.toLowerCase() : chaveOriginal;
             const chaveJsMapeada = mapaLookup.get(chaveLookup);
-            // Usa a chave mapeada se existir, senão usa a original convertida para camelCase (tentativa)
             const chaveFinal = chaveJsMapeada !== undefined ? chaveJsMapeada
-                             : chaveOriginal.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase()); // Converte snake_case para camelCase
+                             : chaveOriginal.replace(/_([a-z])/g, (match, p1) => p1.toUpperCase());
             novoObj[chaveFinal] = obj[chaveOriginal];
         }
     }
-    // Garante que todas as chaves esperadas no mapa existam no novo objeto (com valor null se ausente)
     Object.values(mapa).forEach(chaveJsEsperada => { if (novoObj[chaveJsEsperada] === undefined) novoObj[chaveJsEsperada] = null; });
     return novoObj;
 }
@@ -2328,6 +2267,7 @@ function mapearChavesObjeto(obj, mapa, caseInsensitive = false) {
 /**
  * Gerar PDF (Função auxiliar, precisa da biblioteca jsPDF)
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Troca
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
     if (!window.jspdf || !window.jspdf.jsPDF) { mostrarNotificacao('Erro: Biblioteca jsPDF não carregada.', 'danger'); return; }
@@ -2335,46 +2275,39 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    let y = 15; // Posição Y inicial
+    let y = 15;
     const margin = 10;
     const pageHeight = doc.internal.pageSize.height;
     const pageWidth = doc.internal.pageSize.width;
     const contentWidth = pageWidth - margin * 2;
-    const lineHeight = 5;       // Altura de linha padrão
-    const smallLineHeight = 4;  // Altura de linha menor
+    const lineHeight = 5;
+    const smallLineHeight = 4;
 
-    /** Adiciona texto com quebra de linha automática */
     const addWrappedText = (label, value, indent = 5, isBold = false, fontSize = 9) => {
-      if (value === null || value === undefined || String(value).trim() === '') value = 'N/A'; // Trata nulos e vazios
+      if (value === null || value === undefined || String(value).trim() === '') value = 'N/A';
       const fullText = `${label ? label + ': ' : ''}${String(value).trim()}`;
-      const textWidth = contentWidth - indent - (label ? margin : 0); // Ajusta largura
+      const textWidth = contentWidth - indent - (label ? margin : 0);
 
       doc.setFontSize(fontSize);
       doc.setFont(undefined, isBold ? 'bold' : 'normal');
 
       const lines = doc.splitTextToSize(fullText, textWidth);
-      checkAddPage(lines.length * (fontSize / 2.5)); // Estima altura baseada no tamanho da fonte
+      checkAddPage(lines.length * (fontSize / 2.5));
       doc.text(lines, margin + indent, y);
-      y += lines.length * (fontSize / 2.5); // Avança Y baseado no número de linhas e tamanho
-      doc.setFont(undefined, 'normal'); // Reseta estilo
+      y += lines.length * (fontSize / 2.5);
+      doc.setFont(undefined, 'normal');
     };
 
-    /** Verifica se precisa adicionar nova página */
     function checkAddPage(alturaNecessaria = 20) {
-      if (y + alturaNecessaria > pageHeight - margin) { // Verifica se conteúdo cabe
+      if (y + alturaNecessaria > pageHeight - margin) {
         doc.addPage();
-        y = margin; // Reseta Y para margem superior
-        // Adicionar cabeçalho/rodapé repetido se necessário aqui
+        y = margin;
       }
     }
 
-    // --- Desenhar PDF ---
-
-    // Cabeçalho da Página
     doc.setFontSize(16); doc.setFont(undefined, 'bold'); doc.text("RELATÓRIO DE TURNO", pageWidth / 2, y, { align: 'center' }); y += lineHeight * 1.5;
     doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.text("GRUPO GPS - MECANIZADA", pageWidth / 2, y, { align: 'center' }); y += lineHeight * 2;
 
-    // Informações Gerais do Turno
     doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text("INFORMAÇÕES GERAIS", margin, y); y += lineHeight * 0.8; doc.setLineWidth(0.2); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.2;
     doc.setFontSize(9); doc.setFont(undefined, 'normal');
     doc.text(`Data: ${formatarData(dadosTurnoPDF.data)}`, margin, y); doc.text(`Horário: ${dadosTurnoPDF.horario || 'N/A'}`, margin + 70, y); y += lineHeight;
@@ -2382,43 +2315,41 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
     doc.text(`ID Relatório: ${relatorioId || 'N/A'}`, margin, y);
     if (dadosTurnoPDF.timestamp) doc.text(`Gerado em: ${formatarDataHora(dadosTurnoPDF.timestamp)}`, margin + 70, y); y += lineHeight * 1.5;
 
-    // Detalhes das Equipes
     const equipesPorTipo = equipesPDF.reduce((acc, eq) => { const tipo = eq.tipo || 'Outro'; if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(eq); return acc; }, {});
-    const ordemTiposPDF = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo']; // Ordem desejada
+    const ordemTiposPDF = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
     const tiposOrdenadosPDF = Object.keys(equipesPorTipo).sort((a, b) => { const idxA = ordemTiposPDF.indexOf(a); const idxB = ordemTiposPDF.indexOf(b); if(idxA===-1 && idxB===-1) return a.localeCompare(b); if(idxA===-1) return 1; if(idxB===-1) return -1; return idxA - idxB; });
 
      for (const tipo of tiposOrdenadosPDF) {
-        checkAddPage(30); // Espaço para título da seção
+        checkAddPage(30);
         doc.setFontSize(12); doc.setFont(undefined, 'bold'); doc.text(`EQUIPES ${tipo.toUpperCase()} (${equipesPorTipo[tipo].length})`, margin, y); y += lineHeight * 0.8; doc.setLineWidth(0.2); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.2;
 
         equipesPorTipo[tipo].forEach((equipe, index) => {
-            checkAddPage(100); // Estimativa de altura por equipe (ajustar conforme necessário)
+            checkAddPage(100);
             doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.text(`Equipe ${index + 1}: ${equipe.numero || 'N/A'}`, margin, y); y += lineHeight * 1.2;
             doc.setFontSize(9); doc.setFont(undefined, 'normal');
 
-            const vagaDisp = equipe.vaga === 'OUTRA VAGA' ? equipe.vagaPersonalizada : equipe.vaga; const equipDisp = equipe.equipamento === 'OUTRO EQUIPAMENTO' ? equipe.equipamentoPersonalizado : equipe.equipamento;
-            const motivoTrocaDisp = (equipe.motivoTroca === 'Outros Motivos (Justificar)' || equipe.motivoTroca === 'Defeitos Em Geral (Justificar)') ? equipe.motivoOutro : equipe.motivoTroca; const isAP = equipe.tipo === 'Alta Pressão';
+            const vagaDisp = normalizarTexto(equipe.vaga) === 'outra vaga' ? equipe.vagaPersonalizada : equipe.vaga;
+            const equipDisp = normalizarTexto(equipe.equipamento) === 'outro equipamento' ? equipe.equipamentoPersonalizado : equipe.equipamento;
+            
+            const equipeMotivoTrocaNorm = normalizarTexto(equipe.motivoTroca);
+            const motivoTrocaDisp = (equipeMotivoTrocaNorm === normalizarTexto('Outros Motivos (Justificar)') || equipeMotivoTrocaNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) ? equipe.motivoOutro : equipe.motivoTroca;
+            const isAP = normalizarTexto(equipe.tipo) === normalizarTexto('Alta Pressão');
 
             addWrappedText('Motorista', equipe.motorista, 5); addWrappedText('Operador(es)', equipe.operadores, 5); addWrappedText('Área', equipe.area, 5); addWrappedText('Atividade', equipe.atividade, 5);
-            addWrappedText('Tipo Atividade', equipe.tipoAtividade || 'Rotineira', 5, true); addWrappedText('Status', equipe.statusAtividade || 'Concluído', 5, true); if (equipe.statusAtividade !== 'Concluído' && equipe.pendencia) addWrappedText('Pendência', equipe.pendencia, 10);
+            addWrappedText('Tipo Atividade', equipe.tipoAtividade || 'Rotineira', 5, true); addWrappedText('Status', equipe.statusAtividade || 'Concluído', 5, true); if (normalizarTexto(equipe.statusAtividade) !== 'concluido' && equipe.pendencia) addWrappedText('Pendência', equipe.pendencia, 10);
             addWrappedText('Vaga', vagaDisp, 5); addWrappedText('Equipamento', equipDisp, 5); if (equipe.identificacaoUsiminas) addWrappedText('ID Usiminas', equipe.identificacaoUsiminas, 5);
 
-            // Troca (com Fim e Tempo)
-            checkAddPage(30); // Mais espaço para detalhes da troca
+            checkAddPage(30);
             addWrappedText('Troca Equip.', equipe.trocaEquipamento || 'Não', 5, true);
-            if (equipe.trocaEquipamento === 'Sim') {
+            if (normalizarTexto(equipe.trocaEquipamento) === 'sim') {
                 addWrappedText('Motivo', motivoTrocaDisp || 'N/A', 10); addWrappedText('Defeito/Medidas', equipe.defeito || 'N/A', 10);
                 if (equipe.placaNova) addWrappedText('Placa Nova', equipe.placaNova, 10);
                 if (equipe.dataHoraTroca) addWrappedText('Início Troca', formatarDataHora(equipe.dataHoraTroca), 10);
-                // ======================= ADICIONA FIM E TEMPO AO PDF =======================
                 if (equipe.dataHoraFimTroca) addWrappedText('Fim Troca', formatarDataHora(equipe.dataHoraFimTroca), 10);
                 if (equipe.tempoTroca && !equipe.tempoTroca.includes('Erro') && !equipe.tempoTroca.includes('Ausente')) addWrappedText('Tempo Indisp.', equipe.tempoTroca, 10);
-                 // Poderia adicionar cálculo local como fallback se tempoTroca for nulo/inválido e as datas existirem
-                // =========================================================================
             }
 
-            // Implementos
-            checkAddPage(35); // Espaço para implementos
+            checkAddPage(35);
             doc.setFont(undefined, 'bold'); doc.text(`Implementos:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
             if (isAP && equipe.materiais) {
                 addWrappedText('- Pistola', equipe.materiais.pistola ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Pistola C.L.', equipe.materiais.pistolaCanoLongo ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Mang. Torpedo', equipe.materiais.mangueiraTorpedo ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Pedal', equipe.materiais.pedal ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Varetas', equipe.materiais.varetas ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Rabicho', equipe.materiais.rabicho ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Lances Mang.', equipe.lancesMangueira ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Lances Var.', equipe.lancesVaretas ?? 'N/A', 10, false, smallLineHeight);
@@ -2427,36 +2358,30 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
             }
             if (equipe.justificativa) addWrappedText('Justificativa Falta', equipe.justificativa, 10, false, smallLineHeight);
 
-            // Segurança
-            checkAddPage(20); // Espaço para segurança
+            checkAddPage(20);
             doc.setFont(undefined, 'bold'); doc.text(`Segurança:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal');
             addWrappedText('- Caixa Bloqueio', equipe.caixaBloqueio ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Cadeados', equipe.cadeados ?? 'N/A', 10, false, smallLineHeight); addWrappedText('- Plaquetas', equipe.plaquetas ?? 'N/A', 10, false, smallLineHeight);
 
-            // Observações
             if (equipe.observacoes) { checkAddPage(15); doc.setFont(undefined, 'bold'); doc.text(`Observações:`, margin + 5, y); y += lineHeight; doc.setFont(undefined, 'normal'); addWrappedText('', equipe.observacoes, 10); }
 
-            y += lineHeight * 0.5; // Pequeno espaço antes da linha
-            doc.setLineWidth(0.1); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.5; // Espaço após a linha
+            y += lineHeight * 0.5;
+            doc.setLineWidth(0.1); doc.line(margin, y, pageWidth - margin, y); y += lineHeight * 1.5;
         });
     }
 
-    // Rodapé em todas as páginas
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
-        let footerY = pageHeight - margin / 2; // Posição do rodapé
-        // Linha acima do rodapé
+        let footerY = pageHeight - margin / 2;
         doc.setLineWidth(0.2); doc.line(margin, footerY - smallLineHeight * 1.5, pageWidth - margin, footerY - smallLineHeight * 1.5);
         doc.setFontSize(8); doc.setFont(undefined, 'italic');
-        // Texto do rodapé
-        doc.text(`Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'}`, margin, footerY); // Versão Atualizada
+        doc.text(`Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'}`, margin, footerY);
         doc.text(`Página ${i} de ${pageCount}`, pageWidth - margin, footerY, { align: 'right' });
     }
 
-    // Salvar o PDF
-    const sup = (dadosTurnoPDF.supervisor || 'Sup').replace(/[^a-z0-9]/gi, '_'); // Limpa nome supervisor
+    const sup = (dadosTurnoPDF.supervisor || 'Sup').replace(/[^a-z0-9]/gi, '_');
     const letra = dadosTurnoPDF.letra || 'X';
-    const dataFmt = formatarData(dadosTurnoPDF.data).replace(/\//g, '-') || 'data'; // Formata data
+    const dataFmt = formatarData(dadosTurnoPDF.data).replace(/\//g, '-') || 'data';
     const nomeArquivo = `Relatorio_${sup}_${letra}_${dataFmt}.pdf`;
 
     doc.save(nomeArquivo);
@@ -2466,21 +2391,20 @@ async function gerarPDF(dadosTurnoPDF, equipesPDF, relatorioId) {
 /** Formatar WhatsApp de relatório existente (Local ou Servidor) */
 async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'formatarWhatsApp') {
    if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-   setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume origem da pesquisa
+   setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa');
    mostrarLoading('Formatando para WhatsApp...');
    try {
      let textoWhatsApp = ''; let relatorioCompleto = null;
      if (origem === 'local') {
        relatorioCompleto = obterRelatorioLocal(id); if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
-       // Usa a função principal de formatação com os dados locais
        textoWhatsApp = formatarRelatorioParaCompartilhamentoFormal(relatorioCompleto.dadosTurno, relatorioCompleto.equipes);
-     } else { // Origem 'servidor'
-       const result = await callAPI(apiAction, { turnoId: id }); // API já retorna formatado
+     } else {
+       const result = await callAPI(apiAction, { turnoId: id });
        if (result && result.success && result.relatorio) { textoWhatsApp = result.relatorio; }
        else { throw new Error(result?.message || `Erro ao formatar WhatsApp via API (${apiAction}).`); }
      }
 
-     if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id); // Atualiza último ID visualizado
+     if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
 
      navegarParaEtapa('stepWhatsApp');
      const el = document.getElementById('whatsAppTexto'); if (el) el.textContent = textoWhatsApp;
@@ -2492,37 +2416,34 @@ async function formatarWhatsAppExistente(id, origem = 'servidor', apiAction = 'f
 /** Gerar texto WhatsApp para relatório local (usa a função principal de formatação) */
 function gerarTextoWhatsAppLocal(relatorio) {
   if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) { return 'Erro: Dados locais inválidos para formatação WhatsApp.'; }
-  // Reutiliza a função principal de formatação
   return formatarRelatorioParaCompartilhamentoFormal(relatorio.dadosTurno, relatorio.equipes);
 }
 
 /**
  * Formatar o relatório para compartilhamento (WhatsApp) - Versão Formal
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Troca (usa dados do GAS ou locais)
+ * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
   var texto = ""; const nl = "\n"; const sepPrincipal = "====================================" + nl; const sepSecao = "------------------------------------" + nl;
   if (!dadosTurno || !Array.isArray(equipes)) return "Erro: Dados inválidos para formatação WhatsApp.";
 
-  // Função auxiliar para pegar campo (prioriza GAS, depois Local)
   const getField = (obj, fieldGas, fieldLocal, defaultVal = 'N/A') => {
-      let val = obj[fieldGas]; // Tenta chave GAS (se obj for do GAS)
+      let val = obj[fieldGas];
       if (val !== undefined && val !== null && String(val).trim() !== '') return val;
-      val = obj[fieldLocal]; // Tenta chave Local (se obj for local ou GAS falhou)
+      val = obj[fieldLocal];
       if (val !== undefined && val !== null && String(val).trim() !== '') return val;
-      return defaultVal; // Retorna padrão se ambos falharem ou forem vazios
+      return defaultVal;
   }
 
-  // Cabeçalho
   texto += "*RELATÓRIO DE TURNO - GPS MECANIZADA*" + nl + sepPrincipal + nl;
   texto += `*Data:* ${formatarData(getField(dadosTurno, 'Data', 'data'))}` + nl;
   texto += `*Horário:* ${getField(dadosTurno, 'Horário', 'horario')}` + nl;
   texto += `*Letra:* ${getField(dadosTurno, 'Letra', 'letra')}` + nl;
   texto += `*Supervisor:* ${getField(dadosTurno, 'Supervisor', 'supervisor')}` + nl + nl;
 
-  // Agrupar equipes
   var equipesPorTipo = equipes.reduce((acc, eq) => { var tipo = getField(eq, 'Tipo_Equipe', 'tipo', 'Desconhecido'); if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(eq); return acc; }, {});
-  const ordemTiposWpp = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo']; // Ordem desejada
+  const ordemTiposWpp = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
   const tiposOrdenadosWpp = Object.keys(equipesPorTipo).sort((a, b) => { const idxA = ordemTiposWpp.indexOf(a); const idxB = ordemTiposWpp.indexOf(b); if(idxA===-1 && idxB===-1) return a.localeCompare(b); if(idxA===-1) return 1; if(idxB===-1) return -1; return idxA - idxB; });
 
 
@@ -2530,67 +2451,63 @@ function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
       const equipesDoTipo = equipesPorTipo[tipo];
       texto += `*EQUIPES ${tipo.toUpperCase()} (${equipesDoTipo.length})*` + nl + sepSecao + nl;
       equipesDoTipo.forEach((equipe, index) => {
-          const vaga = getField(equipe, 'Vaga', 'vaga'); const vagaP = getField(equipe, 'Vaga_Personalizada', 'vagaPersonalizada', ''); let vagaD = vaga === 'OUTRA VAGA' ? vagaP : vaga;
-          const equip = getField(equipe, 'Equipamento', 'equipamento'); const equipP = getField(equipe, 'Equipamento_Personalizada', 'equipamentoPersonalizado', ''); let equipD = equip === 'OUTRO EQUIPAMENTO' ? equipP : equip;
+          const vaga = getField(equipe, 'Vaga', 'vaga'); const vagaP = getField(equipe, 'Vaga_Personalizada', 'vagaPersonalizada', ''); let vagaD = normalizarTexto(vaga) === 'outra vaga' ? vagaP : vaga;
+          const equip = getField(equipe, 'Equipamento', 'equipamento'); const equipP = getField(equipe, 'Equipamento_Personalizada', 'equipamentoPersonalizado', ''); let equipD = normalizarTexto(equip) === 'outro equipamento' ? equipP : equip;
           const status = getField(equipe, 'StatusAtividade', 'statusAtividade', 'Concluído'); const pend = getField(equipe, 'Pendencia', 'pendencia', '');
           texto += `*Equipe ${index + 1}:* ${getField(equipe, 'Numero_Equipe', 'numero')}` + nl;
           texto += `  Motorista: ${getField(equipe, 'Motorista', 'motorista')}` + nl; texto += `  Operador(es): ${getField(equipe, 'Operadores', 'operadores')}` + nl; texto += `  Área: ${getField(equipe, 'Area', 'area')}` + nl; texto += `  Atividade: ${getField(equipe, 'Atividade', 'atividade')}` + nl;
-          texto += `  Tipo Ativ.: ${getField(equipe, 'TipoAtividade', 'tipoAtividade', 'Rotineira')}` + nl; texto += `  Status: ${status}${pend && status !== 'Concluído' ? ` (${pend})` : ''}` + nl;
+          texto += `  Tipo Ativ.: ${getField(equipe, 'TipoAtividade', 'tipoAtividade', 'Rotineira')}` + nl; texto += `  Status: ${status}${pend && normalizarTexto(status) !== 'concluido' ? ` (${pend})` : ''}` + nl;
           texto += `  Vaga: ${vagaD || 'N/A'}` + nl; texto += `  Equipamento: ${equipD || 'N/A'}` + nl;
-          const idUsiminas = getField(equipe, 'Identificacao_Usiminas', 'identificacaoUsiminas', ''); if (idUsiminas !== 'N/A') texto += `  ID Usiminas: ${idUsiminas}` + nl;
+          const idUsiminas = getField(equipe, 'Identificacao_Usiminas', 'identificacaoUsiminas', ''); if (idUsiminas !== 'N/A' && idUsiminas !== '') texto += `  ID Usiminas: ${idUsiminas}` + nl;
 
-          // Materiais (Simplificado para WhatsApp)
-           if (tipo === 'Alta Pressão') {
+           if (normalizarTexto(tipo) === normalizarTexto('Alta Pressão')) {
                const lancesM = getField(equipe, 'Lances_Mangueira', 'lancesMangueira', '0');
                const lancesV = getField(equipe, 'Lances_Varetas', 'lancesVaretas', '0');
-               texto += `  Materiais AP: L.Mang: ${lancesM}, L.Var: ${lancesV}` + nl; // Exemplo simplificado
-           } else if (tipo === 'Auto Vácuo / Hiper Vácuo') {
+               texto += `  Materiais AP: L.Mang: ${lancesM}, L.Var: ${lancesV}` + nl;
+           } else if (normalizarTexto(tipo) === normalizarTexto('Auto Vácuo / Hiper Vácuo')) {
                const mang3 = getField(equipe, 'Mangotes_3_Polegadas', 'mangotes3Polegadas', '0');
                const mang4 = getField(equipe, 'Mangotes_4_Polegadas', 'mangotes4Polegadas', '0');
                const mang6 = getField(equipe, 'Mangotes_6_Polegadas', 'mangotes6Polegadas', '0');
-               texto += `  Materiais Vácuo: M(3"): ${mang3}, M(4"): ${mang4}, M(6"): ${mang6}` + nl; // Exemplo simplificado
+               texto += `  Materiais Vácuo: M(3"): ${mang3}, M(4"): ${mang4}, M(6"): ${mang6}` + nl;
            }
            const justif = getField(equipe, 'Justificativa', 'justificativa', '');
-           if (justif !== 'N/A') texto += `    Just. Falta: ${justif}`+nl;
+           if (justif !== 'N/A' && justif !== '') texto += `    Just. Falta: ${justif}`+nl;
 
 
-          // Troca (com Fim e Tempo)
           const troca = getField(equipe, 'Troca_Equipamento', 'trocaEquipamento', 'Não');
-          if (troca === 'Sim') {
+          if (normalizarTexto(troca) === 'sim') {
               texto += nl + "  *Troca de Equipamento: Sim*" + nl;
-              const motivo = getField(equipe, 'Motivo_Troca', 'motivoTroca', ''); const motivoO = getField(equipe, 'Motivo_Outro', 'motivoOutro', ''); let motivoD = (motivo === 'Outros Motivos (Justificar)' || motivo === 'Defeitos Em Geral (Justificar)') ? motivoO : motivo;
+              const motivo = getField(equipe, 'Motivo_Troca', 'motivoTroca', ''); const motivoO = getField(equipe, 'Motivo_Outro', 'motivoOutro', '');
+              const motivoNorm = normalizarTexto(motivo);
+              let motivoD = (motivoNorm === normalizarTexto('Outros Motivos (Justificar)') || motivoNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) ? motivoO : motivo;
               texto += `    Motivo: ${motivoD || 'Não especificado'}` + nl;
-              const defeito = getField(equipe, 'Defeito', 'defeito', ''); if (defeito !== 'N/A') texto += `    Defeito/Medidas: ${defeito}` + nl;
-              const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); if (placa !== 'N/A') texto += `    Placa Nova: ${placa}` + nl;
-              const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); if (inicioT !== 'N/A') texto += `    Início: ${formatarDataHora(inicioT)}` + nl;
-               // ======================= ADICIONA FIM E TEMPO AO WHATSAPP =======================
-              const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); if (fimT !== 'N/A') texto += `    Fim: ${formatarDataHora(fimT)}` + nl;
-              const tempoT = getField(equipe, 'Tempo_Troca', '', ''); // Tenta pegar Tempo_Troca do GAS
-              if (tempoT && !tempoT.includes('Erro') && !tempoT.includes('Ausente') && tempoT !== 'N/A') { texto += `    Tempo Indisp.: ${tempoT}` + nl; }
-              else if (inicioT !== 'N/A' && fimT !== 'N/A') { // Tenta calcular se Tempo_Troca não veio pronto (ex: relatório local)
+              const defeito = getField(equipe, 'Defeito', 'defeito', ''); if (defeito !== 'N/A' && defeito !== '') texto += `    Defeito/Medidas: ${defeito}` + nl;
+              const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); if (placa !== 'N/A' && placa !== '') texto += `    Placa Nova: ${placa}` + nl;
+              const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); if (inicioT !== 'N/A' && inicioT !== '') texto += `    Início: ${formatarDataHora(inicioT)}` + nl;
+              const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); if (fimT !== 'N/A' && fimT !== '') texto += `    Fim: ${formatarDataHora(fimT)}` + nl;
+              const tempoT = getField(equipe, 'Tempo_Troca', '', '');
+              if (tempoT && !tempoT.includes('Erro') && !tempoT.includes('Ausente') && tempoT !== 'N/A' && tempoT !== '') { texto += `    Tempo Indisp.: ${tempoT}` + nl; }
+              else if (inicioT !== 'N/A' && inicioT !== '' && fimT !== 'N/A' && fimT !== '') {
                   try { const inicio = new Date(inicioT); const fim = new Date(fimT); if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) { const dM = Math.round((fim-inicio)/60000); const h = Math.floor(dM/60); const m = dM%60; texto += `    Tempo Indisp.: ${h}h${m<10?'0':''}${m}min`+nl; } } catch(e){}
               }
-              // ==============================================================================
           }
-          // Observações
-          const obs = getField(equipe, 'Observacoes', 'observacoes', ''); if (obs !== 'N/A') texto += nl + `  *Observações:* ${obs}` + nl;
-          texto += nl; // Espaço entre equipes
+          const obs = getField(equipe, 'Observacoes', 'observacoes', ''); if (obs !== 'N/A' && obs !== '') texto += nl + `  *Observações:* ${obs}` + nl;
+          texto += nl;
       });
   }
-  // Rodapé
-  texto += sepPrincipal + `Sistema v${window.CONFIG?.VERSAO_APP || '3.2'}`; // Versão Atualizada
+  texto += sepPrincipal + `Sistema v${window.CONFIG?.VERSAO_APP || '3.2'}`;
   return texto;
 }
 
 /** Voltar da visualização/WhatsApp para a tela de pesquisa */
 function voltarDaVisualizacaoParaPesquisa() { navegarParaEtapa('stepPesquisa'); }
 /** Voltar da tela de pesquisa para o início */
-function voltarDaPesquisa() { novoRelatorio(); } // Volta para a etapa 1 e reseta
+function voltarDaPesquisa() { novoRelatorio(); }
 
 
 // ========== FUNÇÕES DE DASHBOARD ==========
 function mostrarDashboard() {
-  setOrigemNavegacao('dashboard'); // Define a origem
+  setOrigemNavegacao('dashboard');
   if (window.ModuleLoader && ModuleLoader.isInitialized('dashboard')) {
     const Dashboard = ModuleLoader.get('dashboard');
     if (Dashboard && typeof Dashboard.mostrarDashboard === 'function') Dashboard.mostrarDashboard();
@@ -2601,10 +2518,8 @@ function mostrarDashboard() {
      else { mostrarNotificacao('Dashboard não disponível.', 'warning'); voltarDoDashboard(); }
   }
 }
-// Volta do dashboard para a etapa inicial (Turno)
 function voltarDoDashboard() { novoRelatorio(); }
 
-// Mostrar modal de ajuda
 function mostrarHelp() { if (modalHelp) modalHelp.show(); else mostrarNotificacao("Ajuda não encontrada.", "warning"); }
 
 
@@ -2615,24 +2530,18 @@ function formatarData(dataInput) {
   try {
     let dataObj;
     const dataStr = String(dataInput);
-    // Tenta identificar AAAA-MM-DD (com ou sem T...)
     if (/^\d{4}-\d{2}-\d{2}/.test(dataStr)) {
       const parts = dataStr.substring(0, 10).split('-');
-      // Usa UTC para evitar problemas de timezone ao criar a data apenas com ano, mês, dia
       dataObj = new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
     } else if (dataInput instanceof Date) {
-        dataObj = dataInput; // Já é um objeto Date
+        dataObj = dataInput;
     } else {
-      // Tenta outras formas (DD/MM/YYYY, etc.) ou fallback para o construtor padrão
-      // Cuidado: new Date(string) pode ter comportamento inconsistente entre navegadores
-      dataObj = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1')); // Tenta converter DD/MM/YYYY para YYYY-MM-DD
-       if (isNaN(dataObj.getTime())) dataObj = new Date(dataStr); // Última tentativa
+      dataObj = new Date(dataStr.replace(/(\d{2})\/(\d{2})\/(\d{4})/, '$3-$2-$1'));
+       if (isNaN(dataObj.getTime())) dataObj = new Date(dataStr);
     }
 
-    // Verifica se a data resultante é válida
-    if (isNaN(dataObj.getTime())) return String(dataInput); // Retorna original se inválida
+    if (isNaN(dataObj.getTime())) return String(dataInput);
 
-    // Formata usando UTC para consistência
     const dia = String(dataObj.getUTCDate()).padStart(2, '0');
     const mes = String(dataObj.getUTCMonth() + 1).padStart(2, '0');
     const ano = dataObj.getUTCFullYear();
@@ -2644,10 +2553,9 @@ function formatarData(dataInput) {
 function formatarDataHora(dataHoraInput) {
   if (!dataHoraInput) return 'N/A';
   try {
-    let dataObj; if (dataHoraInput instanceof Date) dataObj = dataHoraInput; else dataObj = new Date(dataHoraInput); // Tenta converter string
-    if (isNaN(dataObj.getTime())) return String(dataHoraInput); // Retorna original se inválida
+    let dataObj; if (dataHoraInput instanceof Date) dataObj = dataHoraInput; else dataObj = new Date(dataHoraInput);
+    if (isNaN(dataObj.getTime())) return String(dataHoraInput);
 
-    // Formata usando o timezone local do navegador
     const dia = String(dataObj.getDate()).padStart(2, '0');
     const mes = String(dataObj.getMonth() + 1).padStart(2, '0');
     const ano = dataObj.getFullYear();
@@ -2659,7 +2567,6 @@ function formatarDataHora(dataHoraInput) {
 
 
 // --- Exportar funções para o escopo global (necessário para onclick no HTML) ---
-// Mantém a exportação para compatibilidade, mas idealmente os eventos seriam adicionados via JS
 window.inicializarFormulario = inicializarFormulario;
 window.avancarParaEquipes = avancarParaEquipes;
 window.voltarParaTurno = voltarParaTurno;
@@ -2677,7 +2584,7 @@ window.copiarWhatsApp = copiarWhatsApp;
 window.adicionarEquipe = adicionarEquipe;
 window.editarEquipe = editarEquipe;
 window.removerEquipe = removerEquipe;
-window.salvarEquipe = salvarEquipe; // O listener do form agora chama esta
+window.salvarEquipe = salvarEquipe;
 window.toggleVagaPersonalizada = toggleVagaPersonalizada;
 window.toggleEquipamentoPersonalizado = toggleEquipamentoPersonalizado;
 window.toggleTrocaEquipamento = toggleTrocaEquipamento;
@@ -2686,7 +2593,7 @@ window.togglePendencia = togglePendencia;
 window.abrirPesquisa = abrirPesquisa;
 window.ajustarCampoPesquisa = ajustarCampoPesquisa;
 window.executarPesquisa = executarPesquisa;
-window.visualizarRelatorioExistente = visualizarRelatorioExistente; // Agora é a versão sem jQuery
+window.visualizarRelatorioExistente = visualizarRelatorioExistente;
 window.gerarPDFExistente = gerarPDFExistente;
 window.formatarWhatsAppExistente = formatarWhatsAppExistente;
 window.voltarDaVisualizacaoParaPesquisa = voltarDaVisualizacaoParaPesquisa;
@@ -2694,7 +2601,7 @@ window.voltarDaPesquisa = voltarDaPesquisa;
 window.mostrarDashboard = mostrarDashboard;
 window.voltarDoDashboard = voltarDoDashboard;
 window.mostrarHelp = mostrarHelp;
-window.copiarRelatorioParaAreaDeTransferencia = copiarRelatorioParaAreaDeTransferencia; // Agora é a versão sem jQuery
+window.copiarRelatorioParaAreaDeTransferencia = copiarRelatorioParaAreaDeTransferencia;
 
 
 // Flags para evitar múltiplos salvamentos/submissões rápidas
@@ -2702,10 +2609,8 @@ let salvandoEquipe = false;
 let salvandoRelatorio = false;
 
 // --- Inicializar listeners específicos do formulário após o carregamento inicial ---
-// Garante que os listeners para os toggles do modal sejam adicionados corretamente
 document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
-    // Adiciona listener para atualizar lista de equipes se AppState for usado
     if (window.AppState) {
         AppState.subscribe('equipes', (newState) => {
             console.log("Estado 'equipes' atualizado, renderizando lista.");
@@ -2714,18 +2619,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
          AppState.subscribe('dadosTurno', (newState) => {
             console.log("Estado 'dadosTurno' atualizado.");
-            // Poderia pré-preencher o form de turno se necessário ao voltar
         });
         AppState.subscribe('currentStep', (newState) => {
             console.log("Estado 'currentStep' atualizado para:", newState);
-             // Poderia adicionar lógica aqui baseada na etapa atual
         });
     }
 
-    // Verifica se jQuery está presente (apenas para fins de log, já que estamos removendo seu uso)
     if (typeof $ === 'function') {
         console.log("jQuery ainda está carregado na página.");
     } else {
         console.log("jQuery não está carregado. Isso é o esperado para as novas atualizações.");
     }
 });
+
+/**
+ * Normaliza texto para comparações mais consistentes
+ * Converte para minúsculas, remove acentos e espaços extras
+ */
+function normalizarTexto(texto) {
+  if (!texto) return '';
+  return String(texto)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
