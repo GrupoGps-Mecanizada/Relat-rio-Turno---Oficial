@@ -1598,49 +1598,78 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
 function configurarBotoesSucesso() {
   console.log("Configurando botões da tela de sucesso...");
   
+  // Verificar se jQuery está disponível
+  const jQueryDisponivel = typeof $ !== 'undefined';
+  
   const btnVisualizarEl = document.getElementById('btnVisualizar');
   const btnCopiarEl = document.getElementById('btnCopiar');
   const btnNovoEl = document.getElementById('btnNovo');
 
-  if (!btnVisualizarEl && !btnCopiarEl && !btnNovoEl) { // Modificado para &&, só avisa se NENHUM for encontrado
-      console.warn("Botões da tela de sucesso (btnVisualizar, btnCopiar, btnNovo) não encontrados. A configuração pode falhar.");
-      // Mesmo que alguns botões não existam, tenta configurar os que existem.
+  if (!btnVisualizarEl && !btnCopiarEl && !btnNovoEl) {
+    console.warn("Botões da tela de sucesso não encontrados.");
+    return;
   }
 
-  // Desvincula eventos anteriores para evitar duplicações
-  $('#btnVisualizar').off('click');
-  $('#btnCopiar').off('click');
-  $('#btnNovo').off('click');
+  // Remover event listeners anteriores (versão sem jQuery)
+  if (btnVisualizarEl) {
+    const oldBtnVisualizar = btnVisualizarEl.cloneNode(true);
+    if (btnVisualizarEl.parentNode) {
+      btnVisualizarEl.parentNode.replaceChild(oldBtnVisualizar, btnVisualizarEl);
+    }
+  }
   
-  const relatorioId = AppState.get('ultimoRelatorioId');
+  if (btnCopiarEl) {
+    const oldBtnCopiar = btnCopiarEl.cloneNode(true);
+    if (btnCopiarEl.parentNode) {
+      btnCopiarEl.parentNode.replaceChild(oldBtnCopiar, btnCopiarEl);
+    }
+  }
+  
+  if (btnNovoEl) {
+    const oldBtnNovo = btnNovoEl.cloneNode(true);
+    if (btnNovoEl.parentNode) {
+      btnNovoEl.parentNode.replaceChild(oldBtnNovo, btnNovoEl);
+    }
+  }
+  
+  const relatorioId = window.AppState ? AppState.get('ultimoRelatorioId') : window.ultimoRelatorioId;
 
-  // Configura o botão Visualizar
-  $('#btnVisualizar').on('click', function() {
-    console.log("Botão Visualizar clicado");
-    if (relatorioId) {
-      visualizarRelatorio(); // Usa a função global que já lida com origem, etc.
-    } else {
-      mostrarNotificacao('ID do relatório não encontrado para visualização.', 'error');
-    }
-  }).prop('disabled', !relatorioId); // Desabilita se não houver ID
+  // Configurar o botão Visualizar
+  if (btnVisualizarEl) {
+    btnVisualizarEl.addEventListener('click', function() {
+      console.log("Botão Visualizar clicado");
+      if (relatorioId) {
+        visualizarRelatorio();
+      } else {
+        mostrarNotificacao('ID do relatório não encontrado para visualização.', 'error');
+      }
+    });
+    btnVisualizarEl.disabled = !relatorioId;
+  }
   
-  // Configura o botão Copiar
-  $('#btnCopiar').on('click', function() {
-    console.log("Botão Copiar clicado");
-    if (relatorioId) {
-      const origem = String(relatorioId).startsWith('local_') ? 'local' : 'servidor';
-      setOrigemNavegacao('stepSucesso'); // Garante que voltará para cá
-      visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true);
-    } else {
-      mostrarNotificacao('ID do relatório não encontrado para cópia.', 'error');
-    }
-  }).prop('disabled', !relatorioId); // Desabilita se não houver ID
+  // Configurar o botão Copiar
+  if (btnCopiarEl) {
+    btnCopiarEl.addEventListener('click', function() {
+      console.log("Botão Copiar clicado");
+      if (relatorioId) {
+        const origem = String(relatorioId).startsWith('local_') ? 'local' : 'servidor';
+        setOrigemNavegacao('stepSucesso');
+        visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true);
+      } else {
+        mostrarNotificacao('ID do relatório não encontrado para cópia.', 'error');
+      }
+    });
+    btnCopiarEl.disabled = !relatorioId;
+  }
   
-  // Configura o botão Novo Relatório
-  $('#btnNovo').on('click', function() {
-    console.log("Botão Novo Relatório clicado");
-    novoRelatorio(); // Função original para criar novo relatório
-  }).prop('disabled', false); // Botão Novo sempre habilitado
+  // Configurar o botão Novo Relatório
+  if (btnNovoEl) {
+    btnNovoEl.addEventListener('click', function() {
+      console.log("Botão Novo Relatório clicado");
+      novoRelatorio();
+    });
+    btnNovoEl.disabled = false;
+  }
   
   console.log("Botões da tela de sucesso configurados com sucesso!");
 }
