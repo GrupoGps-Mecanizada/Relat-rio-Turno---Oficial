@@ -3,6 +3,7 @@
  * Arquivo principal de lógica da aplicação (app.js)
  * ATUALIZADO para incluir Data/Hora FIM da Troca e validações associadas.
  * ATUALIZADO COM NOVAS FUNÇÕES DE TELA DE SUCESSO E CÓPIA.
+ * ATUALIZADO para remover jQuery de visualizarRelatorioExistente e copiarRelatorioParaAreaDeTransferencia.
  */
 
 // Variáveis globais (Considerar mover para AppState no futuro)
@@ -1598,9 +1599,6 @@ function mostrarTelaSucesso(idSalvo = null, foiLocal = false) {
 function configurarBotoesSucesso() {
   console.log("Configurando botões da tela de sucesso...");
   
-  // Verificar se jQuery está disponível
-  const jQueryDisponivel = typeof $ !== 'undefined';
-  
   const btnVisualizarEl = document.getElementById('btnVisualizar');
   const btnCopiarEl = document.getElementById('btnCopiar');
   const btnNovoEl = document.getElementById('btnNovo');
@@ -1632,11 +1630,16 @@ function configurarBotoesSucesso() {
     }
   }
   
+  // É necessário pegar a referência dos botões NOVOS após o cloneNode
+  const newBtnVisualizarEl = document.getElementById('btnVisualizar');
+  const newBtnCopiarEl = document.getElementById('btnCopiar');
+  const newBtnNovoEl = document.getElementById('btnNovo');
+  
   const relatorioId = window.AppState ? AppState.get('ultimoRelatorioId') : window.ultimoRelatorioId;
 
   // Configurar o botão Visualizar
-  if (btnVisualizarEl) {
-    btnVisualizarEl.addEventListener('click', function() {
+  if (newBtnVisualizarEl) {
+    newBtnVisualizarEl.addEventListener('click', function() {
       console.log("Botão Visualizar clicado");
       if (relatorioId) {
         visualizarRelatorio();
@@ -1644,42 +1647,43 @@ function configurarBotoesSucesso() {
         mostrarNotificacao('ID do relatório não encontrado para visualização.', 'error');
       }
     });
-    btnVisualizarEl.disabled = !relatorioId;
+    newBtnVisualizarEl.disabled = !relatorioId;
   }
   
   // Configurar o botão Copiar
-  if (btnCopiarEl) {
-    btnCopiarEl.addEventListener('click', function() {
+  if (newBtnCopiarEl) {
+    newBtnCopiarEl.addEventListener('click', function() {
       console.log("Botão Copiar clicado");
       if (relatorioId) {
         const origem = String(relatorioId).startsWith('local_') ? 'local' : 'servidor';
         setOrigemNavegacao('stepSucesso');
-        visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true);
+        visualizarRelatorioExistente(relatorioId, origem, 'gerarRelatorioTexto', true); // copiarAutomaticamente = true
       } else {
         mostrarNotificacao('ID do relatório não encontrado para cópia.', 'error');
       }
     });
-    btnCopiarEl.disabled = !relatorioId;
+    newBtnCopiarEl.disabled = !relatorioId;
   }
   
   // Configurar o botão Novo Relatório
-  if (btnNovoEl) {
-    btnNovoEl.addEventListener('click', function() {
+  if (newBtnNovoEl) {
+    newBtnNovoEl.addEventListener('click', function() {
       console.log("Botão Novo Relatório clicado");
       novoRelatorio();
     });
-    btnNovoEl.disabled = false;
+    newBtnNovoEl.disabled = false;
   }
   
   console.log("Botões da tela de sucesso configurados com sucesso!");
 }
 
 /**
- * Função para copiar o relatório visualizado para a área de transferência
+ * Função para copiar o relatório visualizado para a área de transferência - VERSÃO SEM JQUERY
  */
 function copiarRelatorioParaAreaDeTransferencia() {
   console.log("Tentando copiar relatório para área de transferência...");
-  const relatorioText = $('#relatorioTexto').text(); // ID do elemento que contém o texto do relatório
+  const relatorioTextEl = document.getElementById('relatorioTexto');
+  const relatorioText = relatorioTextEl ? relatorioTextEl.textContent : '';
   
   if (!relatorioText || relatorioText.trim() === '') {
     mostrarNotificacao('Nenhum texto de relatório encontrado para copiar.', 'error');
@@ -1705,14 +1709,14 @@ function copiarRelatorioParaAreaDeTransferencia() {
   if (copiadoComSucesso) {
     mostrarNotificacao('Relatório copiado para a área de transferência!', 'success');
     
-    const dicaContainer = $('#dicaPosCopiaCont'); // Este elemento deve existir na tela de visualização
-    if (dicaContainer.length) {
-        dicaContainer.html(`
+    const dicaContainer = document.getElementById('dicaPosCopiaCont');
+    if (dicaContainer) {
+        dicaContainer.innerHTML = `
             <div class="alert alert-info mt-3">
             <i class="bi bi-info-circle-fill me-2"></i> Relatório copiado! 
             <strong>Dica:</strong> Abra seu aplicativo de mensagens para colar o relatório.
             </div>
-        `);
+        `;
     } else {
         console.warn("#dicaPosCopiaCont não encontrado no DOM para exibir dica.");
     }
@@ -2045,55 +2049,67 @@ function exibirResultadosPesquisa(resultados) {
   }
 }
 
-/** Visualizar um relatório específico (local ou servidor) */
+/**
+ * Visualizar um relatório específico (local ou servidor) - VERSÃO SEM JQUERY
+ */
 async function visualizarRelatorioExistente(id, origem = 'servidor', apiAction = 'gerarRelatorioTexto', copiarAutomaticamente = false) {
   if (!id) { mostrarNotificacao("ID inválido.", "danger"); return; }
-  // Armazena a etapa atual como origem para poder voltar (a menos que já venha da tela de sucesso, nesse caso setOrigemNavegacao já foi chamado)
+  // Armazena a etapa atual como origem para poder voltar
   if (getOrigemNavegacao() !== 'stepSucesso') {
-    setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa'); // Assume stepPesquisa se não houver AppState
+    setOrigemNavegacao(window.AppState?.get('currentStep') || 'stepPesquisa');
   }
   
   mostrarLoading('Carregando relatório...');
   try {
-    let textoRelatorio = ''; let relatorioCompleto = null;
+    let textoRelatorio = ''; 
+    let relatorioCompleto = null;
+    
     if (origem === 'local') {
-      relatorioCompleto = obterRelatorioLocal(id); if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
-      textoRelatorio = gerarTextoRelatorioLocal(relatorioCompleto); // Gera texto a partir dos dados locais
+      relatorioCompleto = obterRelatorioLocal(id); 
+      if (!relatorioCompleto) throw new Error('Relatório local não encontrado.');
+      textoRelatorio = gerarTextoRelatorioLocal(relatorioCompleto);
     } else { // Origem 'servidor'
       const result = await callAPI(apiAction, { turnoId: id });
-      if (result && result.success && result.relatorio) { textoRelatorio = result.relatorio; }
-      else { throw new Error(result?.message || `Erro ao buscar relatório do servidor (${apiAction}).`); }
+      if (result && result.success && result.relatorio) { 
+        textoRelatorio = result.relatorio; 
+      } else { 
+        throw new Error(result?.message || `Erro ao buscar relatório do servidor (${apiAction}).`); 
+      }
     }
 
-    // Atualiza o ID do último relatório visualizado (útil se navegar de volta)
-    if(window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
+    // Atualiza o ID do último relatório visualizado
+    if (window.AppState) AppState.update('ultimoRelatorioIdVisualizado', id);
 
-    navegarParaEtapa('stepRelatorio'); // Vai para a tela de visualização
-    const el = document.getElementById('relatorioTexto'); 
-    if (el) {
-        el.textContent = textoRelatorio;
+    navegarParaEtapa('stepRelatorio');
+    
+    const elRelatorioTexto = document.getElementById('relatorioTexto'); 
+    if (elRelatorioTexto) {
+        elRelatorioTexto.textContent = textoRelatorio;
+        
         // Limpa dica de cópia anterior ao visualizar novo relatório
-        const dicaContainer = $('#dicaPosCopiaCont');
-        if (dicaContainer.length) dicaContainer.html('');
+        const dicaContainer = document.getElementById('dicaPosCopiaCont');
+        if (dicaContainer) dicaContainer.innerHTML = '';
     }
-    const btn = document.getElementById('btnVoltarRelatorio'); if (btn) btn.onclick = voltarDoRelatorio; // Configura botão voltar
+    
+    const btnVoltar = document.getElementById('btnVoltarRelatorio'); 
+    if (btnVoltar) btnVoltar.onclick = voltarDoRelatorio;
 
     // Após mostrar o relatório, copiar se solicitado
     if (copiarAutomaticamente) {
       setTimeout(function() {
         copiarRelatorioParaAreaDeTransferencia();
-      }, 500); // Pequeno atraso para garantir que o conteúdo foi renderizado
+      }, 500);
     }
 
   } catch (error) { 
       console.error('Erro ao visualizar relatório:', error); 
       mostrarNotificacao('Erro ao carregar relatório: ' + error.message, 'danger'); 
-      // Se falhar ao carregar, e a origem era 'stepSucesso', talvez volte para lá para não ficar preso
       if (getOrigemNavegacao() === 'stepSucesso') {
           voltarParaSucesso();
       }
-    }
-  finally { ocultarLoading(); }
+  } finally { 
+      ocultarLoading(); 
+  }
 }
 
 /** Obter dados de um relatório local por ID */
@@ -2670,7 +2686,7 @@ window.togglePendencia = togglePendencia;
 window.abrirPesquisa = abrirPesquisa;
 window.ajustarCampoPesquisa = ajustarCampoPesquisa;
 window.executarPesquisa = executarPesquisa;
-window.visualizarRelatorioExistente = visualizarRelatorioExistente;
+window.visualizarRelatorioExistente = visualizarRelatorioExistente; // Agora é a versão sem jQuery
 window.gerarPDFExistente = gerarPDFExistente;
 window.formatarWhatsAppExistente = formatarWhatsAppExistente;
 window.voltarDaVisualizacaoParaPesquisa = voltarDaVisualizacaoParaPesquisa;
@@ -2678,9 +2694,7 @@ window.voltarDaPesquisa = voltarDaPesquisa;
 window.mostrarDashboard = mostrarDashboard;
 window.voltarDoDashboard = voltarDoDashboard;
 window.mostrarHelp = mostrarHelp;
-// Funções novas (se precisarem ser chamadas externamente, mas configurarBotoesSucesso é chamada internamente)
-// window.configurarBotoesSucesso = configurarBotoesSucesso;
-// window.copiarRelatorioParaAreaDeTransferencia = copiarRelatorioParaAreaDeTransferencia;
+window.copiarRelatorioParaAreaDeTransferencia = copiarRelatorioParaAreaDeTransferencia; // Agora é a versão sem jQuery
 
 
 // Flags para evitar múltiplos salvamentos/submissões rápidas
@@ -2708,8 +2722,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // jQuery está sendo usado pelas novas funções, então o if (typeof $ === 'function') pode ser útil.
-    if (typeof $ !== 'function') {
-        console.error("jQuery não está disponível. Algumas funcionalidades podem não funcionar como esperado.");
+    // Verifica se jQuery está presente (apenas para fins de log, já que estamos removendo seu uso)
+    if (typeof $ === 'function') {
+        console.log("jQuery ainda está carregado na página.");
+    } else {
+        console.log("jQuery não está carregado. Isso é o esperado para as novas atualizações.");
     }
 });
