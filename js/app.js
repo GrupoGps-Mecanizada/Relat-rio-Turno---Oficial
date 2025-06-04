@@ -1,10 +1,11 @@
 /**
- * Sistema de Relatório de Turno v3.2
+ * Sistema de Relatório de Turno v3.3
  * Arquivo principal de lógica da aplicação (app.js)
  * ATUALIZADO para incluir Data/Hora FIM da Troca e validações associadas.
  * ATUALIZADO COM NOVAS FUNÇÕES DE TELA DE SUCESSO E CÓPIA.
  * ATUALIZADO para remover jQuery de visualizarRelatorioExistente e copiarRelatorioParaAreaDeTransferencia.
  * ATUALIZADO para incluir normalização de texto e tratamento consistente de status.
+ * CORRIGIDO: Formatação de relatório local para usar formato executivo correto.
  */
 
 // Variáveis globais (Considerar mover para AppState no futuro)
@@ -2078,7 +2079,8 @@ function obterRelatorioLocal(id) {
 
 
 /**
- * Gerar texto de relatório local (Melhorado e mais detalhado)
+ * Gerar texto de relatório local (CORRIGIDO - Formato Executivo)
+ * ATUALIZADO: Usa o mesmo formato da função gerarRelatorioTexto do backend
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Calculado
  * ATUALIZADO: Usa normalizarTexto para comparações.
  */
@@ -2087,120 +2089,270 @@ function gerarTextoRelatorioLocal(relatorio) {
     return 'Erro: Dados do relatório local inválidos ou ausentes.';
   }
 
-  const { dadosTurno, equipes, id, timestamp } = relatorio;
-  let texto = '';
-  const linhaSeparadora = '='.repeat(72) + '\n';
-  const subLinha = '-'.repeat(72) + '\n';
+  const { dadosTurno, equipes } = relatorio;
+  
+  // Iniciar relatório executivo com o formato correto
+  var relatorioTexto = "RELATÓRIO DE TURNO - GPS MECANIZADA\n\n";
+  
+  // === RESUMO EXECUTIVO ===
+  relatorioTexto += "🔹 RESUMO EXECUTIVO 🔹\n";
+  relatorioTexto += `- Data: ${formatarData(dadosTurno.data)} | Turno: ${dadosTurno.horario || 'N/A'} | Letra: ${dadosTurno.letra || 'N/A'}\n`;
+  relatorioTexto += `- Supervisor: ${dadosTurno.supervisor || 'N/A'}\n`;
+  
+  // Calcular contadores
+  let totalAltaPressao = 0, totalVacuo = 0;
+  let totalConcluido = 0, totalEmAndamento = 0;
+  let totalIndisponibilidadeTecnica = 0; // Em minutos - apenas manutenções técnicas
+  let totalIndisponibilidadeCliente = 0; // Em minutos - solicitações de cliente
+  let tiposAtividade = {};
 
-  texto += linhaSeparadora;
-  texto += '                     RELATÓRIO DE TURNO (LOCAL)\n';
-  texto += '                   GRUPO GPS - MECANIZADA\n';
-  texto += linhaSeparadora + '\n';
+  // Agrupar equipes por tipo
+  var equipesPorTipo = {};
+  
+  equipes.forEach((eq) => {
+    var tipo = eq.tipo || 'Desconhecido';
+    if (!equipesPorTipo[tipo]) equipesPorTipo[tipo] = [];
+    equipesPorTipo[tipo].push(eq);
 
-  texto += 'INFORMAÇÕES GERAIS\n';
-  texto += subLinha;
-  texto += `Data: ${formatarData(dadosTurno.data)}\n`;
-  texto += `Horário: ${dadosTurno.horario || 'N/A'}\n`;
-  texto += `Letra do turno: ${dadosTurno.letra || 'N/A'}\n`;
-  texto += `Supervisor: ${dadosTurno.supervisor || 'N/A'}\n`;
-  texto += `ID Relatório Local: ${id || 'N/A'}\n`;
-  texto += `Salvo em: ${formatarDataHora(timestamp)}\n`;
-  texto += subLinha + '\n';
+    // Contagem por tipo
+    if (tipo === 'Alta Pressão') totalAltaPressao++;
+    else if (tipo === 'Auto Vácuo / Hiper Vácuo') totalVacuo++;
 
-  const equipesPorTipo = equipes.reduce((acc, equipe) => {
-    const tipo = equipe.tipo || 'Outro'; if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(equipe); return acc;
-  }, {});
+    // Contagem por status
+    const statusNormalizado = normalizarTexto(eq.statusAtividade || 'concluído');
+    if (statusNormalizado === 'concluído') {
+      totalConcluido++;
+    } else if (statusNormalizado === 'em andamento') {
+      totalEmAndamento++;
+    }
+    
+    // Contar tipos de atividade
+    const tipoAtiv = eq.tipoAtividade || 'Rotineira';
+    tiposAtividade[tipoAtiv] = (tiposAtividade[tipoAtiv] || 0) + 1;
 
-  const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
-  const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => {
-      const indexA = ordemTipos.indexOf(a);
-      const indexB = ordemTipos.indexOf(b);
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-  });
-
-
-  for (const tipo of tiposOrdenados) {
-    const equipesDoTipo = equipesPorTipo[tipo];
-    texto += linhaSeparadora;
-    texto += `          EQUIPES DE ${tipo.toUpperCase()} (${equipesDoTipo.length})\n`;
-    texto += linhaSeparadora + '\n';
-
-    equipesDoTipo.forEach((equipe, index) => {
-      const vagaDisplay = normalizarTexto(equipe.vaga) === 'outra vaga' ? equipe.vagaPersonalizada : equipe.vaga;
-      const equipDisplay = normalizarTexto(equipe.equipamento) === 'outro equipamento' ? equipe.equipamentoPersonalizado : equipe.equipamento;
+    // CÁLCULO CORRETO DE INDISPONIBILIDADE
+    if (eq.trocaEquipamento === 'Sim') {
+      var tempoMinutos = 0;
+      var isSolicitacaoCliente = false;
       
-      const equipeMotivoTrocaNorm = normalizarTexto(equipe.motivoTroca);
-      const motivoTrocaDisplay = (equipeMotivoTrocaNorm === normalizarTexto('Outros Motivos (Justificar)') || equipeMotivoTrocaNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) ? equipe.motivoOutro : equipe.motivoTroca;
-      const isAltaPressao = normalizarTexto(tipo) === normalizarTexto('Alta Pressão');
+      // Verificar se é solicitação do cliente
+      const motivoNormalizado = normalizarTexto(eq.motivoTroca || '');
+      const motivoOutroNormalizado = normalizarTexto(eq.motivoOutro || '');
 
-      texto += `EQUIPE ${index + 1} | ${equipe.numero || 'N/A'}\n`;
-      texto += subLinha;
-      texto += `Motorista: ${equipe.motorista || 'N/A'}\n`;
-      texto += `Operador(es): ${equipe.operadores || 'N/A'}\n`;
-      texto += `Área: ${equipe.area || 'N/A'}\n`;
-      texto += `Atividade: ${equipe.atividade || 'N/A'}\n`;
-      texto += `> Tipo de Atividade: ${equipe.tipoAtividade || 'Rotineira'}\n`;
-      texto += `> Status: ${equipe.statusAtividade || 'Concluído'}\n`;
-      if (equipe.statusAtividade && normalizarTexto(equipe.statusAtividade) !== 'concluido' && equipe.pendencia) { texto += `  - Pendência: ${equipe.pendencia}\n`; }
-      texto += `Vaga: ${vagaDisplay || 'N/A'}\n`;
-      texto += `Equipamento: ${equipDisplay || 'N/A'}\n`;
-      if (equipe.identificacaoUsiminas) texto += `Identificação Usiminas: ${equipe.identificacaoUsiminas}\n`;
+      if (motivoNormalizado.includes('solicitacao') || 
+          motivoNormalizado.includes('cliente') ||
+          motivoNormalizado.includes('solicitação')) {
+        isSolicitacaoCliente = true;
+      } else if ((motivoNormalizado.includes('outros') || motivoNormalizado.includes('defeitos')) &&
+                 (motivoOutroNormalizado.includes('solicitacao') || 
+                  motivoOutroNormalizado.includes('cliente') ||
+                  motivoOutroNormalizado.includes('solicitação'))) {
+        isSolicitacaoCliente = true;
+      }
 
-      texto += '\n> Status Equipamento:\n';
-      texto += `  Houve troca: ${equipe.trocaEquipamento || 'Não'}\n`;
-      if (normalizarTexto(equipe.trocaEquipamento) === 'sim') {
-        texto += `  - Motivo: ${motivoTrocaDisplay || 'Não especificado'}\n`;
-        texto += `  - Defeito/Medidas: ${equipe.defeito || 'N/A'}\n`;
-        if (equipe.placaNova) texto += `  - Placa Nova: ${equipe.placaNova}\n`;
-        if (equipe.dataHoraTroca) texto += `  - Início Troca: ${formatarDataHora(equipe.dataHoraTroca)}\n`;
-        if (equipe.dataHoraFimTroca) texto += `  - Fim Troca: ${formatarDataHora(equipe.dataHoraFimTroca)}\n`;
-        if (equipe.dataHoraTroca && equipe.dataHoraFimTroca) {
-            try {
-                const inicio = new Date(equipe.dataHoraTroca); const fim = new Date(equipe.dataHoraFimTroca);
-                if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
-                   const diffMins = Math.round((fim - inicio) / 60000); const h = Math.floor(diffMins / 60); const m = diffMins % 60;
-                   texto += `  - Tempo Indisp.: ${h}h${m < 10 ? '0' : ''}${m}min\n`;
-                }
-            } catch(e) { console.warn("Erro ao calcular tempo de troca local:", e); }
+      // Calcular tempo se houver dados válidos
+      if (eq.dataHoraTroca && eq.dataHoraFimTroca) {
+        // Calcular baseado nas datas
+        try {
+          var inicio = new Date(eq.dataHoraTroca);
+          var fim = new Date(eq.dataHoraFimTroca);
+          if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
+            tempoMinutos = Math.round((fim - inicio) / (1000 * 60));
+          }
+        } catch (e) {
+          console.log("Erro ao calcular tempo das datas: " + e.message);
         }
       }
 
-      texto += '\n> Implementos:\n';
-      if (isAltaPressao) {
-         texto += `  - Pistola: ${equipe.materiais?.pistola ?? 'N/A'}\n`;
-         texto += `  - Pistola C.L.: ${equipe.materiais?.pistolaCanoLongo ?? 'N/A'}\n`;
-         texto += `  - Mang. Torpedo: ${equipe.materiais?.mangueiraTorpedo ?? 'N/A'}\n`;
-         texto += `  - Pedal: ${equipe.materiais?.pedal ?? 'N/A'}\n`;
-         texto += `  - Varetas: ${equipe.materiais?.varetas ?? 'N/A'}\n`;
-         texto += `  - Rabicho: ${equipe.materiais?.rabicho ?? 'N/A'}\n`;
-         texto += `  - Lances Mang.: ${equipe.lancesMangueira ?? 'N/A'}\n`;
-         texto += `  - Lances Var.: ${equipe.lancesVaretas ?? 'N/A'}\n`;
+      // Somar ao total apropriado
+      if (isSolicitacaoCliente) {
+        totalIndisponibilidadeCliente += tempoMinutos;
       } else {
-         texto += `  - Mangotes: ${equipe.materiaisVacuo?.mangotes ?? 'N/A'}\n`;
-         texto += `  - Reduções: ${equipe.materiaisVacuo?.reducoes ?? 'N/A'}\n`;
-         texto += `  - Mangotes 3": ${equipe.mangotes3Polegadas ?? 'N/A'}\n`;
-         texto += `  - Mangotes 4": ${equipe.mangotes4Polegadas ?? 'N/A'}\n`;
-         texto += `  - Mangotes 6": ${equipe.mangotes6Polegadas ?? 'N/A'}\n`;
+        totalIndisponibilidadeTecnica += tempoMinutos;
       }
-      if (equipe.justificativa) { texto += `\n> Justificativa Implementos Falta:\n  ${equipe.justificativa}\n`; }
+    }
+  });
 
-      texto += '\n> Segurança:\n';
-      texto += `  - Caixa Bloqueio: ${equipe.caixaBloqueio ?? 'N/A'}\n`;
-      texto += `  - Cadeados: ${equipe.cadeados ?? 'N/A'}\n`;
-      texto += `  - Plaquetas: ${equipe.plaquetas ?? 'N/A'}\n`;
+  // Completar resumo executivo
+  relatorioTexto += `- Equipes: ${equipes.length} (${totalAltaPressao} Alta Pressão, ${totalVacuo} Auto Vácuo)\n`;
+  relatorioTexto += `- Andamento: ${totalConcluido} Concluídas, ${totalEmAndamento} Em Andamento\n`;
+  
+  if (totalIndisponibilidadeTecnica > 0) {
+    const horasIndisponibilidade = Math.floor(totalIndisponibilidadeTecnica / 60);
+    const minutosIndisponibilidade = totalIndisponibilidadeTecnica % 60;
+    relatorioTexto += `- Indisponibilidade: ${horasIndisponibilidade}h${minutosIndisponibilidade < 10 ? '0' : ''}${minutosIndisponibilidade}min (manutenções técnicas)\n`;
+  } else {
+    relatorioTexto += `- Indisponibilidade: 0h00min (manutenções técnicas)\n`;
+  }
+  
+  relatorioTexto += "\n";
 
-      if (equipe.observacoes) { texto += `\n> Observações Adicionais:\n  ${equipe.observacoes}\n`; }
-      texto += subLinha + '\n';
+  // === SEÇÕES POR TIPO DE EQUIPE ===
+  const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
+  const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => {
+      let indexA = ordemTipos.indexOf(a);
+      let indexB = ordemTipos.indexOf(b);
+      if (indexA === -1) indexA = ordemTipos.length;
+      if (indexB === -1) indexB = ordemTipos.length;
+      return indexA - indexB;
+  });
+
+  for (const tipo of tiposOrdenados) {
+    const equipesDoTipo = equipesPorTipo[tipo];
+    const isAltaPressao = tipo === 'Alta Pressão';
+    
+    // Cabeçalho da seção
+    relatorioTexto += `🔸 ${tipo.toUpperCase()} (${equipesDoTipo.length} EQUIPES) 🔸\n`;
+    
+    equipesDoTipo.forEach((equipe, index) => {
+      // Determinar equipamento e vaga de forma otimizada
+      const equipamento = equipe.equipamento === 'OUTRO EQUIPAMENTO' ?
+                         (equipe.equipamentoPersonalizado || 'N/A') :
+                         (equipe.equipamento || 'N/A');
+
+      const vaga = equipe.vaga === 'OUTRA VAGA' ?
+                  (equipe.vagaPersonalizada || 'N/A') :
+                  (equipe.vaga || 'N/A');
+      
+      // Extrair códigos da vaga e equipamento para formato compacto
+      const vagaCodigo = extrairCodigoVaga(vaga);
+      const equipamentoCodigo = extrairCodigoEquipamento(equipamento);
+      
+      const statusNormalizado = normalizarTexto(equipe.statusAtividade || 'concluído');
+      const statusTexto = statusNormalizado === 'concluído' ? 'CONCLUÍDO' : 
+                         statusNormalizado === 'em andamento' ? 'EM ANDAMENTO' : 'PENDENTE';
+
+      // Linha principal da equipe (formato compacto)
+      relatorioTexto += `EQUIPE ${index + 1} - ${vagaCodigo}/${equipamentoCodigo} - ${statusTexto}\n`;
+      relatorioTexto += `Motorista: ${equipe.motorista || 'N/A'} | Operadores: ${equipe.operadores || 'N/A'}\n`;
+      relatorioTexto += `Local: ${equipe.area || 'N/A'}\n`;
+      relatorioTexto += `Atividade: ${equipe.atividade || 'N/A'} (${equipe.tipoAtividade || 'Rotineira'})\n`;
+      
+      // Implementos específicos por tipo
+      relatorioTexto += "IMPLEMENTOS:\n";
+      if (isAltaPressao) {
+        const pistola = equipe.materiais?.pistola !== 'N/A' ? equipe.materiais?.pistola : '';
+        const pistolaCL = equipe.materiais?.pistolaCanoLongo !== 'N/A' ? equipe.materiais?.pistolaCanoLongo : '';
+        const implementos = [pistola, pistolaCL].filter(i => i && i !== 'N/A').join(', ');
+        
+        relatorioTexto += `- Principais: ${implementos || 'Não informado'}\n`;
+        relatorioTexto += `- Lances: ${equipe.lancesMangueira || '0'} mangueiras, ${equipe.lancesVaretas || '0'} varetas\n`;
+      } else {
+        const mangotes = equipe.materiaisVacuo?.mangotes || 'N/A';
+        const reducoes = equipe.materiaisVacuo?.reducoes || 'N/A';
+        relatorioTexto += `- Mangotes: ${mangotes}, Reduções: ${reducoes}\n`;
+        
+        const m3 = formatarMangotes(equipe.mangotes3Polegadas);
+        const m4 = formatarMangotes(equipe.mangotes4Polegadas);
+        const m6 = formatarMangotes(equipe.mangotes6Polegadas);
+        relatorioTexto += `- Volumes: ${m3} (3"), ${m4} (4"), ${m6} (6")\n`;
+      }
+      
+      // Segurança (formato compacto)
+      const caixaBloqueio = equipe.caixaBloqueio === 'Sim' ? 'Sim' : 'Não';
+      const cadeados = equipe.cadeados || '0';
+      const plaquetas = equipe.plaquetas || '0';
+      relatorioTexto += `- Bloqueio: ${caixaBloqueio} (${cadeados} cadeados, ${plaquetas} plaquetas)\n`;
+      
+      // Adicionar linha separadora entre equipes
+      relatorioTexto += "------------------------------------------\n";
     });
+    
+    relatorioTexto += "\n";
   }
 
-  texto += linhaSeparadora;
-  texto += `Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'} (Relatório Local)\n`;
-  texto += linhaSeparadora;
-  return texto;
+  // === INDICADORES DE TURNO ===
+  relatorioTexto += "🔹 INDICADORES DE TURNO 🔹\n";
+  relatorioTexto += `- Realizações: ${totalConcluido} concluídas, ${totalEmAndamento} em andamento\n`;
+  
+  // Tipos de atividade
+  const tiposTexto = Object.entries(tiposAtividade)
+    .map(([tipo, count]) => `${count} ${tipo}`)
+    .join(', ');
+  relatorioTexto += `- Tipos: ${tiposTexto}\n`;
+  
+  // Indisponibilidade total
+  const totalIndisponibilidade = totalIndisponibilidadeTecnica + totalIndisponibilidadeCliente;
+  if (totalIndisponibilidade > 0) {
+    const horasTotal = Math.floor(totalIndisponibilidade / 60);
+    const minutosTotal = totalIndisponibilidade % 60;
+    relatorioTexto += `- Indisponibilidade Total: ${horasTotal}h${minutosTotal < 10 ? '0' : ''}${minutosTotal}min\n`;
+    
+    if (totalIndisponibilidadeCliente > 0) {
+      const horasCliente = Math.floor(totalIndisponibilidadeCliente / 60);
+      const minutosCliente = totalIndisponibilidadeCliente % 60;
+      relatorioTexto += `  - Cliente: ${horasCliente}h${minutosCliente < 10 ? '0' : ''}${minutosCliente}min (não conta para indisponibilidade técnica)\n`;
+    }
+  } else {
+    relatorioTexto += `- Indisponibilidade Total: 0h00min\n`;
+    relatorioTexto += `  - Cliente: 0h00min (não conta para indisponibilidade técnica)\n`;
+  }
+  
+  relatorioTexto += "\n";
+
+  // Rodapé
+  relatorioTexto += `GPS Mecanizada | Sistema v${window.CONFIG?.VERSAO_APP || '3.2'} | ${formatarData(new Date())}`;
+
+  return relatorioTexto;
+}
+
+/**
+ * Extrai código simplificado da vaga
+ */
+function extrairCodigoVaga(vaga) {
+  if (!vaga || vaga === 'N/A') return 'N/A';
+  
+  // Extrair padrões como "GPS - 01 - 24 HS" -> "AP-01 - 24 HS"
+  if (vaga.includes('ALTA PRESSÃO')) {
+    const match = vaga.match(/GPS - (\d+)( - 24 HS)?/);
+    if (match) {
+      return `AP-${match[1]}${match[2] || ''}`;
+    }
+    return 'AP-XX';
+  } else if (vaga.includes('AUTO VÁCUO')) {
+    const match = vaga.match(/GPS - (\d+)( - 16 HS)?/);
+    if (match) {
+      return `AV-${match[1]}${match[2] || ''}`;
+    }
+    return 'AV-XX';
+  } else if (vaga.includes('HIPER VÁCUO')) {
+    const match = vaga.match(/GPS - (\d+)/);
+    if (match) {
+      return `HV-${match[1]}`;
+    }
+    return 'HV-XX';
+  }
+  
+  return vaga.length > 15 ? vaga.substring(0, 15) + '...' : vaga;
+}
+
+/**
+ * Extrai código simplificado do equipamento
+ */
+function extrairCodigoEquipamento(equipamento) {
+  if (!equipamento || equipamento === 'N/A') return 'N/A';
+  
+  // Se já é um código (ex: "EOF-5208"), retorna como está
+  if (equipamento.match(/^[A-Z]{3}-\d{4}$/)) {
+    return equipamento;
+  }
+  
+  return equipamento.length > 10 ? equipamento.substring(0, 10) + '...' : equipamento;
+}
+
+/**
+ * Formata valores de mangotes para exibição compacta
+ */
+function formatarMangotes(valor) {
+  if (!valor || valor === 'N/A' || valor === '0') return '0m';
+  
+  // Se já tem formato "XX metros", extrair número
+  const match = String(valor).match(/(\d+)\s*metros?/);
+  if (match) {
+    return match[1] + 'm';
+  }
+  
+  return String(valor);
 }
 
 /**
@@ -2420,82 +2572,219 @@ function gerarTextoWhatsAppLocal(relatorio) {
 }
 
 /**
- * Formatar o relatório para compartilhamento (WhatsApp) - Versão Formal
+ * Formatar o relatório para compartilhamento (WhatsApp) - Versão Formal CORRIGIDA
+ * ATUALIZADO: Usa o formato correto e compacto
  * ATUALIZADO: Inclui Data/Hora Fim e Tempo Troca (usa dados do GAS ou locais)
  * ATUALIZADO: Usa normalizarTexto para comparações.
  */
 function formatarRelatorioParaCompartilhamentoFormal(dadosTurno, equipes) {
-  var texto = ""; const nl = "\n"; const sepPrincipal = "====================================" + nl; const sepSecao = "------------------------------------" + nl;
-  if (!dadosTurno || !Array.isArray(equipes)) return "Erro: Dados inválidos para formatação WhatsApp.";
+  var texto = "";
+  const nl = "\n";
 
-  const getField = (obj, fieldGas, fieldLocal, defaultVal = 'N/A') => {
-      let val = obj[fieldGas];
-      if (val !== undefined && val !== null && String(val).trim() !== '') return val;
-      val = obj[fieldLocal];
-      if (val !== undefined && val !== null && String(val).trim() !== '') return val;
-      return defaultVal;
+  if (!dadosTurno || !Array.isArray(equipes)) { 
+    return "Erro: Dados inválidos para formatação WhatsApp."; 
   }
 
-  texto += "*RELATÓRIO DE TURNO - GPS MECANIZADA*" + nl + sepPrincipal + nl;
+  // Função auxiliar para obter valores
+  const getField = (obj, fieldGas, fieldLocal, defaultVal = 'N/A') => {
+    let val = obj[fieldGas]; 
+    if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+    val = obj[fieldLocal]; 
+    if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+    return defaultVal;
+  }
+
+  // Cabeçalho
+  texto += "*RELATÓRIO DE TURNO - GPS MECANIZADA*" + nl + nl;
   texto += `*Data:* ${formatarData(getField(dadosTurno, 'Data', 'data'))}` + nl;
   texto += `*Horário:* ${getField(dadosTurno, 'Horário', 'horario')}` + nl;
   texto += `*Letra:* ${getField(dadosTurno, 'Letra', 'letra')}` + nl;
   texto += `*Supervisor:* ${getField(dadosTurno, 'Supervisor', 'supervisor')}` + nl + nl;
 
-  var equipesPorTipo = equipes.reduce((acc, eq) => { var tipo = getField(eq, 'Tipo_Equipe', 'tipo', 'Desconhecido'); if (!acc[tipo]) acc[tipo] = []; acc[tipo].push(eq); return acc; }, {});
-  const ordemTiposWpp = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
-  const tiposOrdenadosWpp = Object.keys(equipesPorTipo).sort((a, b) => { const idxA = ordemTiposWpp.indexOf(a); const idxB = ordemTiposWpp.indexOf(b); if(idxA===-1 && idxB===-1) return a.localeCompare(b); if(idxA===-1) return 1; if(idxB===-1) return -1; return idxA - idxB; });
+  // Calcular estatísticas CORRIGIDAS
+  let totalConcluido = 0, totalEmAndamento = 0, totalNaoIniciado = 0, totalTrocas = 0;
+  let totalIndisponibilidadeTecnicaWpp = 0; // CORRIGIDO: Só manutenções técnicas
+  
+  var equipesPorTipo = {};
+  equipes.forEach((eq) => {
+    var tipoParaAgrupamento = getField(eq, 'Tipo_Equipe', 'tipo', 'Desconhecido');
+    // Normalizar o tipo para consistência
+    if (normalizarTexto(tipoParaAgrupamento).includes('alta') || normalizarTexto(tipoParaAgrupamento).includes('pressão')) {
+      tipoParaAgrupamento = 'Alta Pressão';
+    } else if (normalizarTexto(tipoParaAgrupamento).includes('vácuo') || normalizarTexto(tipoParaAgrupamento).includes('vacuo')) {
+      tipoParaAgrupamento = 'Auto Vácuo / Hiper Vácuo';
+    }
+    
+    if (!equipesPorTipo[tipoParaAgrupamento]) equipesPorTipo[tipoParaAgrupamento] = [];
+    equipesPorTipo[tipoParaAgrupamento].push(eq);
 
+    const status = getField(eq, 'StatusAtividade', 'statusAtividade', 'Concluído');
+    if (status === 'Concluído') totalConcluido++; 
+    else if (status.toLowerCase().includes('andamento')) totalEmAndamento++; 
+    else totalNaoIniciado++;
+    
+    if (getField(eq, 'Troca_Equipamento', 'trocaEquipamento') === 'Sim') {
+      totalTrocas++;
+      
+      // APLICAR LÓGICA CORRIGIDA DE INDISPONIBILIDADE
+      var isSolicitacaoClienteWpp = false;
+      const motivoNormWpp = normalizarTexto(getField(eq, 'Motivo_Troca', 'motivoTroca', ''));
+      const motivoOutroNormWpp = normalizarTexto(getField(eq, 'Motivo_Outro', 'motivoOutro', ''));
 
-  for (const tipo of tiposOrdenadosWpp) {
-      const equipesDoTipo = equipesPorTipo[tipo];
-      texto += `*EQUIPES ${tipo.toUpperCase()} (${equipesDoTipo.length})*` + nl + sepSecao + nl;
-      equipesDoTipo.forEach((equipe, index) => {
-          const vaga = getField(equipe, 'Vaga', 'vaga'); const vagaP = getField(equipe, 'Vaga_Personalizada', 'vagaPersonalizada', ''); let vagaD = normalizarTexto(vaga) === 'outra vaga' ? vagaP : vaga;
-          const equip = getField(equipe, 'Equipamento', 'equipamento'); const equipP = getField(equipe, 'Equipamento_Personalizada', 'equipamentoPersonalizado', ''); let equipD = normalizarTexto(equip) === 'outro equipamento' ? equipP : equip;
-          const status = getField(equipe, 'StatusAtividade', 'statusAtividade', 'Concluído'); const pend = getField(equipe, 'Pendencia', 'pendencia', '');
-          texto += `*Equipe ${index + 1}:* ${getField(equipe, 'Numero_Equipe', 'numero')}` + nl;
-          texto += `  Motorista: ${getField(equipe, 'Motorista', 'motorista')}` + nl; texto += `  Operador(es): ${getField(equipe, 'Operadores', 'operadores')}` + nl; texto += `  Área: ${getField(equipe, 'Area', 'area')}` + nl; texto += `  Atividade: ${getField(equipe, 'Atividade', 'atividade')}` + nl;
-          texto += `  Tipo Ativ.: ${getField(equipe, 'TipoAtividade', 'tipoAtividade', 'Rotineira')}` + nl; texto += `  Status: ${status}${pend && normalizarTexto(status) !== 'concluido' ? ` (${pend})` : ''}` + nl;
-          texto += `  Vaga: ${vagaD || 'N/A'}` + nl; texto += `  Equipamento: ${equipD || 'N/A'}` + nl;
-          const idUsiminas = getField(equipe, 'Identificacao_Usiminas', 'identificacaoUsiminas', ''); if (idUsiminas !== 'N/A' && idUsiminas !== '') texto += `  ID Usiminas: ${idUsiminas}` + nl;
+      if (motivoNormWpp.includes('solicitacao') || motivoNormWpp.includes('cliente') || motivoNormWpp.includes('solicitação')) {
+        isSolicitacaoClienteWpp = true;
+      } else if ((motivoNormWpp.includes('outros') || motivoNormWpp.includes('defeitos')) &&
+                 (motivoOutroNormWpp.includes('solicitacao') || motivoOutroNormWpp.includes('cliente') || motivoOutroNormWpp.includes('solicitação'))) {
+        isSolicitacaoClienteWpp = true;
+      }
 
-           if (normalizarTexto(tipo) === normalizarTexto('Alta Pressão')) {
-               const lancesM = getField(equipe, 'Lances_Mangueira', 'lancesMangueira', '0');
-               const lancesV = getField(equipe, 'Lances_Varetas', 'lancesVaretas', '0');
-               texto += `  Materiais AP: L.Mang: ${lancesM}, L.Var: ${lancesV}` + nl;
-           } else if (normalizarTexto(tipo) === normalizarTexto('Auto Vácuo / Hiper Vácuo')) {
-               const mang3 = getField(equipe, 'Mangotes_3_Polegadas', 'mangotes3Polegadas', '0');
-               const mang4 = getField(equipe, 'Mangotes_4_Polegadas', 'mangotes4Polegadas', '0');
-               const mang6 = getField(equipe, 'Mangotes_6_Polegadas', 'mangotes6Polegadas', '0');
-               texto += `  Materiais Vácuo: M(3"): ${mang3}, M(4"): ${mang4}, M(6"): ${mang6}` + nl;
-           }
-           const justif = getField(equipe, 'Justificativa', 'justificativa', '');
-           if (justif !== 'N/A' && justif !== '') texto += `    Just. Falta: ${justif}`+nl;
-
-
-          const troca = getField(equipe, 'Troca_Equipamento', 'trocaEquipamento', 'Não');
-          if (normalizarTexto(troca) === 'sim') {
-              texto += nl + "  *Troca de Equipamento: Sim*" + nl;
-              const motivo = getField(equipe, 'Motivo_Troca', 'motivoTroca', ''); const motivoO = getField(equipe, 'Motivo_Outro', 'motivoOutro', '');
-              const motivoNorm = normalizarTexto(motivo);
-              let motivoD = (motivoNorm === normalizarTexto('Outros Motivos (Justificar)') || motivoNorm === normalizarTexto('Defeitos Em Geral (Justificar)')) ? motivoO : motivo;
-              texto += `    Motivo: ${motivoD || 'Não especificado'}` + nl;
-              const defeito = getField(equipe, 'Defeito', 'defeito', ''); if (defeito !== 'N/A' && defeito !== '') texto += `    Defeito/Medidas: ${defeito}` + nl;
-              const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); if (placa !== 'N/A' && placa !== '') texto += `    Placa Nova: ${placa}` + nl;
-              const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); if (inicioT !== 'N/A' && inicioT !== '') texto += `    Início: ${formatarDataHora(inicioT)}` + nl;
-              const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); if (fimT !== 'N/A' && fimT !== '') texto += `    Fim: ${formatarDataHora(fimT)}` + nl;
-              const tempoT = getField(equipe, 'Tempo_Troca', '', '');
-              if (tempoT && !tempoT.includes('Erro') && !tempoT.includes('Ausente') && tempoT !== 'N/A' && tempoT !== '') { texto += `    Tempo Indisp.: ${tempoT}` + nl; }
-              else if (inicioT !== 'N/A' && inicioT !== '' && fimT !== 'N/A' && fimT !== '') {
-                  try { const inicio = new Date(inicioT); const fim = new Date(fimT); if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) { const dM = Math.round((fim-inicio)/60000); const h = Math.floor(dM/60); const m = dM%60; texto += `    Tempo Indisp.: ${h}h${m<10?'0':''}${m}min`+nl; } } catch(e){}
-              }
+      // SÓ SOMA NO TEMPO DE INDISPONIBILIDADE SE NÃO FOR SOLICITAÇÃO DO CLIENTE
+      if (!isSolicitacaoClienteWpp) {
+        // Calcular tempo baseado nas datas se disponível
+        const dataInicio = getField(eq, 'Data_Hora_Troca', 'dataHoraTroca', '');
+        const dataFim = getField(eq, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', '');
+        
+        if (dataInicio && dataInicio !== 'N/A' && dataFim && dataFim !== 'N/A') {
+          try {
+            const inicio = new Date(dataInicio);
+            const fim = new Date(dataFim);
+            if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
+              const tempoMinutos = Math.round((fim - inicio) / (1000 * 60));
+              totalIndisponibilidadeTecnicaWpp += tempoMinutos;
+            }
+          } catch (e) {
+            console.warn("Erro ao calcular tempo de troca:", e);
           }
-          const obs = getField(equipe, 'Observacoes', 'observacoes', ''); if (obs !== 'N/A' && obs !== '') texto += nl + `  *Observações:* ${obs}` + nl;
-          texto += nl;
-      });
+        }
+      }
+    }
+  });
+
+  const numEquipes = equipes.length || 1;
+  const eficiencia = Math.round((totalConcluido / numEquipes) * 100);
+  
+  // Resumo executivo
+  texto += `*RESUMO EXECUTIVO*` + nl;
+  texto += `Equipes: ${numEquipes} | Eficiência: ${eficiencia}%` + nl;
+  texto += `Status: ${totalConcluido} Concluídas, ${totalEmAndamento} Em Andamento` + nl;
+  
+  // EXIBIR INDISPONIBILIDADE CORRIGIDA
+  if (totalIndisponibilidadeTecnicaWpp > 0) {
+    const horasIndispCorr = Math.floor(totalIndisponibilidadeTecnicaWpp / 60);
+    const minutosIndispCorr = totalIndisponibilidadeTecnicaWpp % 60;
+    texto += `Indisponibilidade Técnica: ${horasIndispCorr}h${minutosIndispCorr < 10 ? '0' : ''}${minutosIndispCorr}min` + nl;
   }
-  texto += sepPrincipal + `Sistema v${window.CONFIG?.VERSAO_APP || '3.2'}`;
+  if (totalTrocas > 0) {
+    texto += `Trocas: ${totalTrocas} registradas` + nl;
+  }
+  texto += nl;
+
+  // Ordenar tipos
+  const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
+  const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => { 
+    let idxA = ordemTipos.indexOf(a); 
+    let idxB = ordemTipos.indexOf(b); 
+    if(idxA===-1 && idxB===-1) return a.localeCompare(b); 
+    if(idxA===-1) return 1; 
+    if(idxB===-1) return -1; 
+    return idxA - idxB; 
+  });
+
+  // Formatar equipes por tipo
+  for (const tipoChaveGrupo of tiposOrdenados) {
+    const equipesDoTipo = equipesPorTipo[tipoChaveGrupo];
+    texto += `*${tipoChaveGrupo.toUpperCase()} (${equipesDoTipo.length})*` + nl + nl;
+    
+    equipesDoTipo.forEach(function(equipe, index) {
+      const vaga = getField(equipe, 'Vaga', 'vaga'); 
+      const vagaPers = getField(equipe, 'Vaga_Personalizada', 'vagaPersonalizada',''); 
+      const vagaDisplay = vaga === 'OUTRA VAGA' ? vagaPers : vaga;
+      const equip = getField(equipe, 'Equipamento', 'equipamento'); 
+      const equipPers = getField(equipe, 'Equipamento_Personalizada', 'equipamentoPersonalizado',''); 
+      const equipDisplay = equip === 'OUTRO EQUIPAMENTO' ? equipPers : equip;
+      const statusAtividade = getField(equipe, 'StatusAtividade', 'statusAtividade', 'Concluído');
+      const statusSymbol = statusAtividade === 'Concluído' ? '✅' : (statusAtividade.toLowerCase().includes('andamento') ? '⏳' : '❌');
+
+      texto += `*Equipe ${index + 1}: ${getField(equipe, 'Numero_Equipe', 'numero')}* ${statusSymbol}` + nl;
+      texto += `Motorista: ${getField(equipe, 'Motorista', 'motorista')}` + nl;
+      texto += `Operador(es): ${getField(equipe, 'Operadores', 'operadores')}` + nl;
+      texto += `Local: ${getField(equipe, 'Area', 'area')}` + nl;
+      texto += `Atividade: ${getField(equipe, 'Atividade', 'atividade')}` + nl;
+      
+      const tipoAtividade = getField(equipe, 'TipoAtividade', 'tipoAtividade', 'Rotineira');
+      texto += `Tipo: ${tipoAtividade}` + nl;
+      
+      let statusText = `Status: ${statusAtividade}`; 
+      const pendencia = getField(equipe, 'Pendencia', 'pendencia', '');
+      if (statusAtividade !== 'Concluído' && pendencia) statusText += ` (${pendencia})`;
+      texto += `${statusText}` + nl;
+      
+      texto += `Vaga: ${vagaDisplay || 'N/A'}` + nl;
+      texto += `Equipamento: ${equipDisplay || 'N/A'}` + nl;
+
+      // TROCA COM LÓGICA CORRIGIDA
+      if (getField(equipe, 'Troca_Equipamento', 'trocaEquipamento') === 'Sim') {
+        // VERIFICAR SE É SOLICITAÇÃO DO CLIENTE
+        var isSolicitacaoClienteTroca = false;
+        const motivoTrocaWpp = getField(equipe, 'Motivo_Troca', 'motivoTroca', '');
+        const motivoOutroWpp = getField(equipe, 'Motivo_Outro', 'motivoOutro', '');
+        const motivoNormWppTroca = normalizarTexto(motivoTrocaWpp);
+        const motivoOutroNormWppTroca = normalizarTexto(motivoOutroWpp);
+
+        if (motivoNormWppTroca.includes('solicitacao') || motivoNormWppTroca.includes('cliente') || motivoNormWppTroca.includes('solicitação')) {
+          isSolicitacaoClienteTroca = true;
+        } else if ((motivoNormWppTroca.includes('outros') || motivoNormWppTroca.includes('defeitos')) &&
+                   (motivoOutroNormWppTroca.includes('solicitacao') || motivoOutroNormWppTroca.includes('cliente') || motivoOutroNormWppTroca.includes('solicitação'))) {
+          isSolicitacaoClienteTroca = true;
+        }
+
+        texto += `⚠️ *TROCA EQUIPAMENTO*` + nl;
+        
+        if (isSolicitacaoClienteTroca) {
+          texto += `Tipo: SOLICITAÇÃO CLIENTE (não conta indisponibilidade)` + nl;
+        } else {
+          texto += `Tipo: MANUTENÇÃO TÉCNICA` + nl;
+        }
+        
+        let motivoDisplay = (motivoTrocaWpp === 'Outros Motivos (Justificar)' || motivoTrocaWpp === 'Defeitos Em Geral (Justificar)') ? motivoOutroWpp : motivoTrocaWpp;
+        texto += `Motivo: ${motivoDisplay || 'N/A'}` + nl;
+        
+        const placa = getField(equipe, 'Placa_Nova', 'placaNova', ''); 
+        if (placa !== 'N/A') texto += `Novo: ${placa}` + nl;
+        
+        // Exibir tempo apenas se não for solicitação do cliente
+        if (!isSolicitacaoClienteTroca) {
+          const inicioT = getField(equipe, 'Data_Hora_Troca', 'dataHoraTroca', ''); 
+          if (inicioT !== 'N/A') texto += `Início: ${formatarDataHora(inicioT)}` + nl;
+          const fimT = getField(equipe, 'Data_Hora_Fim_Troca', 'dataHoraFimTroca', ''); 
+          if (fimT !== 'N/A') texto += `Fim: ${formatarDataHora(fimT)}` + nl;
+          
+          if (inicioT !== 'N/A' && fimT !== 'N/A') {
+            try { 
+              const inicio = new Date(inicioT); 
+              const fim = new Date(fimT); 
+              if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) { 
+                const dM = Math.round((fim-inicio)/60000); 
+                const h = Math.floor(dM/60); 
+                const m = dM%60; 
+                texto += `Tempo Indisponibilidade: ${h}h${m<10?'0':''}${m}min`+nl; 
+              } 
+            } catch(e){}
+          }
+        }
+      }
+
+      // Observações
+      const obs = getField(equipe, 'Observacoes', 'observacoes', ''); 
+      if (obs !== 'N/A') texto += `Obs: ${obs}` + nl;
+
+      texto += nl; // Espaço entre equipes
+    });
+  }
+
+  // Rodapé
+  texto += `*Sistema de Relatório de Turno v${window.CONFIG?.VERSAO_APP || '3.2'}*`;
+
   return texto;
 }
 
@@ -2565,6 +2854,19 @@ function formatarDataHora(dataHoraInput) {
   } catch (e) { console.error("Erro formatarDataHora:", dataHoraInput, e); return String(dataHoraInput); }
 }
 
+/**
+ * Normaliza texto para comparações mais consistentes
+ * Converte para minúsculas, remove acentos e espaços extras
+ */
+function normalizarTexto(texto) {
+  if (!texto) return '';
+  return String(texto)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 
 // --- Exportar funções para o escopo global (necessário para onclick no HTML) ---
 window.inicializarFormulario = inicializarFormulario;
@@ -2631,16 +2933,3 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("jQuery não está carregado. Isso é o esperado para as novas atualizações.");
     }
 });
-
-/**
- * Normaliza texto para comparações mais consistentes
- * Converte para minúsculas, remove acentos e espaços extras
- */
-function normalizarTexto(texto) {
-  if (!texto) return '';
-  return String(texto)
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim();
-}
