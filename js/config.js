@@ -4,8 +4,8 @@
   window.CONFIG = window.CONFIG || {};
   
   // Definir propriedades individualmente para melhor controle
-  window.CONFIG.VERSAO_APP = '3.2'; // Alterado de 3.0 para 3.1
-  window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbwKNWb2lCJHpXhN7P12gUmRPo-3dZYOcx-IOEFmRk6Hf_hJKXdBhSh1JTk894aVSiA0wA/exec';
+  window.CONFIG.VERSAO_APP = '3.3'; // Alterado de 3.0 para 3.1
+  window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbxzt0BPpo0l9na3CiXznIJ2fuGcii9-IQejH_g6Q7QtcP6Jelv5iQB_Tg4Q5OaO6bgGqg/exec';
   window.CONFIG.PLANILHA_ID = '1BXQDku3C3uuOyucuAmQoV36iQMtC0bsa--4VDZQBO54';
   window.CONFIG.API_KEY = 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM';
   window.CONFIG.AUTH_REQUIRED = false;
