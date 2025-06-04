@@ -2276,42 +2276,7 @@ function gerarTextoRelatorioLocal(relatorio) {
   relatorioTexto += `GPS Mecanizada | Sistema v${window.CONFIG?.VERSAO_APP || '3.2'} | ${formatarData(new Date())}`;
 
   return relatorioTexto;
-}
-
-  // === INDICADORES DE TURNO ===
-  relatorioTexto += "🔹 INDICADORES DE TURNO 🔹\n";
-  relatorioTexto += `- Realizações: ${totalConcluido} concluídas, ${totalEmAndamento} em andamento\n`;
-  
-  // Tipos de atividade
-  const tiposTexto = Object.entries(tiposAtividade)
-    .map(([tipo, count]) => `${count} ${tipo}`)
-    .join(', ');
-  relatorioTexto += `- Tipos: ${tiposTexto}\n`;
-  
-  // Indisponibilidade total
-  const totalIndisponibilidade = totalIndisponibilidadeTecnica + totalIndisponibilidadeCliente;
-  if (totalIndisponibilidade > 0) {
-    const horasTotal = Math.floor(totalIndisponibilidade / 60);
-    const minutosTotal = totalIndisponibilidade % 60;
-    relatorioTexto += `- Indisponibilidade Total: ${horasTotal}h${minutosTotal < 10 ? '0' : ''}${minutosTotal}min\n`;
-    
-    if (totalIndisponibilidadeCliente > 0) {
-      const horasCliente = Math.floor(totalIndisponibilidadeCliente / 60);
-      const minutosCliente = totalIndisponibilidadeCliente % 60;
-      relatorioTexto += `  - Cliente: ${horasCliente}h${minutosCliente < 10 ? '0' : ''}${minutosCliente}min (não conta para indisponibilidade técnica)\n`;
-    }
-  } else {
-    relatorioTexto += `- Indisponibilidade Total: 0h00min\n`;
-    relatorioTexto += `  - Cliente: 0h00min (não conta para indisponibilidade técnica)\n`;
-  }
-  
-  relatorioTexto += "\n";
-
-  // Rodapé
-  relatorioTexto += `GPS Mecanizada | Sistema v${window.CONFIG?.VERSAO_APP || '3.2'} | ${formatarData(new Date())}`;
-
-  return relatorioTexto;
-}
+} 
 
 /**
  * Extrai código simplificado da vaga
