@@ -1,4 +1,4 @@
-**
+/**
  * Módulo de Dashboard - Implementa visualizações e estatísticas
  * ATUALIZADO para incluir gráfico de Status de Atividade.
  */
@@ -11,7 +11,7 @@ ModuleLoader.register('dashboard', function() {
   let chartInstanceEquipamentos = null;
   let chartInstanceAreas = null;
   let chartInstanceMotivos = null;
-  let chartInstanceStatus = null; // <<< ADICIONADO: Instância para o novo gráfico de Status
+  let chartInstanceStatus = null; // ADICIONADO: Instância para o novo gráfico de Status
 
   // Inicializar listeners
   function init() {
@@ -180,8 +180,11 @@ ModuleLoader.register('dashboard', function() {
   // Transformar dados da pesquisa em formato para dashboard
   function transformarDadosParaDashboard(resultadoPesquisa) {
     const relatorios = resultadoPesquisa.resultados || [];
-    const equipamentosMap = new Map(); const areasMap = new Map(); const motivosMap = new Map();
-    let totalEquipes = 0; let totalTrocas = 0;
+    const equipamentosMap = new Map(); 
+    const areasMap = new Map(); 
+    const motivosMap = new Map();
+    let totalEquipes = 0; 
+    let totalTrocas = 0;
 
     // Esta fonte (pesquisa) NÃO contém dados de status de atividade
     // Retornaremos dadosStatus vazio
@@ -191,7 +194,9 @@ ModuleLoader.register('dashboard', function() {
       // A API de pesquisa atual não retorna as equipes completas.
       // Idealmente, a API 'obterDadosDashboard' seria a fonte principal.
       // Como fallback, vamos simular contagens básicas se 'pesquisarRelatorios' não retornar equipes.
-      if (rel.totalEquipes) { totalEquipes += rel.totalEquipes; } // Usa a contagem se vier da API
+      if (rel.totalEquipes) { 
+        totalEquipes += rel.totalEquipes; 
+      } // Usa a contagem se vier da API
 
       // Se a API de pesquisa fosse modificada para retornar equipes, o loop seria aqui:
       /*
@@ -210,12 +215,24 @@ ModuleLoader.register('dashboard', function() {
     Logger.log("Dashboard: Transformação de dados da pesquisa - detalhes das equipes não disponíveis.");
 
     return {
-      estatisticasGerais: { totalRelatorios: relatorios.length, totalEquipes, totalTrocas: 0, totalAreas: 0 }, // Stats limitados
-      equipamentos: [], areas: [], motivos: [], // Sem dados para gráficos
-      dadosStatus: {}, // <<< ADICIONADO: Retorna vazio >>>
+      estatisticasGerais: { 
+        totalRelatorios: relatorios.length, 
+        totalEquipes, 
+        totalTrocas: 0, 
+        totalAreas: 0 
+      }, // Stats limitados
+      equipamentos: [], 
+      areas: [], 
+      motivos: [], // Sem dados para gráficos
+      dadosStatus: {}, // ADICIONADO: Retorna vazio
       ultimosRelatorios: relatorios.map(rel => ({
-        id: rel.id, data: rel.data, horario: rel.horario, letra: rel.letra, supervisor: rel.supervisor,
-        totalEquipes: rel.totalEquipes || 0, origem: rel.origem || 'servidor'
+        id: rel.id, 
+        data: rel.data, 
+        horario: rel.horario, 
+        letra: rel.letra, 
+        supervisor: rel.supervisor,
+        totalEquipes: rel.totalEquipes || 0, 
+        origem: rel.origem || 'servidor'
       })).slice(0, 5)
     };
   }
@@ -224,10 +241,33 @@ ModuleLoader.register('dashboard', function() {
   function gerarDadosSimulados() {
     const idBase = new Date().getTime();
     return {
-      estatisticasGerais: { totalRelatorios: Math.floor(Math.random() * 100) + 50, totalEquipes: Math.floor(Math.random() * 150) + 100, totalTrocas: Math.floor(Math.random() * 30) + 10, totalAreas: Math.floor(Math.random() * 20) + 5 },
-      equipamentos: [ { equipamento: "SIM-EGC-001", quantidade: Math.floor(Math.random() * 20) + 5 }, { equipamento: "SIM-DSY-002", quantidade: Math.floor(Math.random() * 20) + 5 }, { equipamento: "SIM-EAM-003", quantidade: Math.floor(Math.random() * 20) + 5 }, { equipamento: "SIM-PUB-004", quantidade: Math.floor(Math.random() * 20) + 5 }, { equipamento: "SIM-EOF-005", quantidade: Math.floor(Math.random() * 20) + 5 }, ],
-      areas: [ { area: "Área Simulada A", quantidade: Math.floor(Math.random() * 30) + 10 }, { area: "Área Simulada B", quantidade: Math.floor(Math.random() * 25) + 8 }, { area: "Área Simulada C", quantidade: Math.floor(Math.random() * 20) + 15 }, { area: "Área Simulada D", quantidade: Math.floor(Math.random() * 15) + 5 }, { area: "Outras Áreas", quantidade: Math.floor(Math.random() * 10) + 5 } ],
-      motivos: [ { motivo: "Manutenção Preventiva", quantidade: Math.floor(Math.random() * 10) + 5 }, { motivo: "Quebra Simulada", quantidade: Math.floor(Math.random() * 8) + 3 }, { motivo: "Falha Aleatória", quantidade: Math.floor(Math.random() * 7) + 2 }, { motivo: "Troca Programada", quantidade: Math.floor(Math.random() * 5) + 4 }, { motivo: "Outros", quantidade: Math.floor(Math.random() * 5) + 1 } ],
+      estatisticasGerais: { 
+        totalRelatorios: Math.floor(Math.random() * 100) + 50, 
+        totalEquipes: Math.floor(Math.random() * 150) + 100, 
+        totalTrocas: Math.floor(Math.random() * 30) + 10, 
+        totalAreas: Math.floor(Math.random() * 20) + 5 
+      },
+      equipamentos: [ 
+        { equipamento: "SIM-EGC-001", quantidade: Math.floor(Math.random() * 20) + 5 }, 
+        { equipamento: "SIM-DSY-002", quantidade: Math.floor(Math.random() * 20) + 5 }, 
+        { equipamento: "SIM-EAM-003", quantidade: Math.floor(Math.random() * 20) + 5 }, 
+        { equipamento: "SIM-PUB-004", quantidade: Math.floor(Math.random() * 20) + 5 }, 
+        { equipamento: "SIM-EOF-005", quantidade: Math.floor(Math.random() * 20) + 5 } 
+      ],
+      areas: [ 
+        { area: "Área Simulada A", quantidade: Math.floor(Math.random() * 30) + 10 }, 
+        { area: "Área Simulada B", quantidade: Math.floor(Math.random() * 25) + 8 }, 
+        { area: "Área Simulada C", quantidade: Math.floor(Math.random() * 20) + 15 }, 
+        { area: "Área Simulada D", quantidade: Math.floor(Math.random() * 15) + 5 }, 
+        { area: "Outras Áreas", quantidade: Math.floor(Math.random() * 10) + 5 } 
+      ],
+      motivos: [ 
+        { motivo: "Manutenção Preventiva", quantidade: Math.floor(Math.random() * 10) + 5 }, 
+        { motivo: "Quebra Simulada", quantidade: Math.floor(Math.random() * 8) + 3 }, 
+        { motivo: "Falha Aleatória", quantidade: Math.floor(Math.random() * 7) + 2 }, 
+        { motivo: "Troca Programada", quantidade: Math.floor(Math.random() * 5) + 4 }, 
+        { motivo: "Outros", quantidade: Math.floor(Math.random() * 5) + 1 } 
+      ],
       // ======================= INÍCIO ATUALIZAÇÃO =======================
       dadosStatus: { // Dados simulados para o status
         concluido: Math.floor(Math.random() * 100) + 50, // Ex: 50 a 149
@@ -235,7 +275,26 @@ ModuleLoader.register('dashboard', function() {
         naoIniciado: Math.floor(Math.random() * 15) + 5   // Ex: 5 a 19
       },
       // ======================= FIM ATUALIZAÇÃO =========================
-      ultimosRelatorios: [ { id: "simulado_" + (idBase + 1), data: "21/07/2024", horario: "06:50 às 18:40", letra: "A", supervisor: "Supervisor Sim", totalEquipes: 2, origem: "simulado" }, { id: "simulado_" + (idBase + 2), data: "20/07/2024", horario: "18:40 às 06:50", letra: "B", supervisor: "Outro Sup Sim", totalEquipes: 3, origem: "simulado" } ]
+      ultimosRelatorios: [ 
+        { 
+          id: "simulado_" + (idBase + 1), 
+          data: "21/07/2024", 
+          horario: "06:50 às 18:40", 
+          letra: "A", 
+          supervisor: "Supervisor Sim", 
+          totalEquipes: 2, 
+          origem: "simulado" 
+        }, 
+        { 
+          id: "simulado_" + (idBase + 2), 
+          data: "20/07/2024", 
+          horario: "18:40 às 06:50", 
+          letra: "B", 
+          supervisor: "Outro Sup Sim", 
+          totalEquipes: 3, 
+          origem: "simulado" 
+        } 
+      ]
     };
   }
 
@@ -248,22 +307,38 @@ ModuleLoader.register('dashboard', function() {
       <div class="row g-3"> <!-- g-3 para espaçamento -->
         <div class="col-6 col-md-3 mb-3"> <!-- mb-3 para espaçamento vertical -->
           <div class="card text-white h-100 shadow-sm" style="background-color: var(--primary-color, #0d6efd);">
-           <div class="card-body text-center"> <div class="stat-icon mb-2"><i class="bi bi-clipboard-data fs-2"></i></div> <h6 class="card-title">Total Relatórios</h6> <p class="display-6 fw-bold">${dados?.totalRelatorios ?? 0}</p> </div>
+           <div class="card-body text-center"> 
+             <div class="stat-icon mb-2"><i class="bi bi-clipboard-data fs-2"></i></div> 
+             <h6 class="card-title">Total Relatórios</h6> 
+             <p class="display-6 fw-bold">${dados?.totalRelatorios ?? 0}</p> 
+           </div>
           </div>
         </div>
         <div class="col-6 col-md-3 mb-3">
           <div class="card text-white h-100 shadow-sm" style="background-color: var(--success-color, #198754);">
-            <div class="card-body text-center"> <div class="stat-icon mb-2"><i class="bi bi-people-fill fs-2"></i></div> <h6 class="card-title">Equipes Registradas</h6> <p class="display-6 fw-bold">${dados?.totalEquipes ?? 0}</p> </div>
+            <div class="card-body text-center"> 
+              <div class="stat-icon mb-2"><i class="bi bi-people-fill fs-2"></i></div> 
+              <h6 class="card-title">Equipes Registradas</h6> 
+              <p class="display-6 fw-bold">${dados?.totalEquipes ?? 0}</p> 
+            </div>
           </div>
         </div>
         <div class="col-6 col-md-3 mb-3">
           <div class="card text-white h-100 shadow-sm" style="background-color: var(--info-color, #0dcaf0);">
-             <div class="card-body text-center"> <div class="stat-icon mb-2"><i class="bi bi-arrow-repeat fs-2"></i></div> <h6 class="card-title">Trocas Equipamento</h6> <p class="display-6 fw-bold">${dados?.totalTrocas ?? 0}</p> </div>
+             <div class="card-body text-center"> 
+               <div class="stat-icon mb-2"><i class="bi bi-arrow-repeat fs-2"></i></div> 
+               <h6 class="card-title">Trocas Equipamento</h6> 
+               <p class="display-6 fw-bold">${dados?.totalTrocas ?? 0}</p> 
+             </div>
           </div>
         </div>
         <div class="col-6 col-md-3 mb-3">
           <div class="card text-dark h-100 shadow-sm" style="background-color: var(--warning-color, #ffc107);">
-            <div class="card-body text-center"> <div class="stat-icon mb-2"><i class="bi bi-geo-alt-fill fs-2"></i></div> <h6 class="card-title">Áreas Atendidas</h6> <p class="display-6 fw-bold">${dados?.totalAreas ?? 0}</p> </div>
+            <div class="card-body text-center"> 
+              <div class="stat-icon mb-2"><i class="bi bi-geo-alt-fill fs-2"></i></div> 
+              <h6 class="card-title">Áreas Atendidas</h6> 
+              <p class="display-6 fw-bold">${dados?.totalAreas ?? 0}</p> 
+            </div>
           </div>
         </div>
       </div>`;
@@ -272,69 +347,164 @@ ModuleLoader.register('dashboard', function() {
   // Renderizar gráfico de equipamentos
   function renderizarGraficoEquipamentos(dados) {
     const canvas = document.getElementById('graficoEquipamentos');
-    if (!canvas) { console.warn("Canvas 'graficoEquipamentos' não encontrado."); return; }
+    if (!canvas) { 
+      console.warn("Canvas 'graficoEquipamentos' não encontrado."); 
+      return; 
+    }
     if (chartInstanceEquipamentos) chartInstanceEquipamentos.destroy(); // Destroi anterior
     if (!dados || dados.length === 0) { // Verifica se há dados
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#6c757d'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#6c757d'; 
+        ctx.textAlign = 'center';
         ctx.fillText("Sem dados de equipamentos", canvas.width / 2, canvas.height / 2);
         return;
     }
-    const labels = dados.map(item => item.equipamento); const values = dados.map(item => item.quantidade);
+    const labels = dados.map(item => item.equipamento); 
+    const values = dados.map(item => item.quantidade);
     const backgroundColors = dados.map((_, index) => `hsla(${(index * 30 + 210) % 360}, 75%, 60%, 0.7)`); // Tons azulados/roxos
     const borderColors = backgroundColors.map(c => c.replace('0.7', '1'));
     const ctx = canvas.getContext('2d');
     chartInstanceEquipamentos = new Chart(ctx, {
       type: 'bar',
-      data: { labels, datasets: [{ label: 'Utilizações', data: values, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 1 }] },
-      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false }, title: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.formattedValue}` } } } } // Eixo Y, sem título/legenda, tooltip simples
+      data: { 
+        labels, 
+        datasets: [{ 
+          label: 'Utilizações', 
+          data: values, 
+          backgroundColor: backgroundColors, 
+          borderColor: borderColors, 
+          borderWidth: 1 
+        }] 
+      },
+      options: { 
+        indexAxis: 'y', 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        scales: { 
+          x: { 
+            beginAtZero: true, 
+            ticks: { precision: 0 } 
+          } 
+        }, 
+        plugins: { 
+          legend: { display: false }, 
+          title: { display: false }, 
+          tooltip: { 
+            callbacks: { 
+              label: (c) => ` ${c.dataset.label}: ${c.formattedValue}` 
+            } 
+          } 
+        } 
+      } // Eixo Y, sem título/legenda, tooltip simples
     });
   }
 
   // Renderizar gráfico de áreas
   function renderizarGraficoAreas(dados) {
     const canvas = document.getElementById('graficoAreas');
-    if (!canvas) { console.warn("Canvas 'graficoAreas' não encontrado."); return; }
+    if (!canvas) { 
+      console.warn("Canvas 'graficoAreas' não encontrado."); 
+      return; 
+    }
     if (chartInstanceAreas) chartInstanceAreas.destroy();
      if (!dados || dados.length === 0) { // Verifica se há dados
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#6c757d'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#6c757d'; 
+        ctx.textAlign = 'center';
         ctx.fillText("Sem dados de áreas", canvas.width / 2, canvas.height / 2);
         return;
     }
-    const labels = dados.map(item => item.area); const values = dados.map(item => item.quantidade);
+    const labels = dados.map(item => item.area); 
+    const values = dados.map(item => item.quantidade);
     const backgroundColors = dados.map((_, index) => `hsla(${(index * 50 + 30) % 360}, 70%, 65%, 0.7)`); // Tons variados
     const borderColors = backgroundColors.map(c => c.replace('0.7', '1'));
     const ctx = canvas.getContext('2d');
     chartInstanceAreas = new Chart(ctx, {
       type: 'doughnut',
-      data: { labels, datasets: [{ data: values, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 1 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } }, title: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.formattedValue}` } } } } // Legenda direita, sem título, tooltip simples
+      data: { 
+        labels, 
+        datasets: [{ 
+          data: values, 
+          backgroundColor: backgroundColors, 
+          borderColor: borderColors, 
+          borderWidth: 1 
+        }] 
+      },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { 
+          legend: { 
+            position: 'right', 
+            labels: { 
+              boxWidth: 12, 
+              padding: 15 
+            } 
+          }, 
+          title: { display: false }, 
+          tooltip: { 
+            callbacks: { 
+              label: (c) => ` ${c.label}: ${c.formattedValue}` 
+            } 
+          } 
+        } 
+      } // Legenda direita, sem título, tooltip simples
     });
   }
 
   // Renderizar gráfico de motivos de troca
   function renderizarGraficoMotivos(dados) {
     const canvas = document.getElementById('graficoMotivos'); // Assume canvas existe no container
-    if (!canvas) { console.warn("Canvas 'graficoMotivos' não encontrado."); return; }
+    if (!canvas) { 
+      console.warn("Canvas 'graficoMotivos' não encontrado."); 
+      return; 
+    }
     if (chartInstanceMotivos) chartInstanceMotivos.destroy();
      if (!dados || dados.length === 0) { // Verifica se há dados
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = '#6c757d'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#6c757d'; 
+        ctx.textAlign = 'center';
         ctx.fillText("Sem dados de motivos de troca", canvas.width / 2, canvas.height / 2);
         return;
     }
-    const labels = dados.map(item => item.motivo); const values = dados.map(item => item.quantidade);
+    const labels = dados.map(item => item.motivo); 
+    const values = dados.map(item => item.quantidade);
     const backgroundColors = dados.map((_, index) => `hsla(${(index * 60 + 120) % 360}, 70%, 60%, 0.7)`); // Tons esverdeados/amarelados
     const borderColors = backgroundColors.map(c => c.replace('0.7', '1'));
     const ctx = canvas.getContext('2d');
     chartInstanceMotivos = new Chart(ctx, {
       type: 'pie',
-      data: { labels, datasets: [{ data: values, backgroundColor: backgroundColors, borderColor: borderColors, borderWidth: 1 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } }, title: { display: false }, tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.formattedValue}` } } } } // Legenda direita, sem título, tooltip simples
+      data: { 
+        labels, 
+        datasets: [{ 
+          data: values, 
+          backgroundColor: backgroundColors, 
+          borderColor: borderColors, 
+          borderWidth: 1 
+        }] 
+      },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { 
+          legend: { 
+            position: 'right', 
+            labels: { 
+              boxWidth: 12, 
+              padding: 15 
+            } 
+          }, 
+          title: { display: false }, 
+          tooltip: { 
+            callbacks: { 
+              label: (c) => ` ${c.label}: ${c.formattedValue}` 
+            } 
+          } 
+        } 
+      } // Legenda direita, sem título, tooltip simples
     });
   }
 
@@ -381,7 +551,11 @@ ModuleLoader.register('dashboard', function() {
       const warningColor = rootStyles.getPropertyValue('--warning-color').trim() || '#f39c12';
       const dangerColor = rootStyles.getPropertyValue('--danger-color').trim() || '#e74c3c';
 
-      const backgroundColors = [ `${successColor}b3`, `${warningColor}b3`, `${dangerColor}b3` ]; // ~70% opacidade
+      const backgroundColors = [ 
+        `${successColor}b3`, 
+        `${warningColor}b3`, 
+        `${dangerColor}b3` 
+      ]; // ~70% opacidade
       const borderColors = [successColor, warningColor, dangerColor];
 
       // Criar gráfico
@@ -406,13 +580,19 @@ ModuleLoader.register('dashboard', function() {
               plugins: {
                   legend: {
                       position: 'bottom',
-                      labels: { boxWidth: 12, padding: 20 } // Mais padding na legenda
+                      labels: { 
+                        boxWidth: 12, 
+                        padding: 20 
+                      } // Mais padding na legenda
                   },
                   title: { display: false }, // Título omitido para layout mais limpo no card
                   tooltip: {
                       callbacks: {
                           label: function(context) {
-                              let label = context.label || ''; if (label) { label += ': '; }
+                              let label = context.label || ''; 
+                              if (label) { 
+                                label += ': '; 
+                              }
                               if (context.parsed !== null) {
                                   const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                   const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) + '%' : '0%';
@@ -431,8 +611,14 @@ ModuleLoader.register('dashboard', function() {
   // Renderizar lista de últimos relatórios
   function renderizarUltimosRelatorios(relatorios) {
     const container = document.getElementById('ultimosRelatorios');
-    if (!container) { console.warn("Container 'ultimosRelatorios' não encontrado."); return; }
-    if (!relatorios || relatorios.length === 0) { container.innerHTML = '<div class="alert alert-light text-center p-4"><i class="bi bi-info-circle fs-3 mb-2 d-block"></i>Nenhum relatório recente encontrado.</div>'; return; }
+    if (!container) { 
+      console.warn("Container 'ultimosRelatorios' não encontrado."); 
+      return; 
+    }
+    if (!relatorios || relatorios.length === 0) { 
+      container.innerHTML = '<div class="alert alert-light text-center p-4"><i class="bi bi-info-circle fs-3 mb-2 d-block"></i>Nenhum relatório recente encontrado.</div>'; 
+      return; 
+    }
 
     let html = '<div class="table-responsive recent-reports-table"><table class="table table-striped table-hover table-sm align-middle">'; // align-middle para centralizar verticalmente
     html += `<thead class="table-light"><tr><th>Origem</th><th>Data</th><th>Horário</th><th>Letra</th><th>Sup.</th><th class="text-center">Equipes</th><th class="text-center">Ações</th></tr></thead><tbody>`;
