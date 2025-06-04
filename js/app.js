@@ -2099,11 +2099,10 @@ function gerarTextoRelatorioLocal(relatorio) {
   relatorioTexto += `- Data: ${formatarData(dadosTurno.data)} | Turno: ${dadosTurno.horario || 'N/A'} | Letra: ${dadosTurno.letra || 'N/A'}\n`;
   relatorioTexto += `- Supervisor: ${dadosTurno.supervisor || 'N/A'}\n`;
   
-  // Calcular contadores
+  // Calcular contadores CORRETOS
   let totalAltaPressao = 0, totalVacuo = 0;
   let totalConcluido = 0, totalEmAndamento = 0;
-  let totalIndisponibilidadeTecnica = 0; // Em minutos - apenas manutenções técnicas
-  let totalIndisponibilidadeCliente = 0; // Em minutos - solicitações de cliente
+  let totalIndisponibilidadeTecnica = 0;
   let tiposAtividade = {};
 
   // Agrupar equipes por tipo
@@ -2118,7 +2117,7 @@ function gerarTextoRelatorioLocal(relatorio) {
     if (tipo === 'Alta Pressão') totalAltaPressao++;
     else if (tipo === 'Auto Vácuo / Hiper Vácuo') totalVacuo++;
 
-    // Contagem por status
+    // Contagem por status - CORRIGIDA
     const statusNormalizado = normalizarTexto(eq.statusAtividade || 'concluído');
     if (statusNormalizado === 'concluído') {
       totalConcluido++;
@@ -2130,12 +2129,9 @@ function gerarTextoRelatorioLocal(relatorio) {
     const tipoAtiv = eq.tipoAtividade || 'Rotineira';
     tiposAtividade[tipoAtiv] = (tiposAtividade[tipoAtiv] || 0) + 1;
 
-    // CÁLCULO CORRETO DE INDISPONIBILIDADE
+    // Calcular indisponibilidade só para manutenções técnicas
     if (eq.trocaEquipamento === 'Sim') {
-      var tempoMinutos = 0;
       var isSolicitacaoCliente = false;
-      
-      // Verificar se é solicitação do cliente
       const motivoNormalizado = normalizarTexto(eq.motivoTroca || '');
       const motivoOutroNormalizado = normalizarTexto(eq.motivoOutro || '');
 
@@ -2145,30 +2141,22 @@ function gerarTextoRelatorioLocal(relatorio) {
         isSolicitacaoCliente = true;
       } else if ((motivoNormalizado.includes('outros') || motivoNormalizado.includes('defeitos')) &&
                  (motivoOutroNormalizado.includes('solicitacao') || 
-                  motivoOutroNormalizado.includes('cliente') ||
-                  motivoOutroNormalizado.includes('solicitação'))) {
+                  motivoOutroNormalizado.includes('cliente'))) {
         isSolicitacaoCliente = true;
       }
 
-      // Calcular tempo se houver dados válidos
-      if (eq.dataHoraTroca && eq.dataHoraFimTroca) {
-        // Calcular baseado nas datas
+      // Só conta tempo se NÃO for solicitação do cliente
+      if (!isSolicitacaoCliente && eq.dataHoraTroca && eq.dataHoraFimTroca) {
         try {
           var inicio = new Date(eq.dataHoraTroca);
           var fim = new Date(eq.dataHoraFimTroca);
           if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
-            tempoMinutos = Math.round((fim - inicio) / (1000 * 60));
+            var tempoMinutos = Math.round((fim - inicio) / (1000 * 60));
+            totalIndisponibilidadeTecnica += tempoMinutos;
           }
         } catch (e) {
           console.log("Erro ao calcular tempo das datas: " + e.message);
         }
-      }
-
-      // Somar ao total apropriado
-      if (isSolicitacaoCliente) {
-        totalIndisponibilidadeCliente += tempoMinutos;
-      } else {
-        totalIndisponibilidadeTecnica += tempoMinutos;
       }
     }
   });
@@ -2205,7 +2193,7 @@ function gerarTextoRelatorioLocal(relatorio) {
     relatorioTexto += `🔸 ${tipo.toUpperCase()} (${equipesDoTipo.length} EQUIPES) 🔸\n`;
     
     equipesDoTipo.forEach((equipe, index) => {
-      // Determinar equipamento e vaga de forma otimizada
+      // Determinar equipamento e vaga
       const equipamento = equipe.equipamento === 'OUTRO EQUIPAMENTO' ?
                          (equipe.equipamentoPersonalizado || 'N/A') :
                          (equipe.equipamento || 'N/A');
@@ -2214,7 +2202,7 @@ function gerarTextoRelatorioLocal(relatorio) {
                   (equipe.vagaPersonalizada || 'N/A') :
                   (equipe.vaga || 'N/A');
       
-      // Extrair códigos da vaga e equipamento para formato compacto
+      // Extrair códigos para formato compacto
       const vagaCodigo = extrairCodigoVaga(vaga);
       const equipamentoCodigo = extrairCodigoEquipamento(equipamento);
       
@@ -2260,6 +2248,35 @@ function gerarTextoRelatorioLocal(relatorio) {
     
     relatorioTexto += "\n";
   }
+
+  // === INDICADORES DE TURNO ===
+  relatorioTexto += "🔹 INDICADORES DE TURNO 🔹\n";
+  relatorioTexto += `- Realizações: ${totalConcluido} concluídas, ${totalEmAndamento} em andamento\n`;
+  
+  // Tipos de atividade
+  const tiposTexto = Object.entries(tiposAtividade)
+    .map(([tipo, count]) => `${count} ${tipo}`)
+    .join(', ');
+  relatorioTexto += `- Tipos: ${tiposTexto}\n`;
+  
+  // Indisponibilidade total
+  if (totalIndisponibilidadeTecnica > 0) {
+    const horasTotal = Math.floor(totalIndisponibilidadeTecnica / 60);
+    const minutosTotal = totalIndisponibilidadeTecnica % 60;
+    relatorioTexto += `- Indisponibilidade Total: ${horasTotal}h${minutosTotal < 10 ? '0' : ''}${minutosTotal}min\n`;
+    relatorioTexto += `  - Cliente: 0h00min (não conta para indisponibilidade técnica)\n`;
+  } else {
+    relatorioTexto += `- Indisponibilidade Total: 0h00min\n`;
+    relatorioTexto += `  - Cliente: 0h00min (não conta para indisponibilidade técnica)\n`;
+  }
+  
+  relatorioTexto += "\n";
+
+  // Rodapé
+  relatorioTexto += `GPS Mecanizada | Sistema v${window.CONFIG?.VERSAO_APP || '3.2'} | ${formatarData(new Date())}`;
+
+  return relatorioTexto;
+}
 
   // === INDICADORES DE TURNO ===
   relatorioTexto += "🔹 INDICADORES DE TURNO 🔹\n";
