@@ -2077,12 +2077,8 @@ function obterRelatorioLocal(id) {
   return relatoriosLocais.find(r => r.id === id) || null;
 }
 
-
 /**
- * Gerar texto de relatório local (CORRIGIDO - Formato Executivo)
- * ATUALIZADO: Usa o mesmo formato da função gerarRelatorioTexto do backend
- * ATUALIZADO: Inclui Data/Hora Fim e Tempo Calculado
- * ATUALIZADO: Usa normalizarTexto para comparações.
+ * Gerar texto de relatório local (FORMATO PADRONIZADO)
  */
 function gerarTextoRelatorioLocal(relatorio) {
   if (!relatorio || !relatorio.dadosTurno || !relatorio.equipes) {
@@ -2091,7 +2087,7 @@ function gerarTextoRelatorioLocal(relatorio) {
 
   const { dadosTurno, equipes } = relatorio;
   
-  // Iniciar relatório executivo com o formato correto
+  // Iniciar relatório executivo PADRONIZADO
   var relatorioTexto = "RELATÓRIO DE TURNO - GPS MECANIZADA\n\n";
   
   // === RESUMO EXECUTIVO ===
