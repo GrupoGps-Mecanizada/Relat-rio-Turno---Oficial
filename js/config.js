@@ -5,7 +5,7 @@
   
   // Definir propriedades individualmente para melhor controle
   window.CONFIG.VERSAO_APP = '3.3'; // Alterado de 3.0 para 3.1
-  window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbygEmpgOT6fn6_CLTMMd7mvd5VhAw0v1EuxvzGQeDAtOtyNUANd_M2Q7YKjt3GPeG6C/exec';
+  window.CONFIG.API_URL = 'https://script.google.com/macros/s/AKfycbwB9-ONNAFifKV0YpG8DoeMMlAPZNhI05uTHyzEl2V6FDSnwkv2SywEjacQOi1WgRA/exec';
   window.CONFIG.PLANILHA_ID = '1BXQDku3C3uuOyucuAmQoV36iQMtC0bsa--4VDZQBO54';
   window.CONFIG.API_KEY = 'AIzaSyCi8G96eC3Ok9PLimQJ0OqVEe3-rJgWGaM';
   window.CONFIG.AUTH_REQUIRED = false;
