@@ -8,6 +8,14 @@
  * CORRIGIDO: Formatação de relatório local para usar formato executivo correto.
  */
 
+// ========== CORREÇÕES IMEDIATAS PARA app.js ==========
+const STATUS_CONSTANTS = {
+  CONCLUIDO: 'concluido',
+  EM_ANDAMENTO: 'em_andamento', 
+  NAO_INICIADO: 'nao_iniciado',
+  PENDENTE: 'pendente'
+};
+
 // Variáveis globais (Considerar mover para AppState no futuro)
 let equipes = [];
 let dadosTurno = {};
@@ -1432,7 +1440,7 @@ function toggleMotivoOutro() {
 
 /**
  * Mostrar/ocultar campo de pendência baseado no status da atividade
- * ATUALIZADO: Usa normalizarTexto.
+ * ATUALIZADO: Usa normalizarStatus.
  */
 function togglePendencia() {
     const statusSelect = document.getElementById('equipeStatusAtividade');
@@ -1440,7 +1448,9 @@ function togglePendencia() {
     const pendenciaInput = document.getElementById('equipePendencia');
 
     if (statusSelect && pendenciaContainer && pendenciaInput) {
-        const show = normalizarTexto(statusSelect.value) !== 'concluido';
+        const statusNormalizado = normalizarStatus(statusSelect.value);
+        const show = statusNormalizado !== STATUS_CONSTANTS.CONCLUIDO;
+        
         pendenciaContainer.style.display = show ? 'block' : 'none';
         pendenciaInput.required = show;
         if (!show) {
@@ -2087,24 +2097,27 @@ function gerarTextoRelatorioLocal(relatorio) {
 
   const { dadosTurno, equipes } = relatorio;
   
-  // Iniciar relatório executivo PADRONIZADO
-  var relatorioTexto = "RELATÓRIO DE TURNO - GPS MECANIZADA\n\n";
-  
-  // === RESUMO EXECUTIVO ===
+  let relatorioTexto = "RELATÓRIO DE TURNO - GPS MECANIZADA\n\n";
   relatorioTexto += "🔹 RESUMO EXECUTIVO 🔹\n";
   relatorioTexto += `- Data: ${formatarData(dadosTurno.data)} | Turno: ${dadosTurno.horario || 'N/A'} | Letra: ${dadosTurno.letra || 'N/A'}\n`;
   relatorioTexto += `- Supervisor: ${dadosTurno.supervisor || 'N/A'}\n`;
   
-  // Calcular contadores CORRETOS
+  // CONTADORES CORRIGIDOS
   let totalAltaPressao = 0, totalVacuo = 0;
   let totalConcluido = 0, totalEmAndamento = 0;
   let totalIndisponibilidadeTecnica = 0;
   let tiposAtividade = {};
-
-  // Agrupar equipes por tipo
   var equipesPorTipo = {};
   
-  equipes.forEach((eq) => {
+  console.log("🔍 DEBUG: Analisando equipes:", equipes.length);
+  
+  equipes.forEach((eq, index) => {
+    console.log(`Equipe ${index + 1}:`, {
+      numero: eq.numero,
+      statusOriginal: eq.statusAtividade,
+      tipo: eq.tipo
+    });
+    
     var tipo = eq.tipo || 'Desconhecido';
     if (!equipesPorTipo[tipo]) equipesPorTipo[tipo] = [];
     equipesPorTipo[tipo].push(eq);
@@ -2113,11 +2126,13 @@ function gerarTextoRelatorioLocal(relatorio) {
     if (tipo === 'Alta Pressão') totalAltaPressao++;
     else if (tipo === 'Auto Vácuo / Hiper Vácuo') totalVacuo++;
 
-    // Contagem por status - CORRIGIDA
-    const statusNormalizado = normalizarTexto(eq.statusAtividade || 'concluído');
-    if (statusNormalizado === 'concluído') {
+    // CORREÇÃO: Contagem por status
+    const statusNormalizado = normalizarStatus(eq.statusAtividade);
+    console.log(`  Status normalizado: ${statusNormalizado}`);
+    
+    if (statusNormalizado === STATUS_CONSTANTS.CONCLUIDO) {
       totalConcluido++;
-    } else if (statusNormalizado === 'em andamento') {
+    } else if (statusNormalizado === STATUS_CONSTANTS.EM_ANDAMENTO) {
       totalEmAndamento++;
     }
     
@@ -2125,36 +2140,23 @@ function gerarTextoRelatorioLocal(relatorio) {
     const tipoAtiv = eq.tipoAtividade || 'Rotineira';
     tiposAtividade[tipoAtiv] = (tiposAtividade[tipoAtiv] || 0) + 1;
 
-    // Calcular indisponibilidade só para manutenções técnicas
+    // CORREÇÃO: Calcular indisponibilidade
     if (eq.trocaEquipamento === 'Sim') {
-      var isSolicitacaoCliente = false;
-      const motivoNormalizado = normalizarTexto(eq.motivoTroca || '');
-      const motivoOutroNormalizado = normalizarTexto(eq.motivoOutro || '');
-
-      if (motivoNormalizado.includes('solicitacao') || 
-          motivoNormalizado.includes('cliente') ||
-          motivoNormalizado.includes('solicitação')) {
-        isSolicitacaoCliente = true;
-      } else if ((motivoNormalizado.includes('outros') || motivoNormalizado.includes('defeitos')) &&
-                 (motivoOutroNormalizado.includes('solicitacao') || 
-                  motivoOutroNormalizado.includes('cliente'))) {
-        isSolicitacaoCliente = true;
-      }
-
-      // Só conta tempo se NÃO for solicitação do cliente
-      if (!isSolicitacaoCliente && eq.dataHoraTroca && eq.dataHoraFimTroca) {
-        try {
-          var inicio = new Date(eq.dataHoraTroca);
-          var fim = new Date(eq.dataHoraFimTroca);
-          if (!isNaN(inicio.getTime()) && !isNaN(fim.getTime()) && fim > inicio) {
-            var tempoMinutos = Math.round((fim - inicio) / (1000 * 60));
-            totalIndisponibilidadeTecnica += tempoMinutos;
-          }
-        } catch (e) {
-          console.log("Erro ao calcular tempo das datas: " + e.message);
-        }
+      const eSolicitacaoCliente = isSolicitacaoCliente(eq.motivoTroca, eq.motivoOutro);
+      console.log(`  Troca: ${eSolicitacaoCliente ? 'Cliente' : 'Técnica'}`);
+      
+      if (!eSolicitacaoCliente) {
+        const tempoMinutos = calcularTempoIndisponibilidade(eq.dataHoraTroca, eq.dataHoraFimTroca);
+        totalIndisponibilidadeTecnica += tempoMinutos;
+        console.log(`  Tempo indisponibilidade: ${tempoMinutos} min`);
       }
     }
+  });
+
+  console.log("📊 TOTAIS:", {
+    totalConcluido,
+    totalEmAndamento,
+    totalIndisponibilidadeTecnica
   });
 
   // Completar resumo executivo
@@ -2171,7 +2173,7 @@ function gerarTextoRelatorioLocal(relatorio) {
   
   relatorioTexto += "\n";
 
-  // === SEÇÕES POR TIPO DE EQUIPE ===
+  // Seções por tipo de equipe
   const ordemTipos = ['Alta Pressão', 'Auto Vácuo / Hiper Vácuo'];
   const tiposOrdenados = Object.keys(equipesPorTipo).sort((a, b) => {
       let indexA = ordemTipos.indexOf(a);
@@ -2185,11 +2187,9 @@ function gerarTextoRelatorioLocal(relatorio) {
     const equipesDoTipo = equipesPorTipo[tipo];
     const isAltaPressao = tipo === 'Alta Pressão';
     
-    // Cabeçalho da seção
     relatorioTexto += `🔸 ${tipo.toUpperCase()} (${equipesDoTipo.length} EQUIPES) 🔸\n`;
     
     equipesDoTipo.forEach((equipe, index) => {
-      // Determinar equipamento e vaga
       const equipamento = equipe.equipamento === 'OUTRO EQUIPAMENTO' ?
                          (equipe.equipamentoPersonalizado || 'N/A') :
                          (equipe.equipamento || 'N/A');
@@ -2198,15 +2198,14 @@ function gerarTextoRelatorioLocal(relatorio) {
                   (equipe.vagaPersonalizada || 'N/A') :
                   (equipe.vaga || 'N/A');
       
-      // Extrair códigos para formato compacto
       const vagaCodigo = extrairCodigoVaga(vaga);
       const equipamentoCodigo = extrairCodigoEquipamento(equipamento);
       
-      const statusNormalizado = normalizarTexto(equipe.statusAtividade || 'concluído');
-      const statusTexto = statusNormalizado === 'concluído' ? 'CONCLUÍDO' : 
-                         statusNormalizado === 'em andamento' ? 'EM ANDAMENTO' : 'PENDENTE';
+      // CORREÇÃO: Usar nova função de status
+      const statusNormalizado = normalizarStatus(equipe.statusAtividade);
+      const statusTexto = statusNormalizado === STATUS_CONSTANTS.CONCLUIDO ? 'CONCLUÍDO' : 
+                         statusNormalizado === STATUS_CONSTANTS.EM_ANDAMENTO ? 'EM ANDAMENTO' : 'PENDENTE';
 
-      // Linha principal da equipe (formato compacto)
       relatorioTexto += `EQUIPE ${index + 1} - ${vagaCodigo}/${equipamentoCodigo} - ${statusTexto}\n`;
       relatorioTexto += `Motorista: ${equipe.motorista || 'N/A'} | Operadores: ${equipe.operadores || 'N/A'}\n`;
       relatorioTexto += `Local: ${equipe.area || 'N/A'}\n`;
@@ -2232,30 +2231,25 @@ function gerarTextoRelatorioLocal(relatorio) {
         relatorioTexto += `- Volumes: ${m3} (3"), ${m4} (4"), ${m6} (6")\n`;
       }
       
-      // Segurança (formato compacto)
       const caixaBloqueio = equipe.caixaBloqueio === 'Sim' ? 'Sim' : 'Não';
       const cadeados = equipe.cadeados || '0';
       const plaquetas = equipe.plaquetas || '0';
       relatorioTexto += `- Bloqueio: ${caixaBloqueio} (${cadeados} cadeados, ${plaquetas} plaquetas)\n`;
-      
-      // Adicionar linha separadora entre equipes
       relatorioTexto += "------------------------------------------\n";
     });
     
     relatorioTexto += "\n";
   }
 
-  // === INDICADORES DE TURNO ===
+  // Indicadores de turno
   relatorioTexto += "🔹 INDICADORES DE TURNO 🔹\n";
   relatorioTexto += `- Realizações: ${totalConcluido} concluídas, ${totalEmAndamento} em andamento\n`;
   
-  // Tipos de atividade
   const tiposTexto = Object.entries(tiposAtividade)
     .map(([tipo, count]) => `${count} ${tipo}`)
     .join(', ');
   relatorioTexto += `- Tipos: ${tiposTexto}\n`;
   
-  // Indisponibilidade total
   if (totalIndisponibilidadeTecnica > 0) {
     const horasTotal = Math.floor(totalIndisponibilidadeTecnica / 60);
     const minutosTotal = totalIndisponibilidadeTecnica % 60;
@@ -2267,12 +2261,10 @@ function gerarTextoRelatorioLocal(relatorio) {
   }
   
   relatorioTexto += "\n";
-
-  // Rodapé
   relatorioTexto += `GPS Mecanizada | Sistema v${window.CONFIG?.VERSAO_APP || '3.2'} | ${formatarData(new Date())}`;
 
   return relatorioTexto;
-} 
+}
 
 /**
  * Extrai código simplificado da vaga
@@ -2842,9 +2834,69 @@ function normalizarTexto(texto) {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, ' ') // normalizar espaços
     .trim();
 }
 
+// 3. NOVA FUNÇÃO PARA NORMALIZAR STATUS
+function normalizarStatus(status) {
+  if (!status) return STATUS_CONSTANTS.CONCLUIDO;
+  
+  const statusNorm = normalizarTexto(status);
+  
+  if (statusNorm === 'concluido' || statusNorm.includes('concluido')) {
+    return STATUS_CONSTANTS.CONCLUIDO;
+  } else if (statusNorm.includes('andamento') || statusNorm.includes('progresso')) {
+    return STATUS_CONSTANTS.EM_ANDAMENTO;
+  } else if (statusNorm.includes('nao') || statusNorm.includes('iniciado')) {
+    return STATUS_CONSTANTS.NAO_INICIADO;
+  } else {
+    return STATUS_CONSTANTS.PENDENTE;
+  }
+}
+
+// 4. FUNÇÃO MELHORADA PARA VERIFICAR SOLICITAÇÃO DO CLIENTE
+function isSolicitacaoCliente(motivoTroca, motivoOutro) {
+  if (!motivoTroca) return false;
+  
+  const motivoNorm = normalizarTexto(motivoTroca);
+  const motivoOutroNorm = normalizarTexto(motivoOutro || '');
+  
+  const indicadoresCliente = ['solicitacao', 'cliente', 'pedido'];
+  
+  // Verifica no motivo principal
+  for (const indicador of indicadoresCliente) {
+    if (motivoNorm.includes(indicador)) return true;
+  }
+  
+  // Se for "Outros" ou "Defeitos", verifica no campo especificado
+  if ((motivoNorm.includes('outros') || motivoNorm.includes('defeitos')) && motivoOutroNorm) {
+    for (const indicador of indicadoresCliente) {
+      if (motivoOutroNorm.includes(indicador)) return true;
+    }
+  }
+  
+  return false;
+}
+
+// 5. FUNÇÃO PARA CALCULAR TEMPO
+function calcularTempoIndisponibilidade(dataInicio, dataFim) {
+  if (!dataInicio || !dataFim) return 0;
+  
+  try {
+    const inicio = new Date(dataInicio);
+    const fim = new Date(dataFim);
+    
+    if (isNaN(inicio.getTime()) || isNaN(fim.getTime()) || fim <= inicio) {
+      return 0;
+    }
+    
+    return Math.round((fim - inicio) / (1000 * 60));
+  } catch (e) {
+    console.error("Erro ao calcular tempo:", e);
+    return 0;
+  }
+}
 
 // --- Exportar funções para o escopo global (necessário para onclick no HTML) ---
 window.inicializarFormulario = inicializarFormulario;
