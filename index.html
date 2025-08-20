@@ -1,0 +1,3951 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Relatório de Turno - GrupoGPS v4.1</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #64748b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+            color: var(--gray-900);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .sync-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success-color);
+        }
+
+        .sync-dot.loading {
+            background: var(--warning-color);
+            animation: pulse 2s infinite;
+        }
+
+        .sync-dot.error {
+            background: var(--danger-color);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: var(--white);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-sm { padding: 0.5rem 1rem; font-size: 0.875rem; }
+        .btn-lg { padding: 1rem 2rem; font-size: 1.125rem; }
+        .btn-secondary { background: var(--secondary-color); }
+        .btn-secondary:hover { background: var(--gray-700); }
+        .btn-success { background: var(--success-color); }
+        .btn-success:hover { background: #059669; }
+        .btn-warning { background: var(--warning-color); }
+        .btn-warning:hover { background: #d97706; }
+        .btn-danger { background: var(--danger-color); }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-info { background: var(--info-color); }
+        .btn-info:hover { background: #2563eb; }
+
+        /* Navigation */
+        .nav-tabs {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            overflow-x: auto;
+        }
+
+        .nav-tabs-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-600);
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.95rem;
+        }
+
+        .nav-tab:hover {
+            color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        .nav-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: var(--gray-50);
+        }
+
+        .card-title {
+            font-weight: 700;
+            color: var(--gray-900);
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: var(--white);
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 3rem;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+        }
+
+        .form-radio, .form-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .form-radio input, .form-checkbox input {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: var(--primary-color);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+            justify-content: center;
+        }
+
+        /* Step Indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 1.5rem;
+            background: var(--gray-100);
+            border-radius: 8px;
+            color: var(--gray-500);
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .step-item.active {
+            background: var(--primary-color);
+            color: var(--white);
+            transform: scale(1.05);
+        }
+
+        .step-item.completed {
+            background: var(--success-color);
+            color: var(--white);
+        }
+
+        .step-number {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            background: var(--white);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+
+        .step-item.active .step-number {
+            background: var(--white);
+            color: var(--primary-color);
+        }
+
+        .step-item.completed .step-number {
+            background: var(--white);
+            color: var(--success-color);
+        }
+
+        /* Team Cards */
+        .teams-container {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .team-card {
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .team-card.alta-pressao {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .team-card.vacuo {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .team-card.horas-extras {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .team-header {
+            padding: 1.5rem;
+            background: var(--gray-50);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .team-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .team-info p {
+            color: var(--gray-600);
+            font-size: 0.875rem;
+        }
+
+        .team-content {
+            padding: 1.5rem;
+        }
+
+        .team-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-item {
+            padding: 1rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal.show {
+            display: flex !important;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 16px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 95vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--gray-400);
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--gray-600);
+            background: var(--gray-100);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem 2rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            background: var(--white);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.875rem;
+        }
+
+        .data-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-900);
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        /* Badge */
+        .badge {
+            padding: 0.375rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.025em;
+        }
+
+        .badge-primary { background: rgba(37, 99, 235, 0.1); color: var(--primary-color); }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+        .badge-info { background: rgba(59, 130, 246, 0.1); color: var(--info-color); }
+        .badge-secondary { background: rgba(100, 116, 139, 0.1); color: var(--secondary-color); }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            color: var(--white);
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        .notification.success { background: var(--success-color); }
+        .notification.error { background: var(--danger-color); }
+        .notification.warning { background: var(--warning-color); }
+        .notification.info { background: var(--info-color); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-content {
+            background: var(--white);
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid var(--gray-300);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: var(--gray-700);
+            font-weight: 600;
+        }
+
+        /* Report View */
+        .report-container {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 2rem;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        /* Success Animation */
+        .success-animation {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        /* Implementos Section */
+        .implementos-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: 8px;
+        }
+
+        .implementos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .implemento-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .implemento-item label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+            min-width: 100px;
+        }
+
+        .implemento-item select {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 4px;
+            font-size: 0.875rem;
+        }
+
+        /* Troca Item Styling */
+        .troca-item {
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--white);
+        }
+
+        .troca-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .troca-title {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .btn-remove-troca {
+            background: var(--danger-color);
+            color: var(--white);
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        /* Atraso Section */
+        .atraso-section {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--warning-color);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .atraso-section h5 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .atraso-section .form-label {
+            color: white;
+            font-weight: 600;
+        }
+
+        .atraso-section .form-select,
+        .atraso-section .form-textarea,
+        .atraso-section .form-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--gray-900);
+        }
+
+        /* Campo customizado para "Outro" */
+        .campo-outro {
+            margin-top: 0.5rem;
+        }
+
+        .campo-outro input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .observacoes-gerais {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--info-color);
+            color: white;
+            border-radius: 8px;
+        }
+
+        .observacoes-gerais h5 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .observacoes-gerais .form-label {
+            color: white;
+            font-weight: 600;
+        }
+
+        .observacoes-gerais .form-textarea {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--gray-900);
+        }
+
+        /* Responsive Design - Melhorado */
+        @media (max-width: 1024px) {
+            .main-content {
+                padding: 1.5rem;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+            
+            .modal-content {
+                margin: 1rem;
+                max-height: 90vh;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-controls {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .header-brand {
+                font-size: 1.25rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .nav-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                padding: 0.875rem 1.5rem;
+                font-size: 0.95rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 1rem;
+            }
+
+            .step-indicator {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .step-item {
+                padding: 0.75rem 1rem;
+            }
+
+            .team-details {
+                grid-template-columns: 1fr;
+            }
+
+            .implementos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+            
+            .modal-body > form > div {
+                grid-template-columns: 1fr !important;
+                gap: 1.5rem;
+            }
+
+            .team-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .table-container {
+                font-size: 0.8rem;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-brand {
+                font-size: 1.1rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 0.5rem;
+                max-height: 95vh;
+            }
+
+            .card-content {
+                padding: 1rem;
+            }
+            
+            .step-item {
+                padding: 0.5rem;
+                font-size: 0.875rem;
+            }
+            
+            .step-number {
+                width: 1.5rem;
+                height: 1.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.875rem;
+            }
+            
+            .form-input,
+            .form-select,
+            .form-textarea {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .nav-tab {
+                min-width: 120px;
+                flex-shrink: 0;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-content {
+                padding: 0.75rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .card-content {
+                padding: 0.75rem;
+            }
+            
+            .modal-body {
+                padding: 0.75rem;
+            }
+        }
+
+        .hidden { display: none !important; }
+        .show { display: block !important; }
+    </style>
+</head>
+<body>
+    <div class="app-container" id="appContainer">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-brand">
+                    Sistema de Relatório de Turno
+                </div>
+                
+                <div class="header-controls">
+                    <div class="user-info">
+                        <span id="currentUser">Sistema Interno</span>
+                    </div>
+                    
+                    <div class="sync-status">
+                        <div class="sync-dot" id="syncDot"></div>
+                        <span id="syncStatus">Conectado</span>
+                    </div>
+                    
+                    <button class="btn btn-sm btn-info" onclick="forceRefresh()">
+                        Atualizar
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs">
+            <div class="nav-tabs-container">
+                <div class="nav-tab active" onclick="switchTab('novo-relatorio')">
+                    Novo Relatório
+                </div>
+                <div class="nav-tab" onclick="switchTab('relatorios')">
+                    Relatórios
+                </div>
+                <div class="nav-tab" onclick="switchTab('pesquisa')">
+                    Pesquisar
+                </div>
+                <div class="nav-tab" onclick="switchTab('configuracoes')">
+                    Configurações
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Novo Relatório Tab -->
+            <div id="novo-relatorio-tab" class="tab-content active">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-item active" id="step1">
+                        <div class="step-number">1</div>
+                        <span>Informações do Turno</span>
+                    </div>
+                    <div class="step-item" id="step2">
+                        <div class="step-number">2</div>
+                        <span>Equipes</span>
+                    </div>
+                    <div class="step-item" id="step3">
+                        <div class="step-number">3</div>
+                        <span>Revisão</span>
+                    </div>
+                </div>
+
+                <!-- Etapa 1: Informações do Turno -->
+                <div id="etapa1" class="step-content">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Informações Básicas do Turno</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Data do Turno *</label>
+                                    <input type="date" id="dataTurno" class="form-input" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Horário do Turno *</label>
+                                    <select id="horarioTurno" class="form-select" required>
+                                        <option value="">Selecione o horário...</option>
+                                        <option value="07:00 - 19:00">07:00 - 19:00</option>
+                                        <option value="19:00 - 07:00">19:00 - 07:00</option>
+                                        <option value="ADM">ADM</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Letra do Turno *</label>
+                                    <select id="letraTurno" class="form-select" required>
+                                        <option value="">Selecione a letra...</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="C">C</option>
+                                        <option value="D">D</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Supervisor Responsável *</label>
+                                    <select id="supervisorTurno" class="form-select" required>
+                                        <option value="">Selecione o supervisor...</option>
+                                        <!-- Preenchido via JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-lg" onclick="nextStep()">
+                                    Próximo: Adicionar Equipes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 2: Equipes -->
+                <div id="etapa2" class="step-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Detalhes das Equipes</h2>
+                            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                                <button class="btn btn-success" onclick="adicionarEquipe('Alta Pressao')">
+                                    + Alta Pressao
+                                </button>
+                                <button class="btn btn-danger" onclick="adicionarEquipe('Auto Vacuo / Hiper Vacuo')">
+                                    + Vacuo/Hiper
+                                </button>
+                                <button class="btn btn-warning" onclick="adicionarEquipe('Horas Extras')">
+                                    + Horas Extras
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="teams-container" id="teamsContainer">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">⚠️</div>
+                                    <h3>Nenhuma equipe adicionada</h3>
+                                    <p>Clique nos botões acima para adicionar equipes ao relatório</p>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary btn-lg" onclick="prevStep()">
+                                    Voltar
+                                </button>
+                                <button type="button" class="btn btn-lg" onclick="nextStep()" id="btnProximoRevisao" disabled>
+                                    Próximo: Revisão
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 3: Revisão -->
+                <div id="etapa3" class="step-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2 class="card-title">Revisão e Finalização</h2>
+                        </div>
+                        <div class="card-content">
+                            <div class="card" style="margin-bottom: 2rem;">
+                                <div class="card-header">
+                                    <h3 class="card-title">Resumo do Turno</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div id="resumoTurno" class="form-grid">
+                                        <!-- Preenchido via JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Resumo das Equipes</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div id="resumoEquipes">
+                                        <!-- Preenchido via JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Observações Gerais -->
+                            <div class="observacoes-gerais">
+                                <h5>📝 Observações Gerais do Turno</h5>
+                                <div class="form-group">
+                                    <label class="form-label">Houve alguma situação especial que deve ser mencionada?</label>
+                                    <textarea id="observacoesGeraisTurno" class="form-textarea" rows="4" placeholder="Ex: Falta de colaborador, incidente, ponto de observação importante para o próximo turno, etc."></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-secondary btn-lg" onclick="prevStep()">
+                                    Voltar
+                                </button>
+                                <button type="button" class="btn btn-success btn-lg" onclick="salvarRelatorio()">
+                                    Salvar Relatório
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Etapa 4: Sucesso -->
+                <div id="etapa4" class="step-content" style="display: none;">
+                    <div class="card">
+                        <div class="card-content">
+                            <div class="success-animation">
+                                <div class="success-icon">✓</div>
+                                <h2 style="color: var(--success-color); margin-bottom: 1rem;">Relatório Salvo com Sucesso!</h2>
+                                <p style="color: var(--gray-600); margin-bottom: 2rem;">
+                                    Relatório <strong id="relatorioIdDisplay"></strong> foi registrado no sistema.
+                                </p>
+                                
+                                <div class="form-actions">
+                                    <button class="btn btn-primary btn-lg" onclick="visualizarRelatorio()">
+                                        Visualizar Relatório
+                                    </button>
+                                    <button class="btn btn-secondary" onclick="novoRelatorio()">
+                                        Novo Relatório
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Relatórios Tab -->
+            <div id="relatorios-tab" class="tab-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalRelatorios">0</div>
+                        <div class="stat-label">Total de Relatórios</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="relatoriosHoje">0</div>
+                        <div class="stat-label">Relatórios Hoje</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="equipesTotal">0</div>
+                        <div class="stat-label">Total de Equipes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="atividadesConcluidas">0</div>
+                        <div class="stat-label">Atividades Concluídas</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Relatórios Registrados</h3>
+                        <button class="btn btn-success" onclick="exportarRelatorios()">
+                            Exportar Excel
+                        </button>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-container">
+                            <table class="data-table" id="tabelaRelatorios">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Data</th>
+                                        <th>Horário</th>
+                                        <th>Letra</th>
+                                        <th>Supervisor</th>
+                                        <th>Equipes</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="relatoriosTableBody">
+                                    <tr>
+                                        <td colspan="8">
+                                            <div class="empty-state">
+                                                <div class="empty-state-icon">📋</div>
+                                                <h3>Nenhum relatório encontrado</h3>
+                                                <p>Crie seu primeiro relatório na aba "Novo Relatório"</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pesquisa Tab -->
+            <div id="pesquisa-tab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Pesquisar Relatórios</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Pesquisar por</label>
+                                <select id="tipoPesquisa" class="form-select" onchange="ajustarCampoPesquisa()">
+                                    <option value="geral">Termo Geral ou ID</option>
+                                    <option value="data">Data Específica</option>
+                                    <option value="periodo">Período</option>
+                                    <option value="supervisor">Supervisor</option>
+                                    <option value="letra">Letra do Turno</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" id="campoPesquisaGeral">
+                                <label class="form-label">Termo de Pesquisa</label>
+                                <input type="text" id="termoPesquisa" class="form-input" placeholder="Digite ID ou termo geral">
+                            </div>
+                            
+                            <div class="form-group hidden" id="campoPesquisaData">
+                                <label class="form-label">Data</label>
+                                <input type="date" id="dataPesquisa" class="form-input">
+                            </div>
+                            
+                            <div class="form-group hidden" id="campoPesquisaPeriodo">
+                                <label class="form-label">Data Inicial</label>
+                                <input type="date" id="dataInicialPesquisa" class="form-input">
+                            </div>
+                            
+                            <div class="form-group hidden" id="campoPesquisaPeriodoFim">
+                                <label class="form-label">Data Final</label>
+                                <input type="date" id="dataFinalPesquisa" class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button class="btn btn-primary btn-lg" onclick="executarPesquisa()">
+                                Pesquisar
+                            </button>
+                            <button class="btn btn-secondary" onclick="limparPesquisa()">
+                                Limpar
+                            </button>
+                        </div>
+                        
+                        <div id="resultadosPesquisa" class="hidden" style="margin-top: 2rem;">
+                            <h4 style="margin-bottom: 1rem;">Resultados da Pesquisa</h4>
+                            <div class="table-container">
+                                <table class="data-table" id="tabelaPesquisa">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Data</th>
+                                            <th>Horário</th>
+                                            <th>Letra</th>
+                                            <th>Supervisor</th>
+                                            <th>Equipes</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pesquisaTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Configurações Tab -->
+            <div id="configuracoes-tab" class="tab-content">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Configurações do Sistema</h3>
+                    </div>
+                    <div class="card-content">
+                        <!-- GitHub Configuration -->
+                        <div class="card" style="margin-bottom: 2rem;">
+                            <div class="card-header">
+                                <h4 class="card-title">Configurações GitHub</h4>
+                            </div>
+                            <div class="card-content">
+                                <div id="setupInstruction" class="hidden" style="padding: 1rem; margin-bottom: 1rem; background-color: var(--warning-color); color: var(--white); border-radius: 8px;">
+                                    <strong>Modo de Configuração Ativado</strong><br>
+                                    1. Insira seu Token de Acesso do GitHub e clique em "Salvar".<br>
+                                    2. Clique em "Inicializar Sistema" para criar os arquivos no seu repositório.<br>
+                                    3. Após a confirmação, recarregue a página para usar o sistema normalmente.
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Token de Acesso GitHub</label>
+                                        <input type="password" id="githubToken" class="form-input" 
+                                               placeholder="GitHub Personal Access Token">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Repositório</label>
+                                        <input type="text" id="githubRepo" class="form-input" 
+                                               value="GrupoGps-Mecanizada/Sistema-Relatorio-Turno" readonly>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn btn-info" onclick="testarConexaoGitHub()">
+                                        Testar Conexão
+                                    </button>
+                                    <button class="btn btn-success" onclick="salvarConfigGitHub()">
+                                        Salvar Configurações
+                                    </button>
+                                    <button class="btn btn-warning hidden" id="btnInitializeSystem" onclick="initializeSystemFiles()">
+                                        Inicializar Sistema
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- General Settings -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h4 class="card-title">Configurações Gerais</h4>
+                            </div>
+                            <div class="card-content">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label class="form-label">Nome da Empresa</label>
+                                        <input type="text" id="nomeEmpresa" class="form-input" value="GrupoGPS">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Atualização Automática (segundos)</label>
+                                        <input type="number" id="autoRefreshInterval" class="form-input" value="60" min="30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Backup Automático</label>
+                                        <select id="autoBackup" class="form-select">
+                                            <option value="true">Ativado</option>
+                                            <option value="false">Desativado</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-actions">
+                                    <button class="btn btn-success" onclick="salvarConfigGerais()">
+                                        Salvar Configurações
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer style="background: var(--white); border-top: 1px solid var(--gray-200); padding: 1.5rem; text-align: center; color: var(--gray-600);">
+            <p>Desenvolvido por <strong style="color: var(--primary-color);">Warlison Abreu</strong> | © 2025 GrupoGPS - Sistema de Relatório de Turno</p>
+        </footer>
+    </div>
+
+    <!-- Modal Adicionar/Editar Equipe -->
+    <div class="modal" id="modalEquipe">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalEquipeTitle">Adicionar Equipe</h3>
+                <button class="modal-close" onclick="closeModal('modalEquipe')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formEquipe" onsubmit="salvarEquipe(event)">
+                    <input type="hidden" id="equipeIndex" value="-1">
+                    <input type="hidden" id="equipeTipo" value="">
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Coluna Esquerda: Informações Gerais -->
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Informações da Equipe</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Número da Equipe</label>
+                                <input type="text" id="equipeNumero" class="form-input" readonly style="background: var(--gray-100);">
+                                <small style="color: var(--gray-500); font-size: 0.8rem;">Gerado automaticamente baseado no tipo e quantidade de equipes</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Motorista *</label>
+                                <input type="text" id="equipeMotorista" class="form-input" required placeholder="Nome do motorista">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Operador(es) *</label>
+                                <textarea id="equipeOperadores" class="form-textarea" required placeholder="Nome dos operadores"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Área de Atuação *</label>
+                                <input type="text" id="equipeArea" class="form-input" required placeholder="Ex: Galpão X, Linha Y...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Atividade Principal *</label>
+                                <input type="text" id="equipeAtividade" class="form-input" required placeholder="Ex: Limpeza de caixa, Desobstrução...">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Tipo de Atividade *</label>
+                                <select id="equipeTipoAtividade" class="form-select" required>
+                                    <option value="Rotineira">Rotineira</option>
+                                    <option value="Emergencial">Emergencial</option>
+                                    <option value="Programada">Programada</option>
+                                    <option value="Preventiva">Preventiva</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Status da Atividade *</label>
+                                <select id="equipeStatusAtividade" class="form-select" required onchange="togglePendencia()">
+                                    <option value="Concluído">Concluído (100%)</option>
+                                    <option value="Em andamento">Em andamento</option>
+                                    <option value="Não Iniciado">Não Iniciado</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group hidden" id="pendenciaContainer">
+                                <label class="form-label">Justificativa/Pendência *</label>
+                                <textarea id="equipePendencia" class="form-textarea" placeholder="Informe o motivo da pendência ou não início"></textarea>
+                            </div>
+
+                            <!-- Controle de Atrasos por Equipamento - ATUALIZADO -->
+                            <div class="atraso-section">
+                                <h5>⏰ Controle de Atrasos</h5>
+                                <div class="form-group">
+                                    <label class="form-label">Houve atraso no direcionamento deste equipamento?</label>
+                                    <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                                        <div class="form-radio">
+                                            <input type="radio" name="houveAtrasoEquipe" id="atrasoEquipeNao" value="Não" checked onchange="toggleAtrasoEquipe()">
+                                            <label for="atrasoEquipeNao" style="color: white;">Não</label>
+                                        </div>
+                                        <div class="form-radio">
+                                            <input type="radio" name="houveAtrasoEquipe" id="atrasoEquipeSim" value="Sim" onchange="toggleAtrasoEquipe()">
+                                            <label for="atrasoEquipeSim" style="color: white;">Sim</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="atrasoEquipeDetalhes" class="hidden" style="margin-top: 1rem;">
+                                    <div class="form-group">
+                                        <label class="form-label">Horário de direcionamento:</label>
+                                        <input type="datetime-local" id="horarioDirecionamento" class="form-input">
+                                        <small style="color: rgba(255,255,255,0.8); font-size: 0.8rem;">Informe quando o equipamento foi direcionado para a área</small>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">Motivo do atraso:</label>
+                                        <select id="motivoAtrasoEquipe" class="form-select">
+                                            <option value="">Selecione o motivo...</option>
+                                            <option value="Falta de acessório">Falta de acessório</option>
+                                            <option value="Falta de implemento">Falta de implemento</option>
+                                            <option value="Falta de operador">Falta de operador</option>
+                                            <option value="Falta de EPI">Falta de EPI</option>
+                                            <option value="Falta de motorista">Falta de motorista</option>
+                                            <option value="Sem programação">Sem programação</option>
+                                            <option value="Outros">Outros</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Justificativa do atraso:</label>
+                                        <textarea id="justificativaAtrasoEquipe" class="form-textarea" rows="2" placeholder="Descreva detalhadamente o motivo do atraso..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coluna Direita: Equipamentos e Status -->
+                        <div>
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Equipamentos e Status</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Vaga (Parte Diária) *</label>
+                                <select id="equipeVaga" class="form-select" required onchange="checkOutroVaga()">
+                                    <option value="">Selecione a vaga...</option>
+                                    <!-- Preenchido via JavaScript -->
+                                </select>
+                                <div id="campoOutroVaga" class="campo-outro hidden">
+                                    <input type="text" id="equipeVagaOutro" class="form-input" placeholder="Digite a vaga manualmente">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Equipamento *</label>
+                                <select id="equipeEquipamento" class="form-select" required onchange="checkOutroEquipamento()">
+                                    <option value="">Selecione o equipamento...</option>
+                                    <!-- Preenchido via JavaScript -->
+                                </select>
+                                <div id="campoOutroEquipamento" class="campo-outro hidden">
+                                    <input type="text" id="equipeEquipamentoOutro" class="form-input" placeholder="Digite o equipamento manualmente">
+                                </div>
+                            </div>
+                            
+                            <!-- Trocas de Equipamento -->
+                            <div style="border: 1px solid var(--gray-200); border-radius: 8px; padding: 1.5rem; margin-top: 1.5rem;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--secondary-color);">Trocas de Equipamento</h5>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="adicionarTroca()">+ Adicionar Troca</button>
+                                </div>
+                                <div id="trocasContainer">
+                                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>
+                                </div>
+                            </div>
+
+                            <!-- Implementos -->
+                            <div id="implementosSection" class="implementos-section">
+                                <h5 style="margin-bottom: 1rem; color: var(--secondary-color);">Implementos e Segurança</h5>
+                                <div id="implementosContainer">
+                                    <!-- Preenchido via JavaScript baseado no tipo de equipe -->
+                                </div>
+                            </div>
+                            
+                            <!-- Observações -->
+                            <div class="form-group" style="margin-top: 1.5rem;">
+                                <label class="form-label">Observações Adicionais</label>
+                                <textarea id="equipeObservacoes" class="form-textarea" placeholder="Observações gerais sobre a equipe ou atividade"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEquipe')">
+                    Cancelar
+                </button>
+                <button type="submit" form="formEquipe" class="btn btn-success">
+                    Salvar Equipe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Visualizar Relatório -->
+    <div class="modal" id="modalVisualizarRelatorio">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Visualizar Relatório</h3>
+                <button class="modal-close" onclick="closeModal('modalVisualizarRelatorio')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem; display: flex; gap: 1rem; justify-content: center;">
+                    <button class="btn btn-info" onclick="copiarRelatorio()">
+                        Copiar Texto
+                    </button>
+                </div>
+                <div class="report-container" id="relatorioTexto">
+                    <!-- Preenchido via JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('modalVisualizarRelatorio')">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">Carregando...</div>
+        </div>
+    </div>
+
+    <script>
+        // SISTEMA DE RELATÓRIO DE TURNO - GRUPOGPS
+        // Sistema profissional com GitHub como banco de dados
+        
+        // Estado Global da Aplicação
+        let currentUser = 'GrupoGPS';
+        let userLevel = 'admin';
+        let relatorios = [];
+        let configuracoes = {};
+        let systemData = {};
+        let currentStep = 1;
+        let currentRelatorio = {
+            dadosTurno: {},
+            equipes: []
+        };
+        
+        // Controles do sistema
+        let isOnline = navigator.onLine;
+        let autoRefreshTimer = null;
+        
+        // FUNÇÃO DE SANITIZAÇÃO PARA CORRIGIR CARACTERES CORROMPIDOS
+        function sanitizeText(text) {
+            if (typeof text !== 'string') return text;
+            
+            // Remover códigos hexadecimais problemáticos
+            let cleaned = text
+                .replace(/\\x83O/g, 'AO')        // PRESSÃ\x83O -> PRESSAO
+                .replace(/\\x81/g, '')           // Remove \x81
+                .replace(/\\x83/g, '')           // Remove \x83
+                .replace(/Ã\x83O/g, 'AO')       // Variação alternativa
+                .replace(/Ã\x81/g, 'A')         // Variação alternativa
+                .replace(/VÃ\x81CUO/g, 'VACUO') // VÃ\x81CUO -> VACUO
+                .replace(/PRESSÃ\x83O/g, 'PRESSAO') // Específico para PRESSÃO
+                .replace(/CAMINHÃ\x83O/g, 'CAMINHAO') // Específico para CAMINHÃO
+                
+            // Limpar acentos e caracteres especiais comuns
+            cleaned = cleaned
+                .replace(/PRESSÃO/g, 'PRESSAO')
+                .replace(/VÁCUO/g, 'VACUO')
+                .replace(/CAMINHÃO/g, 'CAMINHAO')
+                .replace(/REDUÇÕES/g, 'REDUCOES')
+                .replace(/ASPIRAÇÃO/g, 'ASPIRACAO')
+                .replace(/SUCÇÃO/g, 'SUCCAO')
+                .replace(/AÇÃO/g, 'ACAO')
+                .replace(/OPERAÇÃO/g, 'OPERACAO')
+                .replace(/MANUTENÇÃO/g, 'MANUTENCAO')
+                .replace(/SITUAÇÃO/g, 'SITUACAO')
+                .replace(/INFORMAÇÃO/g, 'INFORMACAO')
+                
+            // Limpar caracteres UTF-8 mal formados
+            cleaned = cleaned
+                .replace(/[\u0080-\u00FF]/g, '') // Remove caracteres estendidos
+                .replace(/\uFFFD/g, '')          // Remove caracteres de substituição
+                .trim();
+                
+            return cleaned;
+        }
+
+        // FUNÇÃO PARA SANITIZAR OBJETOS RECURSIVAMENTE
+        function sanitizeObject(obj) {
+            if (typeof obj === 'string') {
+                return sanitizeText(obj);
+            } else if (Array.isArray(obj)) {
+                return obj.map(item => sanitizeObject(item));
+            } else if (obj && typeof obj === 'object') {
+                const cleaned = {};
+                for (const [key, value] of Object.entries(obj)) {
+                    const cleanKey = sanitizeText(key);
+                    cleaned[cleanKey] = sanitizeObject(value);
+                }
+                return cleaned;
+            }
+            return obj;
+        }
+        
+        // Configuração GitHub
+        const GITHUB_CONFIG = {
+            owner: 'GrupoGps-Mecanizada',
+            repo: 'Sistema-Relatorio-Turno',
+            branch: 'main',
+            token: null,
+            paths: {
+                relatorios: 'data/relatorios.json',
+                configuracoes: 'data/configuracoes.json',
+                supervisores: 'data/supervisores.json',
+                vagas: 'data/vagas.json',
+                equipamentos: 'data/equipamentos.json'
+            }
+        };
+
+        // Dados padrão do sistema atualizados
+        const DEFAULT_SYSTEM_DATA = {
+            supervisores: [
+                'Ozias',
+                'Israel', 
+                'Junior Pereira',
+                'Donizete',
+                'Sebastião Ribeiro',
+                'Jenessi'
+            ],
+            vagas: [
+                'ALTA PRESSAO - GPS - 01 - 24 HS',
+                'ALTA PRESSAO - GPS - 02',
+                'ALTA PRESSAO - GPS - 03',
+                'ALTA PRESSAO - GPS - 04',
+                'ALTA PRESSAO - GPS - 05',
+                'ALTA PRESSAO - GPS - 06',
+                'ALTA PRESSAO - GPS - 07 - 16 HS',
+                'ALTA PRESSAO - GPS - 08 - 24 HS',
+                'ALTA PRESSAO - GPS - 09',
+                'ALTA PRESSAO - GPS - 10',
+                'ASPIRADOR INDUSTRIAL - GPS - 01',
+                'ASPIRADOR INDUSTRIAL - GPS - 02',
+                'ASPIRADOR INDUSTRIAL - GPS - 03',
+                'ASPIRADOR INDUSTRIAL - GPS - 04',
+                'ASPIRADOR INDUSTRIAL - GPS - 05',
+                'ASPIRADOR INDUSTRIAL - GPS - 06',
+                'ASPIRADOR INDUSTRIAL - GPS - 07',
+                'ASPIRADOR INDUSTRIAL - GPS - 08',
+                'ASPIRADOR INDUSTRIAL - GPS - 09',
+                'ASPIRADOR INDUSTRIAL - GPS - 10',
+                'ASPIRADOR INDUSTRIAL - GPS - SPOT',
+                'AUTO VACUO - GPS - 01 - 16 HS',
+                'AUTO VACUO - GPS - 02 - 16 HS',
+                'AUTO VACUO - GPS - 03',
+                'AUTO VACUO - GPS - 04',
+                'AUTO VACUO - GPS - 05',
+                'AUTO VACUO - GPS - 06',
+                'AUTO VACUO - GPS - 07 - 16 HS',
+                'AUTO VACUO - GPS - 08 - 24 HS',
+                'CAMINHAO BROOK - GPS - 01',
+                'CAMINHAO BROOK - GPS - 02',
+                'CAMINHAO BROOK - GPS - 03',
+                'HIPER VACUO - GPS - 01',
+                'HIPER VACUO - GPS - 02'
+            ],
+            equipamentos: {
+                'Alta Pressao': [
+                    'EZC-0453', 'DSY-6474', 'DSY-6475', 'EAM-3253', 'EAM-3255', 'EAM-3256', 'EAM-3262',
+                    'EGC-2978', 'EGC-2985', 'EGC-2983', 'EGC-2986', 'FLX-7616', 'FLX-7617', 'GVB-2102',
+                    'EZS-9784', 'JUX-3201', 'PUB-2502', 'PUB-2780'
+                ],
+                'Auto Vacuo': [
+                    'ANF-5922', 'ANF-2876', 'CUB-0763', 'DSY-6473', 'DSY-6577', 'DYS-7210', 'EAM-3251',
+                    'EAM-3257', 'EGC-2979', 'EGC-2953', 'EGC-3071', 'HDS-1097', 'EZS-9753', 'EZS-9924',
+                    'EHD-9264', 'FMD-2200', 'FTD-6358', 'FTW-4999', 'GAJ-1204'
+                ],
+                'Hiper Vacuo': [
+                    'HVX-1001', 'HVX-1002', 'HVX-1003', 'HVX-1004', 'HVX-1005'
+                ]
+            }
+        };
+
+        // Implementos por tipo de equipamento
+        const IMPLEMENTOS_CONFIG = {
+            'Alta Pressao': {
+                'Pistola': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Pistola C.L.': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Mang. Torpedo': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Pedal': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Varetas': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Rabicho': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Lances Mangueira': { 
+                    type: 'select', 
+                    options: ['N/A', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Mais de 15'] 
+                },
+                'Lances Varetas': { 
+                    type: 'select', 
+                    options: ['N/A', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', 'Mais de 15'] 
+                }
+            },
+            'Auto Vacuo / Hiper Vacuo': {
+                'Mangotes': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Reducoes': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Mangotes 3"': { 
+                    type: 'select', 
+                    options: ['N/A', '10 metros', '20 metros', '30 metros', '40 metros', '50 metros', 
+                             '60 metros', '70 metros', '80 metros', '90 metros', '100 metros', 'Mais de 100 metros'] 
+                },
+                'Mangotes 4"': { 
+                    type: 'select', 
+                    options: ['N/A', '10 metros', '20 metros', '30 metros', '40 metros', '50 metros', 
+                             '60 metros', '70 metros', '80 metros', '90 metros', '100 metros', 'Mais de 100 metros'] 
+                },
+                'Mangotes 6"': { 
+                    type: 'select', 
+                    options: ['N/A', '10 metros', '20 metros', '30 metros', '40 metros', '50 metros', 
+                             '60 metros', '70 metros', '80 metros', '90 metros', '100 metros', 'Mais de 100 metros'] 
+                }
+            }
+        };
+
+        // INICIALIZAÇÃO DO SISTEMA
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🚀 Sistema de Relatório de Turno - GrupoGPS');
+            console.log('🔧 Sistema refinado e otimizado');
+            
+            // Carregar dados do backup local primeiro
+            loadLocalBackup();
+            
+            // Verificar token de configuração
+            const savedToken = localStorage.getItem('grupogps_relatorio_githubToken');
+            if (savedToken) {
+                GITHUB_CONFIG.token = savedToken;
+                
+                try {
+                    await loadAllDataFromGitHub();
+                    initializeInterface();
+                    startAutoRefresh();
+                } catch (error) {
+                    console.error('Erro ao carregar dados do GitHub:', error);
+                    showNotification('Usando dados locais. Verifique o token do GitHub.', 'warning');
+                    // Continuar com dados locais se houver
+                    initializeInterface();
+                    // Mostrar modo setup
+                    if (relatorios.length === 0) {
+                        document.getElementById('setupInstruction').classList.remove('hidden');
+                        document.getElementById('btnInitializeSystem').classList.remove('hidden');
+                    }
+                }
+            } else {
+                // Mostrar modo setup
+                showNotification('Configure o token do GitHub para começar.', 'info');
+                switchTab('configuracoes');
+                document.getElementById('setupInstruction').classList.remove('hidden');
+                document.getElementById('btnInitializeSystem').classList.remove('hidden');
+                
+                // Ainda assim inicializar a interface com dados locais se houver
+                initializeInterface();
+            }
+
+            // Configurar event listeners
+            setupEventListeners();
+            
+            // Configurar data padrão
+            setupDefaultDate();
+            
+            // Monitoramento de conectividade
+            setupNetworkMonitoring();
+
+            // Carregar dados padrão nos selects
+            loadDefaultData();
+        });
+
+        function loadLocalBackup() {
+            try {
+                const backup = localStorage.getItem('grupogps_relatorio_backup');
+                if (backup) {
+                    let backupData = JSON.parse(backup);
+                    
+                    // SANITIZAR DADOS DO BACKUP LOCAL
+                    backupData = sanitizeObject(backupData);
+                    
+                    if (Array.isArray(backupData) && backupData.length > 0) {
+                        relatorios = backupData;
+                        console.log('📦 Dados carregados e sanitizados do backup local:', relatorios.length, 'relatórios');
+                        updateInterface();
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao carregar backup local:', error);
+            }
+        }
+
+        function loadDefaultData() {
+            // Carregar supervisores
+            const supervisorSelect = document.getElementById('supervisorTurno');
+            supervisorSelect.innerHTML = '<option value="">Selecione o supervisor...</option>';
+            DEFAULT_SYSTEM_DATA.supervisores.forEach(supervisor => {
+                supervisorSelect.innerHTML += `<option value="${supervisor}">${supervisor}</option>`;
+            });
+        }
+
+        function setupEventListeners() {
+            // Fechar modais ao clicar fora
+            document.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.classList.remove('show');
+                }
+            });
+
+            // Atalhos de teclado
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    document.querySelectorAll('.modal.show').forEach(modal => {
+                        modal.classList.remove('show');
+                    });
+                }
+            });
+        }
+
+        function setupDefaultDate() {
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById('dataTurno').value = hoje;
+        }
+
+        function setupNetworkMonitoring() {
+            window.addEventListener('online', () => {
+                isOnline = true;
+                updateSyncStatus('success', 'Conectado');
+                showNotification('Conexão restaurada! Sincronizando dados...', 'success');
+                if (GITHUB_CONFIG.token) {
+                    loadAllDataFromGitHub();
+                }
+            });
+            
+            window.addEventListener('offline', () => {
+                isOnline = false;
+                updateSyncStatus('error', 'Offline');
+                showNotification('Sem conexão. Trabalhando offline.', 'warning');
+            });
+        }
+
+        function toggleAtrasoEquipe() {
+            const houveAtraso = document.querySelector('input[name="houveAtrasoEquipe"]:checked').value;
+            const detalhes = document.getElementById('atrasoEquipeDetalhes');
+            
+            if (houveAtraso === 'Sim') {
+                detalhes.classList.remove('hidden');
+                // Configurar data/hora padrão como agora
+                const agora = new Date();
+                const dataHoraLocal = agora.toISOString().slice(0, 16);
+                document.getElementById('horarioDirecionamento').value = dataHoraLocal;
+            } else {
+                detalhes.classList.add('hidden');
+                document.getElementById('horarioDirecionamento').value = '';
+                document.getElementById('motivoAtrasoEquipe').value = '';
+                document.getElementById('justificativaAtrasoEquipe').value = '';
+            }
+        }
+
+        function checkOutroVaga() {
+            const select = document.getElementById('equipeVaga');
+            const campoOutro = document.getElementById('campoOutroVaga');
+            
+            if (select.value === 'Outro') {
+                campoOutro.classList.remove('hidden');
+                document.getElementById('equipeVagaOutro').required = true;
+            } else {
+                campoOutro.classList.add('hidden');
+                document.getElementById('equipeVagaOutro').required = false;
+                document.getElementById('equipeVagaOutro').value = '';
+            }
+        }
+
+        function checkOutroEquipamento() {
+            const select = document.getElementById('equipeEquipamento');
+            const campoOutro = document.getElementById('campoOutroEquipamento');
+            
+            if (select.value === 'Outro') {
+                campoOutro.classList.remove('hidden');
+                document.getElementById('equipeEquipamentoOutro').required = true;
+            } else {
+                campoOutro.classList.add('hidden');
+                document.getElementById('equipeEquipamentoOutro').required = false;
+                document.getElementById('equipeEquipamentoOutro').value = '';
+            }
+        }
+
+        // CARREGAMENTO DE DADOS - CORRIGIDO
+        async function loadAllDataFromGitHub() {
+            if (!GITHUB_CONFIG.token) {
+                throw new Error('Token do GitHub não configurado');
+            }
+            
+            updateSyncStatus('loading', 'Carregando dados...');
+            
+            try {
+                const [
+                    relatoriosData,
+                    configuracoesData,
+                    supervisoresData,
+                    vagasData,
+                    equipamentosData
+                ] = await Promise.all([
+                    getDataFromGitHub('relatorios'),
+                    getDataFromGitHub('configuracoes'),
+                    getDataFromGitHub('supervisores'),
+                    getDataFromGitHub('vagas'),
+                    getDataFromGitHub('equipamentos')
+                ]);
+                
+                // CORREÇÃO: Tratar dados de relatórios corretamente
+                console.log('🔍 Debug: Dados brutos de relatórios:', relatoriosData, typeof relatoriosData);
+                
+                if (relatoriosData === null || relatoriosData === undefined) {
+                    relatorios = [];
+                    console.log('📝 Relatórios: arquivo não existe ainda, iniciando com array vazio');
+                } else if (Array.isArray(relatoriosData)) {
+                    relatorios = relatoriosData;
+                    console.log('📝 Relatórios: array válido carregado com', relatorios.length, 'itens');
+                } else if (typeof relatoriosData === 'object') {
+                    // Verificar se é um object com metadados (_lastUpdate, etc)
+                    if (Array.isArray(relatoriosData.data)) {
+                        relatorios = relatoriosData.data;
+                        console.log('📝 Relatórios: extraindo array da propriedade .data com', relatorios.length, 'itens');
+                    } else if (relatoriosData._lastUpdate && Array.isArray(relatoriosData.relatorios)) {
+                        relatorios = relatoriosData.relatorios;
+                        console.log('📝 Relatórios: extraindo array da propriedade .relatorios com', relatorios.length, 'itens');
+                    } else {
+                        // Tentar extrair qualquer array do objeto
+                        const possibleArrays = Object.values(relatoriosData).filter(val => Array.isArray(val));
+                        if (possibleArrays.length > 0) {
+                            relatorios = possibleArrays[0];
+                            console.log('📝 Relatórios: encontrado array em propriedade do objeto com', relatorios.length, 'itens');
+                        } else {
+                            // Verificar se o objeto tem propriedades que parecem relatórios
+                            const keys = Object.keys(relatoriosData).filter(key => !key.startsWith('_'));
+                            if (keys.length > 0) {
+                                relatorios = keys.map(key => relatoriosData[key]).filter(item => item && typeof item === 'object');
+                                console.log('📝 Relatórios: convertendo propriedades do objeto em array com', relatorios.length, 'itens');
+                            } else {
+                                relatorios = [];
+                                console.log('📝 Relatórios: objeto sem dados válidos, usando array vazio');
+                            }
+                        }
+                    }
+                } else {
+                    relatorios = [];
+                    console.warn('📝 Relatórios: formato não reconhecido, usando array vazio');
+                }
+                
+                // Garantir que relatorios seja sempre um array válido
+                if (!Array.isArray(relatorios)) {
+                    console.warn('🚨 Forçando relatorios a ser array. Era:', typeof relatorios);
+                    relatorios = [];
+                }
+                
+                // SANITIZAR DADOS CARREGADOS
+                relatorios = sanitizeObject(relatorios);
+                configuracoes = sanitizeObject(configuracoes || {});
+                
+                // SANITIZAR E VALIDAR DADOS DO SISTEMA
+                let systemDataTemp = {
+                    supervisores: supervisoresData || DEFAULT_SYSTEM_DATA.supervisores,
+                    vagas: vagasData || DEFAULT_SYSTEM_DATA.vagas,
+                    equipamentos: equipamentosData || DEFAULT_SYSTEM_DATA.equipamentos
+                };
+                
+                // Aplicar sanitização nos dados do sistema
+                systemDataTemp = sanitizeObject(systemDataTemp);
+                
+                // Verificar se dados estão corrompidos e usar padrões limpos se necessário
+                if (systemDataTemp.vagas && systemDataTemp.vagas.length > 0) {
+                    const primeiraVaga = systemDataTemp.vagas[0];
+                    if (primeiraVaga.includes('\\x') || primeiraVaga.includes('Ã')) {
+                        console.warn('🧹 Dados corrompidos detectados, usando dados padrão limpos');
+                        systemDataTemp = sanitizeObject(DEFAULT_SYSTEM_DATA);
+                    }
+                }
+                
+                systemData = systemDataTemp;
+                
+                updateSyncStatus('success', 'Dados atualizados');
+                updateInterface();
+                
+                console.log('✅ Dados carregados do GitHub:', {
+                    relatorios: relatorios.length,
+                    configuracoes: Object.keys(configuracoes).length,
+                    tipoRelatorios: typeof relatorios,
+                    isArrayRelatorios: Array.isArray(relatorios)
+                });
+                
+            } catch (error) {
+                updateSyncStatus('error', 'Erro ao carregar');
+                console.error('Erro ao carregar dados:', error);
+                throw error;
+            }
+        }
+
+        async function getDataFromGitHub(dataType) {
+            const path = GITHUB_CONFIG.paths[dataType];
+            
+            try {
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`, {
+                    headers: { 
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json' 
+                    }
+                });
+
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = atob(fileData.content);
+                    let parsedData = JSON.parse(content);
+                    
+                    // APLICAR SANITIZAÇÃO NOS DADOS CARREGADOS
+                    parsedData = sanitizeObject(parsedData);
+                    
+                    // Log para debug
+                    console.log(`📁 Dados carregados e sanitizados do GitHub (${dataType}):`, parsedData);
+                    
+                    return parsedData;
+                } else if (response.status === 404) {
+                    console.warn(`Arquivo ${path} não encontrado. Será criado na próxima salvação.`);
+                    return null;
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                console.error(`Erro ao buscar ${dataType}:`, error);
+                return null;
+            }
+        }
+
+        async function saveDataToGitHub(dataType, data) {
+            if (!GITHUB_CONFIG.token || !isOnline) {
+                throw new Error('Sem conexão ou token não configurado');
+            }
+            
+            const path = GITHUB_CONFIG.paths[dataType];
+            
+            try {
+                // Obter SHA atual do arquivo
+                let sha = null;
+                const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`, {
+                    headers: { 
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json' 
+                    }
+                });
+
+                if (getResponse.ok) {
+                    const fileData = await getResponse.json();
+                    sha = fileData.sha;
+                }
+
+                // SANITIZAR DADOS ANTES DE SALVAR
+                let dataToSave;
+                if (dataType === 'relatorios') {
+                    // Salvar apenas o array de relatórios sanitizado
+                    dataToSave = sanitizeObject(data);
+                } else {
+                    // Para outros tipos, manter metadados mas sanitizar conteúdo
+                    const sanitizedData = sanitizeObject(data);
+                    dataToSave = {
+                        ...sanitizedData,
+                        _lastUpdate: new Date().toISOString(),
+                        _updatedBy: currentUser
+                    };
+                }
+
+                console.log(`💾 Salvando dados sanitizados (${dataType}):`, dataToSave);
+
+                const jsonContent = JSON.stringify(dataToSave, null, 2);
+                const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
+                
+                const body = {
+                    message: `${sha ? 'Atualizar' : 'Criar'} ${dataType} - ${new Date().toLocaleString('pt-BR')}`,
+                    content: base64Content,
+                    branch: GITHUB_CONFIG.branch
+                };
+                
+                if (sha) {
+                    body.sha = sha;
+                }
+
+                const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': `token ${GITHUB_CONFIG.token}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                    throw new Error(`Erro ${response.status}: ${errorData.message}`);
+                }
+                
+                console.log(`✅ ${dataType} salvo no GitHub com dados sanitizados`);
+                return await response.json();
+
+            } catch (error) {
+                console.error(`Erro ao salvar ${dataType}:`, error);
+                throw error;
+            }
+        }
+
+        // NAVEGAÇÃO ENTRE ETAPAS
+        function nextStep() {
+            if (currentStep === 1) {
+                if (validateStep1()) {
+                    saveStepData(1);
+                    showStep(2);
+                }
+            } else if (currentStep === 2) {
+                if (validateStep2()) {
+                    showStep(3);
+                    generateReview();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep === 2) {
+                showStep(1);
+            } else if (currentStep === 3) {
+                showStep(2);
+            }
+        }
+
+        function showStep(step) {
+            // Ocultar todas as etapas
+            document.querySelectorAll('.step-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Mostrar etapa atual
+            document.getElementById(`etapa${step}`).style.display = 'block';
+            
+            // Atualizar indicador
+            updateStepIndicator(step);
+            
+            currentStep = step;
+        }
+
+        function updateStepIndicator(step) {
+            document.querySelectorAll('.step-item').forEach((item, index) => {
+                item.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    item.classList.add('completed');
+                } else if (index + 1 === step) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function validateStep1() {
+            const data = document.getElementById('dataTurno').value;
+            const horario = document.getElementById('horarioTurno').value;
+            const letra = document.getElementById('letraTurno').value;
+            const supervisor = document.getElementById('supervisorTurno').value;
+            
+            if (!data || !horario || !letra || !supervisor) {
+                showNotification('Preencha todos os campos obrigatórios!', 'warning');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function validateStep2() {
+            if (currentRelatorio.equipes.length === 0) {
+                showNotification('Adicione pelo menos uma equipe!', 'warning');
+                return false;
+            }
+            return true;
+        }
+
+        function saveStepData(step) {
+            if (step === 1) {
+                currentRelatorio.dadosTurno = {
+                    data: document.getElementById('dataTurno').value,
+                    horario: document.getElementById('horarioTurno').value,
+                    letra: document.getElementById('letraTurno').value,
+                    supervisor: document.getElementById('supervisorTurno').value
+                };
+            }
+        }
+
+        // GESTÃO DE EQUIPES
+        function adicionarEquipe(tipo) {
+            document.getElementById('modalEquipeTitle').textContent = `Adicionar Equipe - ${tipo}`;
+            document.getElementById('equipeTipo').value = tipo;
+            document.getElementById('equipeIndex').value = '-1';
+            
+            // Gerar número automático da equipe - CORRIGIDO
+            const numeroEquipe = gerarNumeroEquipe(tipo);
+            document.getElementById('equipeNumero').value = numeroEquipe;
+            
+            // Preencher opções baseadas no tipo
+            populateEquipeOptions(tipo);
+            
+            // Limpar formulário
+            clearEquipeForm();
+            
+            // Configurar implementos
+            setupImplementos(tipo);
+            
+            document.getElementById('modalEquipe').classList.add('show');
+        }
+
+        // CORREÇÃO: Geração automática e inteligente do número da equipe
+        function gerarNumeroEquipe(tipo) {
+            const equipesDoTipo = currentRelatorio.equipes.filter(e => e.tipo === tipo);
+            const numero = equipesDoTipo.length + 1;
+            
+            const prefixos = {
+                'Alta Pressao': 'AP',
+                'Auto Vacuo / Hiper Vacuo': 'AV',
+                'Horas Extras': 'HE'
+            };
+            
+            const dataAtual = new Date();
+            const dia = dataAtual.getDate().toString().padStart(2, '0');
+            const mes = (dataAtual.getMonth() + 1).toString().padStart(2, '0');
+            
+            return `${prefixos[tipo]}-${dia}${mes}-${numero.toString().padStart(2, '0')}`;
+        }
+
+        function populateEquipeOptions(tipo) {
+            const vagaSelect = document.getElementById('equipeVaga');
+            const equipamentoSelect = document.getElementById('equipeEquipamento');
+            
+            // Vagas - todas as vagas disponíveis para todos os tipos (SANITIZADAS)
+            vagaSelect.innerHTML = '<option value="">Selecione a vaga...</option>';
+            let vagas = systemData.vagas || DEFAULT_SYSTEM_DATA.vagas || [];
+            
+            // Sanitizar vagas antes de exibir
+            vagas = sanitizeObject(vagas);
+            
+            vagas.forEach(vaga => {
+                const vagaLimpa = sanitizeText(vaga);
+                vagaSelect.innerHTML += `<option value="${vagaLimpa}">${vagaLimpa}</option>`;
+            });
+            vagaSelect.innerHTML += '<option value="Outro">Outro (digite manualmente)</option>';
+            
+            // Equipamentos - todos os equipamentos de todas as categorias (SANITIZADOS)
+            equipamentoSelect.innerHTML = '<option value="">Selecione o equipamento...</option>';
+            
+            let equipamentos = systemData.equipamentos || DEFAULT_SYSTEM_DATA.equipamentos;
+            
+            // Sanitizar equipamentos antes de exibir
+            equipamentos = sanitizeObject(equipamentos);
+            
+            // Adicionar todas as categorias de equipamentos
+            Object.keys(equipamentos).forEach(categoria => {
+                const categoriaLimpa = sanitizeText(categoria);
+                equipamentoSelect.innerHTML += `<optgroup label="${categoriaLimpa}">`;
+                equipamentos[categoria].forEach(equipamento => {
+                    const equipamentoLimpo = sanitizeText(equipamento);
+                    equipamentoSelect.innerHTML += `<option value="${equipamentoLimpo}">${equipamentoLimpo}</option>`;
+                });
+                equipamentoSelect.innerHTML += '</optgroup>';
+            });
+            
+            equipamentoSelect.innerHTML += '<option value="Outro">Outro (digite manualmente)</option>';
+            
+            console.log('🧹 Opções de equipamentos sanitizadas e carregadas');
+        }
+
+        function clearEquipeForm() {
+            document.getElementById('formEquipe').reset();
+            document.getElementById('pendenciaContainer').classList.add('hidden');
+            document.getElementById('atrasoEquipeDetalhes').classList.add('hidden');
+            document.getElementById('campoOutroVaga').classList.add('hidden');
+            document.getElementById('campoOutroEquipamento').classList.add('hidden');
+            document.getElementById('trocasContainer').innerHTML = '<p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>';
+            
+            // Resetar controles de atraso
+            document.getElementById('atrasoEquipeNao').checked = true;
+            document.getElementById('horarioDirecionamento').value = '';
+            document.getElementById('motivoAtrasoEquipe').value = '';
+            document.getElementById('justificativaAtrasoEquipe').value = '';
+        }
+
+        function setupImplementos(tipo) {
+            const container = document.getElementById('implementosContainer');
+            const implementos = IMPLEMENTOS_CONFIG[tipo] || {};
+            
+            if (Object.keys(implementos).length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-500); text-align: center;">Nenhum implemento específico para este tipo de equipe.</p>';
+                return;
+            }
+            
+            let html = '<div class="implementos-grid">';
+            
+            for (const [nome, config] of Object.entries(implementos)) {
+                html += `
+                    <div class="implemento-item">
+                        <label>${nome}:</label>
+                        <select name="implemento_${nome.replace(/[^a-zA-Z0-9]/g, '_')}" class="form-select">
+                            ${config.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                        </select>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            
+            // Adicionar campos comuns
+            html += `
+                <div class="form-group" style="margin-top: 1rem;">
+                    <label class="form-label">Justificativa (se algum material em Falta):</label>
+                    <textarea name="justificativa_implementos" class="form-textarea" rows="2" placeholder="Descreva os motivos caso algum item esteja em falta..."></textarea>
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <h6 style="margin-bottom: 1rem; color: var(--secondary-color);">Segurança</h6>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
+                        <div>
+                            <label class="form-label">Caixa Bloqueio:</label>
+                            <div style="display: flex; gap: 1rem;">
+                                <div class="form-radio">
+                                    <input type="radio" name="caixa_bloqueio" value="Sim">
+                                    <label>Sim</label>
+                                </div>
+                                <div class="form-radio">
+                                    <input type="radio" name="caixa_bloqueio" value="Não" checked>
+                                    <label>Não</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Cadeados:</label>
+                            <select name="cadeados" class="form-select">
+                                <option value="N/A">N/A</option>
+                                <option value="Em Falta">Em Falta</option>
+                                ${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}
+                                <option value="Mais de 30">Mais de 30</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="form-label">Plaquetas:</label>
+                            <select name="plaquetas" class="form-select">
+                                <option value="N/A">N/A</option>
+                                <option value="Em Falta">Em Falta</option>
+                                ${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}
+                                <option value="Mais de 30">Mais de 30</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function togglePendencia() {
+            const status = document.getElementById('equipeStatusAtividade').value;
+            const container = document.getElementById('pendenciaContainer');
+            
+            if (status === 'Concluído') {
+                container.classList.add('hidden');
+            } else {
+                container.classList.remove('hidden');
+                document.getElementById('equipePendencia').required = true;
+            }
+        }
+
+        function adicionarTroca() {
+            const container = document.getElementById('trocasContainer');
+            
+            // Se for a primeira troca, limpar mensagem
+            if (container.innerHTML.includes('Nenhuma troca registrada')) {
+                container.innerHTML = '';
+            }
+            
+            const trocaIndex = container.children.length;
+            const trocaHtml = `
+                <div class="troca-item" id="troca_${trocaIndex}">
+                    <div class="troca-header">
+                        <h6 class="troca-title">Troca ${trocaIndex + 1}</h6>
+                        <button type="button" class="btn-remove-troca" onclick="removerTroca(${trocaIndex})">Remover</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Motivo *</label>
+                            <select name="troca_motivo_${trocaIndex}" class="form-select" required>
+                                <option value="">Selecione o motivo...</option>
+                                <option value="Manutenção Preventiva">Manutenção Preventiva</option>
+                                <option value="Manutenção Corretiva">Manutenção Corretiva</option>
+                                <option value="Solicitação Do Cliente">Solicitação Do Cliente</option>
+                                <option value="Defeitos Em Geral">Defeitos Em Geral</option>
+                                <option value="Outros Motivos">Outros Motivos</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Nova Placa</label>
+                            <input type="text" name="troca_placa_${trocaIndex}" class="form-input" placeholder="AAA-0000">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Defeito / Medidas Tomadas *</label>
+                        <textarea name="troca_defeito_${trocaIndex}" class="form-textarea" required placeholder="Descreva o defeito encontrado e as medidas tomadas"></textarea>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Data/Hora INÍCIO</label>
+                            <input type="datetime-local" name="troca_inicio_${trocaIndex}" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Data/Hora FIM</label>
+                            <input type="datetime-local" name="troca_fim_${trocaIndex}" class="form-input">
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML += trocaHtml;
+        }
+
+        function removerTroca(index) {
+            const trocaElement = document.getElementById(`troca_${index}`);
+            if (trocaElement) {
+                trocaElement.remove();
+                
+                const container = document.getElementById('trocasContainer');
+                if (container.children.length === 0) {
+                    container.innerHTML = '<p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>';
+                }
+            }
+        }
+
+        function salvarEquipe(event) {
+            event.preventDefault();
+            
+            if (!validateEquipeForm()) {
+                return;
+            }
+            
+            const equipeData = collectEquipeData();
+            const index = parseInt(document.getElementById('equipeIndex').value);
+            
+            if (index === -1) {
+                // Nova equipe
+                currentRelatorio.equipes.push(equipeData);
+            } else {
+                // Editar equipe
+                currentRelatorio.equipes[index] = equipeData;
+            }
+            
+            updateTeamsDisplay();
+            closeModal('modalEquipe');
+            showNotification('Equipe salva com sucesso!', 'success');
+        }
+
+        function validateEquipeForm() {
+            const required = document.querySelectorAll('#formEquipe [required]');
+            let valid = true;
+            
+            required.forEach(field => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = 'var(--danger-color)';
+                    valid = false;
+                } else {
+                    field.style.borderColor = 'var(--gray-200)';
+                }
+            });
+            
+            if (!valid) {
+                showNotification('Preencha todos os campos obrigatórios!', 'warning');
+            }
+            
+            return valid;
+        }
+
+        function collectEquipeData() {
+            // Coletar dados básicos
+            const equipeData = {
+                tipo: document.getElementById('equipeTipo').value,
+                numero: document.getElementById('equipeNumero').value,
+                motorista: document.getElementById('equipeMotorista').value,
+                operadores: document.getElementById('equipeOperadores').value,
+                area: document.getElementById('equipeArea').value,
+                atividade: document.getElementById('equipeAtividade').value,
+                tipoAtividade: document.getElementById('equipeTipoAtividade').value,
+                statusAtividade: document.getElementById('equipeStatusAtividade').value,
+                pendencia: document.getElementById('equipePendencia').value,
+                observacoes: document.getElementById('equipeObservacoes').value
+            };
+
+            // Coletar vaga (verificar se é "Outro")
+            const vagaSelect = document.getElementById('equipeVaga');
+            if (vagaSelect.value === 'Outro') {
+                equipeData.vaga = document.getElementById('equipeVagaOutro').value;
+            } else {
+                equipeData.vaga = vagaSelect.value;
+            }
+
+            // Coletar equipamento (verificar se é "Outro")
+            const equipamentoSelect = document.getElementById('equipeEquipamento');
+            if (equipamentoSelect.value === 'Outro') {
+                equipeData.equipamento = document.getElementById('equipeEquipamentoOutro').value;
+            } else {
+                equipeData.equipamento = equipamentoSelect.value;
+            }
+
+            // Coletar dados de atraso - ATUALIZADO COM HORÁRIO
+            const houveAtraso = document.querySelector('input[name="houveAtrasoEquipe"]:checked').value;
+            equipeData.atraso = {
+                houve: houveAtraso,
+                horarioDirecionamento: document.getElementById('horarioDirecionamento').value,
+                motivo: document.getElementById('motivoAtrasoEquipe').value,
+                justificativa: document.getElementById('justificativaAtrasoEquipe').value
+            };
+            
+            // Coletar trocas de equipamento
+            const trocas = [];
+            const trocasContainer = document.getElementById('trocasContainer');
+            const trocaItems = trocasContainer.querySelectorAll('.troca-item');
+            
+            trocaItems.forEach((item, index) => {
+                const motivo = item.querySelector(`[name="troca_motivo_${index}"]`)?.value;
+                const placa = item.querySelector(`[name="troca_placa_${index}"]`)?.value;
+                const defeito = item.querySelector(`[name="troca_defeito_${index}"]`)?.value;
+                const inicio = item.querySelector(`[name="troca_inicio_${index}"]`)?.value;
+                const fim = item.querySelector(`[name="troca_fim_${index}"]`)?.value;
+                
+                if (motivo && defeito) {
+                    trocas.push({
+                        motivo,
+                        placaNova: placa,
+                        defeito,
+                        dataHoraInicio: inicio,
+                        dataHoraFim: fim
+                    });
+                }
+            });
+            
+            equipeData.trocas = trocas;
+            
+            // Coletar implementos
+            const implementos = {};
+            const implementosContainer = document.getElementById('implementosContainer');
+            const implementosInputs = implementosContainer.querySelectorAll('select, textarea, input[type="radio"]:checked');
+            
+            implementosInputs.forEach(input => {
+                if (input.name) {
+                    implementos[input.name] = input.value;
+                }
+            });
+            
+            equipeData.implementos = implementos;
+            
+            return equipeData;
+        }
+
+        function updateTeamsDisplay() {
+            const container = document.getElementById('teamsContainer');
+            const btnProximo = document.getElementById('btnProximoRevisao');
+            
+            if (currentRelatorio.equipes.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⚠️</div>
+                        <h3>Nenhuma equipe adicionada</h3>
+                        <p>Clique nos botões acima para adicionar equipes ao relatório</p>
+                    </div>
+                `;
+                btnProximo.disabled = true;
+            } else {
+                container.innerHTML = currentRelatorio.equipes.map((equipe, index) => `
+                    <div class="team-card ${equipe.tipo.includes('Alta') ? 'alta-pressao' : equipe.tipo.includes('Vacuo') ? 'vacuo' : 'horas-extras'}">
+                        <div class="team-header">
+                            <div class="team-info">
+                                <h3>${equipe.numero} - ${equipe.tipo}</h3>
+                                <p>Motorista: ${equipe.motorista} | Área: ${equipe.area}</p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-sm btn-info" onclick="editarEquipe(${index})">
+                                    Editar
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="removerEquipe(${index})">
+                                    Remover
+                                </button>
+                            </div>
+                        </div>
+                        <div class="team-content">
+                            <div class="team-details">
+                                <div class="detail-item">
+                                    <div class="detail-label">Operadores</div>
+                                    <div class="detail-value">${equipe.operadores}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Atividade</div>
+                                    <div class="detail-value">${equipe.atividade}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Tipo</div>
+                                    <div class="detail-value">
+                                        <span class="badge badge-info">${equipe.tipoAtividade}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Status</div>
+                                    <div class="detail-value">
+                                        <span class="badge badge-${equipe.statusAtividade === 'Concluído' ? 'success' : 'warning'}">${equipe.statusAtividade}</span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Equipamento</div>
+                                    <div class="detail-value">${equipe.equipamento}</div>
+                                </div>
+                                <div class="detail-item">
+                                    <div class="detail-label">Vaga</div>
+                                    <div class="detail-value">${equipe.vaga}</div>
+                                </div>
+                            </div>
+                            ${equipe.atraso && equipe.atraso.houve === 'Sim' ? `
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;">
+                                    <strong>Atraso Registrado:</strong><br>
+                                    ${equipe.atraso.horarioDirecionamento ? `Direcionado às: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}<br>` : ''}
+                                    Motivo: ${equipe.atraso.motivo}<br>
+                                    ${equipe.atraso.justificativa ? `<small>${equipe.atraso.justificativa}</small>` : ''}
+                                </div>
+                            ` : ''}
+                            ${equipe.pendencia ? `
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;">
+                                    <strong>Pendência:</strong> ${equipe.pendencia}
+                                </div>
+                            ` : ''}
+                            ${equipe.trocas && equipe.trocas.length > 0 ? `
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--info-color); color: white; border-radius: 8px;">
+                                    <strong>Trocas de Equipamento:</strong> ${equipe.trocas.length} troca(s) registrada(s)
+                                </div>
+                            ` : ''}
+                            ${equipe.observacoes ? `
+                                <div style="margin-top: 1rem; padding: 1rem; background: var(--gray-100); border-radius: 8px;">
+                                    <strong>Observações:</strong> ${equipe.observacoes}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                btnProximo.disabled = false;
+            }
+        }
+
+        function editarEquipe(index) {
+            const equipe = currentRelatorio.equipes[index];
+            
+            document.getElementById('modalEquipeTitle').textContent = `Editar Equipe - ${equipe.tipo}`;
+            document.getElementById('equipeTipo').value = equipe.tipo;
+            document.getElementById('equipeIndex').value = index;
+            
+            // Preencher opções
+            populateEquipeOptions(equipe.tipo);
+            setupImplementos(equipe.tipo);
+            
+            // Preencher dados
+            setTimeout(() => {
+                document.getElementById('equipeNumero').value = equipe.numero;
+                document.getElementById('equipeMotorista').value = equipe.motorista;
+                document.getElementById('equipeOperadores').value = equipe.operadores;
+                document.getElementById('equipeArea').value = equipe.area;
+                document.getElementById('equipeAtividade').value = equipe.atividade;
+                document.getElementById('equipeTipoAtividade').value = equipe.tipoAtividade;
+                document.getElementById('equipeStatusAtividade').value = equipe.statusAtividade;
+                document.getElementById('equipePendencia').value = equipe.pendencia || '';
+                document.getElementById('equipeVaga').value = equipe.vaga;
+                document.getElementById('equipeEquipamento').value = equipe.equipamento;
+                document.getElementById('equipeObservacoes').value = equipe.observacoes || '';
+                
+                // Configurar atraso
+                if (equipe.atraso && equipe.atraso.houve === 'Sim') {
+                    document.getElementById('atrasoEquipeSim').checked = true;
+                    toggleAtrasoEquipe();
+                    document.getElementById('horarioDirecionamento').value = equipe.atraso.horarioDirecionamento || '';
+                    document.getElementById('motivoAtrasoEquipe').value = equipe.atraso.motivo || '';
+                    document.getElementById('justificativaAtrasoEquipe').value = equipe.atraso.justificativa || '';
+                }
+                
+                // Restaurar trocas
+                if (equipe.trocas && equipe.trocas.length > 0) {
+                    const trocasContainer = document.getElementById('trocasContainer');
+                    trocasContainer.innerHTML = '';
+                    
+                    equipe.trocas.forEach((troca, trocaIndex) => {
+                        adicionarTroca();
+                        // Preencher dados da troca
+                        setTimeout(() => {
+                            const trocaElement = document.getElementById(`troca_${trocaIndex}`);
+                            if (trocaElement) {
+                                trocaElement.querySelector(`[name="troca_motivo_${trocaIndex}"]`).value = troca.motivo || '';
+                                trocaElement.querySelector(`[name="troca_placa_${trocaIndex}"]`).value = troca.placaNova || '';
+                                trocaElement.querySelector(`[name="troca_defeito_${trocaIndex}"]`).value = troca.defeito || '';
+                                trocaElement.querySelector(`[name="troca_inicio_${trocaIndex}"]`).value = troca.dataHoraInicio || '';
+                                trocaElement.querySelector(`[name="troca_fim_${trocaIndex}"]`).value = troca.dataHoraFim || '';
+                            }
+                        }, 100);
+                    });
+                }
+                
+                // Restaurar implementos
+                if (equipe.implementos) {
+                    Object.entries(equipe.implementos).forEach(([name, value]) => {
+                        const input = document.querySelector(`[name="${name}"]`);
+                        if (input) {
+                            if (input.type === 'radio') {
+                                const radioInput = document.querySelector(`[name="${name}"][value="${value}"]`);
+                                if (radioInput) radioInput.checked = true;
+                            } else {
+                                input.value = value;
+                            }
+                        }
+                    });
+                }
+                
+                // Configurar pendência
+                togglePendencia();
+            }, 100);
+            
+            document.getElementById('modalEquipe').classList.add('show');
+        }
+
+        function removerEquipe(index) {
+            if (confirm('Tem certeza que deseja remover esta equipe?')) {
+                currentRelatorio.equipes.splice(index, 1);
+                updateTeamsDisplay();
+                showNotification('Equipe removida!', 'info');
+            }
+        }
+
+        // REVISÃO E FINALIZAÇÃO
+        function generateReview() {
+            const resumoTurno = document.getElementById('resumoTurno');
+            const resumoEquipes = document.getElementById('resumoEquipes');
+            
+            // Resumo do turno
+            resumoTurno.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">Data</div>
+                    <div class="detail-value">${formatarData(currentRelatorio.dadosTurno.data)}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Horário</div>
+                    <div class="detail-value">${currentRelatorio.dadosTurno.horario}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Letra</div>
+                    <div class="detail-value">${currentRelatorio.dadosTurno.letra}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Supervisor</div>
+                    <div class="detail-value">${currentRelatorio.dadosTurno.supervisor}</div>
+                </div>
+            `;
+            
+            // Resumo das equipes
+            const totalEquipes = currentRelatorio.equipes.length;
+            const equipesAltaPressao = currentRelatorio.equipes.filter(e => e.tipo.includes('Alta')).length;
+            const equipesVacuo = currentRelatorio.equipes.filter(e => e.tipo.includes('Vacuo')).length;
+            const equipesExtras = currentRelatorio.equipes.filter(e => e.tipo.includes('Extras')).length;
+            const atividadesConcluidas = currentRelatorio.equipes.filter(e => e.statusAtividade === 'Concluído').length;
+            const totalTrocas = currentRelatorio.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
+            const equipesComAtraso = currentRelatorio.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
+            
+            resumoEquipes.innerHTML = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${totalEquipes}</div>
+                        <div class="stat-label">Total de Equipes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${equipesAltaPressao}</div>
+                        <div class="stat-label">Alta Pressão</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${equipesVacuo}</div>
+                        <div class="stat-label">Vacuo/Hiper</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${equipesExtras}</div>
+                        <div class="stat-label">Horas Extras</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${atividadesConcluidas}</div>
+                        <div class="stat-label">Concluídas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${totalTrocas}</div>
+                        <div class="stat-label">Trocas de Equipamento</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${equipesComAtraso}</div>
+                        <div class="stat-label">Equipamentos com Atraso</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function salvarRelatorio() {
+            showLoading('Salvando relatório...');
+            
+            try {
+                // Gerar ID único
+                const relatorioId = `REL${Date.now()}`;
+                
+                // Coletar observações gerais
+                const observacoesGerais = document.getElementById('observacoesGeraisTurno').value;
+                
+                // Preparar dados do relatório
+                const relatorio = {
+                    id: relatorioId,
+                    dadosTurno: currentRelatorio.dadosTurno,
+                    equipes: currentRelatorio.equipes,
+                    observacoesGerais: observacoesGerais,
+                    estatisticas: {
+                        totalEquipes: currentRelatorio.equipes.length,
+                        equipesAltaPressao: currentRelatorio.equipes.filter(e => e.tipo.includes('Alta')).length,
+                        equipesVacuo: currentRelatorio.equipes.filter(e => e.tipo.includes('Vácuo')).length,
+                        equipesExtras: currentRelatorio.equipes.filter(e => e.tipo.includes('Extras')).length,
+                        atividadesConcluidas: currentRelatorio.equipes.filter(e => e.statusAtividade === 'Concluído').length,
+                        totalTrocas: currentRelatorio.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0),
+                        equipesComAtraso: currentRelatorio.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length
+                    },
+                    criadoPor: currentUser,
+                    criadoEm: new Date().toISOString()
+                };
+                
+                // Adicionar ao array local primeiro
+                relatorios.unshift(relatorio);
+                
+                // Tentar salvar no GitHub
+                if (GITHUB_CONFIG.token) {
+                    try {
+                        await saveDataToGitHub('relatorios', relatorios);
+                        showNotification('✅ Relatório salvo no GitHub!', 'success');
+                    } catch (gitError) {
+                        console.error('Erro ao salvar no GitHub:', gitError);
+                        showNotification('⚠️ Erro ao salvar no GitHub. Salvo localmente.', 'warning');
+                        
+                        // Remover do array se falhou no GitHub para tentar novamente
+                        relatorios.shift();
+                        throw gitError;
+                    }
+                } else {
+                    throw new Error('Token do GitHub não configurado');
+                }
+                
+                // Salvar localmente como backup (SANITIZADO)
+                const dadosLimpos = sanitizeObject(relatorios);
+                localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(dadosLimpos));
+                
+                // Mostrar sucesso
+                document.getElementById('relatorioIdDisplay').textContent = relatorioId;
+                showStep(4);
+                
+                // Atualizar interface
+                updateInterface();
+                
+                hideLoading();
+                
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao salvar relatório:', error);
+                
+                // Tentar salvar localmente
+                try {
+                    const localRelatorios = JSON.parse(localStorage.getItem('grupogps_relatorio_backup') || '[]');
+                    const relatorioLocal = {
+                        id: `LOCAL${Date.now()}`,
+                        dadosTurno: currentRelatorio.dadosTurno,
+                        equipes: currentRelatorio.equipes,
+                        observacoesGerais: document.getElementById('observacoesGeraisTurno').value,
+                        salvoLocalmente: true,
+                        criadoPor: currentUser,
+                        criadoEm: new Date().toISOString()
+                    };
+                    
+                    // SANITIZAR ANTES DE SALVAR LOCALMENTE
+                    const relatorioLimpo = sanitizeObject(relatorioLocal);
+                    localRelatorios.unshift(relatorioLimpo);
+                    
+                    const dadosLimpos = sanitizeObject(localRelatorios);
+                    localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(dadosLimpos));
+                    
+                    // Adicionar também ao array global para aparecer na interface
+                    relatorios.unshift(relatorioLimpo);
+                    updateInterface();
+                    
+                    document.getElementById('relatorioIdDisplay').textContent = relatorioLimpo.id + ' (Local)';
+                    showStep(4);
+                    showNotification('Relatório salvo localmente. Será sincronizado quando houver conexão.', 'warning');
+                } catch (localError) {
+                    showNotification('Erro ao salvar relatório: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function novoRelatorio() {
+            currentRelatorio = {
+                dadosTurno: {},
+                equipes: []
+            };
+            
+            // Limpar formulários
+            document.getElementById('formEquipe').reset();
+            document.getElementById('observacoesGeraisTurno').value = '';
+            
+            // Configurar data padrão
+            setupDefaultDate();
+            
+            // Voltar para primeira etapa
+            showStep(1);
+            
+            // Limpar displays
+            updateTeamsDisplay();
+        }
+
+        function visualizarRelatorio() {
+            const relatorio = gerarTextoRelatorio();
+            document.getElementById('relatorioTexto').textContent = relatorio;
+            document.getElementById('modalVisualizarRelatorio').classList.add('show');
+        }
+
+        function gerarTextoRelatorio() {
+            const dados = currentRelatorio.dadosTurno;
+            const equipes = currentRelatorio.equipes;
+            const observacoesGerais = document.getElementById('observacoesGeraisTurno')?.value || '';
+            
+            let relatorio = `RELATÓRIO DE TURNO - GRUPOGPS\n`;
+            relatorio += `========================================\n`;
+            relatorio += `Data: ${formatarData(dados.data)}\n`;
+            relatorio += `Horário: ${dados.horario}\n`;
+            relatorio += `Letra do Turno: ${dados.letra}\n`;
+            relatorio += `Supervisor: ${dados.supervisor}\n`;
+            
+            relatorio += `\nRESUMO GERAL:\n`;
+            relatorio += `------------------------------\n`;
+            relatorio += `Total de Equipes: ${equipes.length}\n`;
+            relatorio += `Equipes Alta Pressão: ${equipes.filter(e => e.tipo.includes('Alta')).length}\n`;
+            relatorio += `Equipes Vacuo/Hiper: ${equipes.filter(e => e.tipo.includes('Vacuo')).length}\n`;
+            
+            const equipesExtras = equipes.filter(e => e.tipo.includes('Extras')).length;
+            if (equipesExtras > 0) {
+                relatorio += `Equipes Horas Extras: ${equipesExtras}\n`;
+            }
+            
+            relatorio += `Atividades Concluídas: ${equipes.filter(e => e.statusAtividade === 'Concluído').length}\n`;
+            
+            const totalTrocas = equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
+            relatorio += `Trocas de Equipamento: ${totalTrocas}\n`;
+
+            const equipesComAtraso = equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
+            relatorio += `Equipamentos com Atraso: ${equipesComAtraso}\n`;
+            
+            relatorio += `\nDETALHES DAS EQUIPES:\n`;
+            relatorio += `========================================\n`;
+            
+            equipes.forEach((equipe, index) => {
+                relatorio += `\n${index + 1}. EQUIPE ${equipe.numero} - ${equipe.tipo.toUpperCase()}\n`;
+                relatorio += `----------------------------------------\n`;
+                relatorio += `Motorista: ${equipe.motorista}\n`;
+                relatorio += `Operadores: ${equipe.operadores}\n`;
+                relatorio += `Área de Atuação: ${equipe.area}\n`;
+                relatorio += `Atividade: ${equipe.atividade}\n`;
+                relatorio += `Tipo: ${equipe.tipoAtividade}\n`;
+                relatorio += `Status: ${equipe.statusAtividade}\n`;
+                
+                if (equipe.pendencia) {
+                    relatorio += `PENDÊNCIA: ${equipe.pendencia}\n`;
+                }
+                
+                relatorio += `Vaga: ${equipe.vaga}\n`;
+                relatorio += `Equipamento: ${equipe.equipamento}\n`;
+
+                // Adicionar informações de atraso com horário
+                if (equipe.atraso && equipe.atraso.houve === 'Sim') {
+                    relatorio += `\nATRASO REGISTRADO:\n`;
+                    if (equipe.atraso.horarioDirecionamento) {
+                        relatorio += `Horário de Direcionamento: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}\n`;
+                    }
+                    relatorio += `Motivo: ${equipe.atraso.motivo}\n`;
+                    if (equipe.atraso.justificativa) {
+                        relatorio += `Justificativa: ${equipe.atraso.justificativa}\n`;
+                    }
+                }
+                
+                // Adicionar implementos (apenas os que não são N/A)
+                if (equipe.implementos) {
+                    const implementosRelevantes = [];
+                    
+                    Object.entries(equipe.implementos).forEach(([key, value]) => {
+                        // Filtrar apenas implementos que não são N/A e não são campos especiais
+                        if (value && value !== 'N/A' && !key.includes('justificativa') && !key.includes('caixa_bloqueio') && !key.includes('cadeados') && !key.includes('plaquetas')) {
+                            const nomeImplemento = key.replace('implemento_', '').replace(/_/g, ' ');
+                            implementosRelevantes.push(`${nomeImplemento}: ${value}`);
+                        }
+                    });
+                    
+                    if (implementosRelevantes.length > 0) {
+                        relatorio += `\nIMPLEMENTOS:\n`;
+                        implementosRelevantes.forEach(impl => {
+                            relatorio += `- ${impl}\n`;
+                        });
+                    }
+                    
+                    // Adicionar informações de segurança se relevantes
+                    const seguranca = [];
+                    if (equipe.implementos.caixa_bloqueio && equipe.implementos.caixa_bloqueio !== 'N/A') {
+                        seguranca.push(`Caixa Bloqueio: ${equipe.implementos.caixa_bloqueio}`);
+                    }
+                    if (equipe.implementos.cadeados && equipe.implementos.cadeados !== 'N/A') {
+                        seguranca.push(`Cadeados: ${equipe.implementos.cadeados}`);
+                    }
+                    if (equipe.implementos.plaquetas && equipe.implementos.plaquetas !== 'N/A') {
+                        seguranca.push(`Plaquetas: ${equipe.implementos.plaquetas}`);
+                    }
+                    
+                    if (seguranca.length > 0) {
+                        relatorio += `\nSEGURANÇA:\n`;
+                        seguranca.forEach(seg => {
+                            relatorio += `- ${seg}\n`;
+                        });
+                    }
+                    
+                    // Justificativa de implementos se houver
+                    if (equipe.implementos.justificativa_implementos && equipe.implementos.justificativa_implementos.trim()) {
+                        relatorio += `\nJUSTIFICATIVA IMPLEMENTOS: ${equipe.implementos.justificativa_implementos}\n`;
+                    }
+                }
+                
+                // Adicionar trocas de equipamento
+                if (equipe.trocas && equipe.trocas.length > 0) {
+                    equipe.trocas.forEach((troca, trocaIndex) => {
+                        relatorio += `\nTROCA DE EQUIPAMENTO ${trocaIndex + 1}:\n`;
+                        relatorio += `Motivo: ${troca.motivo}\n`;
+                        if (troca.placaNova) {
+                            relatorio += `Nova Placa: ${troca.placaNova}\n`;
+                        }
+                        if (troca.dataHoraInicio) {
+                            relatorio += `Início: ${formatarDataHora(troca.dataHoraInicio)}\n`;
+                        }
+                        if (troca.dataHoraFim) {
+                            relatorio += `Fim: ${formatarDataHora(troca.dataHoraFim)}\n`;
+                        }
+                        relatorio += `Defeito/Medidas: ${troca.defeito}\n`;
+                    });
+                }
+                
+                if (equipe.observacoes) {
+                    relatorio += `\nObservações: ${equipe.observacoes}\n`;
+                }
+            });
+
+            // Adicionar observações gerais
+            if (observacoesGerais) {
+                relatorio += `\nOBSERVAÇÕES GERAIS DO TURNO:\n`;
+                relatorio += `========================================\n`;
+                relatorio += `${observacoesGerais}\n`;
+            }
+            
+            relatorio += `\n========================================\n`;
+            relatorio += `Relatório gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
+            relatorio += `Sistema: GrupoGPS - Relatório de Turno\n`;
+            
+            return relatorio;
+        }
+
+        function copiarRelatorio() {
+            const texto = document.getElementById('relatorioTexto').textContent;
+            navigator.clipboard.writeText(texto).then(() => {
+                showNotification('Relatório copiado para a área de transferência!', 'success');
+            });
+        }
+
+        // NAVEGAÇÃO ENTRE ABAS
+        function switchTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`)?.classList.add('active');
+            document.getElementById(tabName + '-tab')?.classList.add('active');
+            
+            // Debug info
+            if (tabName === 'relatorios') {
+                console.log('🔍 Aba relatórios aberta. Debug info:');
+                console.log('Array relatorios:', relatorios);
+                console.log('É array?', Array.isArray(relatorios));
+                console.log('Quantidade:', relatorios.length);
+                if (relatorios.length > 0) {
+                    console.log('Primeiro relatório:', relatorios[0]);
+                }
+            }
+            
+            // Atualizar dados ao trocar de aba
+            if (tabName === 'relatorios') {
+                updateInterface();
+            }
+        }
+
+        // PESQUISA
+        function ajustarCampoPesquisa() {
+            const tipo = document.getElementById('tipoPesquisa').value;
+            
+            // Ocultar todos os campos
+            document.querySelectorAll('[id^="campoPesquisa"]').forEach(campo => {
+                campo.classList.add('hidden');
+            });
+            
+            // Mostrar campo apropriado
+            if (tipo === 'data') {
+                document.getElementById('campoPesquisaData').classList.remove('hidden');
+            } else if (tipo === 'periodo') {
+                document.getElementById('campoPesquisaPeriodo').classList.remove('hidden');
+                document.getElementById('campoPesquisaPeriodoFim').classList.remove('hidden');
+            } else {
+                document.getElementById('campoPesquisaGeral').classList.remove('hidden');
+            }
+        }
+
+        function executarPesquisa() {
+            const tipo = document.getElementById('tipoPesquisa').value;
+            let resultados = [];
+            
+            // Verificar se temos dados para pesquisar
+            if (!Array.isArray(relatorios) || relatorios.length === 0) {
+                showNotification('Nenhum relatório encontrado para pesquisar.', 'info');
+                mostrarResultadosPesquisa([]);
+                return;
+            }
+            
+            if (tipo === 'data') {
+                const data = document.getElementById('dataPesquisa').value;
+                if (!data) {
+                    showNotification('Informe uma data para pesquisar.', 'warning');
+                    return;
+                }
+                resultados = relatorios.filter(r => r.dadosTurno && r.dadosTurno.data === data);
+            } else if (tipo === 'periodo') {
+                const dataInicial = document.getElementById('dataInicialPesquisa').value;
+                const dataFinal = document.getElementById('dataFinalPesquisa').value;
+                if (!dataInicial || !dataFinal) {
+                    showNotification('Informe as datas inicial e final.', 'warning');
+                    return;
+                }
+                resultados = relatorios.filter(r => 
+                    r.dadosTurno && r.dadosTurno.data >= dataInicial && r.dadosTurno.data <= dataFinal
+                );
+            } else if (tipo === 'supervisor') {
+                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
+                if (!termo) {
+                    showNotification('Informe o nome do supervisor.', 'warning');
+                    return;
+                }
+                resultados = relatorios.filter(r => 
+                    r.dadosTurno && r.dadosTurno.supervisor && r.dadosTurno.supervisor.toLowerCase().includes(termo)
+                );
+            } else if (tipo === 'letra') {
+                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
+                if (!termo) {
+                    showNotification('Informe a letra do turno.', 'warning');
+                    return;
+                }
+                resultados = relatorios.filter(r => 
+                    r.dadosTurno && r.dadosTurno.letra && r.dadosTurno.letra.toLowerCase().includes(termo)
+                );
+            } else {
+                // Pesquisa geral
+                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
+                if (!termo) {
+                    showNotification('Informe um termo para pesquisar.', 'warning');
+                    return;
+                }
+                resultados = relatorios.filter(r => {
+                    if (!r.dadosTurno) return false;
+                    return (
+                        (r.id && r.id.toLowerCase().includes(termo)) ||
+                        (r.dadosTurno.supervisor && r.dadosTurno.supervisor.toLowerCase().includes(termo)) ||
+                        (r.dadosTurno.letra && r.dadosTurno.letra.toLowerCase().includes(termo))
+                    );
+                });
+            }
+            
+            console.log('Resultados da pesquisa:', resultados);
+            mostrarResultadosPesquisa(resultados);
+        }
+
+        function mostrarResultadosPesquisa(resultados) {
+            const container = document.getElementById('resultadosPesquisa');
+            const tbody = document.getElementById('pesquisaTableBody');
+            
+            if (resultados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">🔍</div>
+                                <h3>Nenhum resultado encontrado</h3>
+                                <p>Tente ajustar os critérios de pesquisa</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = resultados.map(relatorio => `
+                    <tr>
+                        <td>${relatorio.id}</td>
+                        <td>${formatarData(relatorio.dadosTurno.data)}</td>
+                        <td>${relatorio.dadosTurno.horario}</td>
+                        <td>${relatorio.dadosTurno.letra}</td>
+                        <td>${relatorio.dadosTurno.supervisor}</td>
+                        <td>${relatorio.equipes.length}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="visualizarRelatorioSalvo('${relatorio.id}')">
+                                Ver
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            
+            container.classList.remove('hidden');
+        }
+
+        function limparPesquisa() {
+            document.getElementById('tipoPesquisa').value = 'geral';
+            document.getElementById('termoPesquisa').value = '';
+            document.getElementById('dataPesquisa').value = '';
+            document.getElementById('dataInicialPesquisa').value = '';
+            document.getElementById('dataFinalPesquisa').value = '';
+            document.getElementById('resultadosPesquisa').classList.add('hidden');
+            ajustarCampoPesquisa();
+        }
+
+        function visualizarRelatorioSalvo(id) {
+            const relatorio = relatorios.find(r => r.id === id);
+            if (!relatorio) {
+                showNotification('Relatório não encontrado!', 'error');
+                return;
+            }
+            
+            // Gerar texto do relatório salvo
+            const dados = relatorio.dadosTurno;
+            const equipes = relatorio.equipes;
+            const observacoesGerais = relatorio.observacoesGerais || '';
+            
+            let relatorioTexto = `RELATÓRIO DE TURNO - GRUPOGPS\n`;
+            relatorioTexto += `========================================\n`;
+            relatorioTexto += `Data: ${formatarData(dados.data)}\n`;
+            relatorioTexto += `Horário: ${dados.horario}\n`;
+            relatorioTexto += `Letra do Turno: ${dados.letra}\n`;
+            relatorioTexto += `Supervisor: ${dados.supervisor}\n`;
+            
+            relatorioTexto += `\nRESUMO GERAL:\n`;
+            relatorioTexto += `------------------------------\n`;
+            relatorioTexto += `Total de Equipes: ${equipes.length}\n`;
+            relatorioTexto += `Equipes Alta Pressão: ${equipes.filter(e => e.tipo.includes('Alta')).length}\n`;
+            relatorioTexto += `Equipes Vacuo/Hiper: ${equipes.filter(e => e.tipo.includes('Vacuo')).length}\n`;
+            
+            const equipesExtras = equipes.filter(e => e.tipo.includes('Extras')).length;
+            if (equipesExtras > 0) {
+                relatorioTexto += `Equipes Horas Extras: ${equipesExtras}\n`;
+            }
+            
+            relatorioTexto += `Atividades Concluídas: ${equipes.filter(e => e.statusAtividade === 'Concluído').length}\n`;
+            
+            const totalTrocas = equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
+            relatorioTexto += `Trocas de Equipamento: ${totalTrocas}\n`;
+
+            const equipesComAtraso = equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
+            relatorioTexto += `Equipamentos com Atraso: ${equipesComAtraso}\n`;
+            
+            relatorioTexto += `\nDETALHES DAS EQUIPES:\n`;
+            relatorioTexto += `========================================\n`;
+            
+            equipes.forEach((equipe, index) => {
+                relatorioTexto += `\n${index + 1}. EQUIPE ${equipe.numero} - ${equipe.tipo.toUpperCase()}\n`;
+                relatorioTexto += `----------------------------------------\n`;
+                relatorioTexto += `Motorista: ${equipe.motorista}\n`;
+                relatorioTexto += `Operadores: ${equipe.operadores}\n`;
+                relatorioTexto += `Área de Atuação: ${equipe.area}\n`;
+                relatorioTexto += `Atividade: ${equipe.atividade}\n`;
+                relatorioTexto += `Tipo: ${equipe.tipoAtividade}\n`;
+                relatorioTexto += `Status: ${equipe.statusAtividade}\n`;
+                
+                if (equipe.pendencia) {
+                    relatorioTexto += `PENDÊNCIA: ${equipe.pendencia}\n`;
+                }
+                
+                relatorioTexto += `Vaga: ${equipe.vaga}\n`;
+                relatorioTexto += `Equipamento: ${equipe.equipamento}\n`;
+
+                // Adicionar informações de atraso com horário
+                if (equipe.atraso && equipe.atraso.houve === 'Sim') {
+                    relatorioTexto += `\nATRASO REGISTRADO:\n`;
+                    if (equipe.atraso.horarioDirecionamento) {
+                        relatorioTexto += `Horário de Direcionamento: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}\n`;
+                    }
+                    relatorioTexto += `Motivo: ${equipe.atraso.motivo}\n`;
+                    if (equipe.atraso.justificativa) {
+                        relatorioTexto += `Justificativa: ${equipe.atraso.justificativa}\n`;
+                    }
+                }
+                
+                // Implementos e trocas...
+                if (equipe.implementos) {
+                    const implementosRelevantes = [];
+                    
+                    Object.entries(equipe.implementos).forEach(([key, value]) => {
+                        if (value && value !== 'N/A' && !key.includes('justificativa') && !key.includes('caixa_bloqueio') && !key.includes('cadeados') && !key.includes('plaquetas')) {
+                            const nomeImplemento = key.replace('implemento_', '').replace(/_/g, ' ');
+                            implementosRelevantes.push(`${nomeImplemento}: ${value}`);
+                        }
+                    });
+                    
+                    if (implementosRelevantes.length > 0) {
+                        relatorioTexto += `\nIMPLEMENTOS:\n`;
+                        implementosRelevantes.forEach(impl => {
+                            relatorioTexto += `- ${impl}\n`;
+                        });
+                    }
+                }
+                
+                if (equipe.trocas && equipe.trocas.length > 0) {
+                    equipe.trocas.forEach((troca, trocaIndex) => {
+                        relatorioTexto += `\nTROCA DE EQUIPAMENTO ${trocaIndex + 1}:\n`;
+                        relatorioTexto += `Motivo: ${troca.motivo}\n`;
+                        if (troca.placaNova) {
+                            relatorioTexto += `Nova Placa: ${troca.placaNova}\n`;
+                        }
+                        if (troca.dataHoraInicio) {
+                            relatorioTexto += `Início: ${formatarDataHora(troca.dataHoraInicio)}\n`;
+                        }
+                        if (troca.dataHoraFim) {
+                            relatorioTexto += `Fim: ${formatarDataHora(troca.dataHoraFim)}\n`;
+                        }
+                        relatorioTexto += `Defeito/Medidas: ${troca.defeito}\n`;
+                    });
+                }
+                
+                if (equipe.observacoes) {
+                    relatorioTexto += `\nObservações: ${equipe.observacoes}\n`;
+                }
+            });
+
+            if (observacoesGerais) {
+                relatorioTexto += `\nOBSERVAÇÕES GERAIS DO TURNO:\n`;
+                relatorioTexto += `========================================\n`;
+                relatorioTexto += `${observacoesGerais}\n`;
+            }
+            
+            relatorioTexto += `\n========================================\n`;
+            relatorioTexto += `Relatório gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
+            relatorioTexto += `Sistema: GrupoGPS - Relatório de Turno\n`;
+            
+            document.getElementById('relatorioTexto').textContent = relatorioTexto;
+            document.getElementById('modalVisualizarRelatorio').classList.add('show');
+        }
+
+        // INTERFACE E ESTATÍSTICAS
+        function initializeInterface() {
+            updateInterface();
+            loadConfiguracoes();
+        }
+
+        function updateInterface() {
+            updateRelatoriosTable();
+            updateStatistics();
+        }
+
+        function updateRelatoriosTable() {
+            const tbody = document.getElementById('relatoriosTableBody');
+            
+            console.log('Atualizando tabela de relatórios. Total:', relatorios.length);
+            
+            if (!Array.isArray(relatorios) || relatorios.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <h3>Nenhum relatório encontrado</h3>
+                                <p>Crie seu primeiro relatório na aba "Novo Relatório"</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = relatorios.slice(0, 50).map(relatorio => {
+                // Verificar se o relatório tem a estrutura correta
+                if (!relatorio.dadosTurno) {
+                    console.warn('Relatório com estrutura inválida:', relatorio);
+                    return '';
+                }
+                
+                return `
+                    <tr>
+                        <td>${relatorio.id || 'N/A'}</td>
+                        <td>${formatarData(relatorio.dadosTurno.data)}</td>
+                        <td>${relatorio.dadosTurno.horario || 'N/A'}</td>
+                        <td>${relatorio.dadosTurno.letra || 'N/A'}</td>
+                        <td>${relatorio.dadosTurno.supervisor || 'N/A'}</td>
+                        <td>${relatorio.equipes ? relatorio.equipes.length : 0}</td>
+                        <td>
+                            <span class="badge badge-${relatorio.salvoLocalmente ? 'warning' : 'success'}">
+                                ${relatorio.salvoLocalmente ? 'Local' : 'Sincronizado'}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-info" onclick="visualizarRelatorioSalvo('${relatorio.id}')">
+                                Ver
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).filter(row => row !== '').join('');
+            
+            // Se após filtrar não sobrou nada, mostrar mensagem
+            if (tbody.innerHTML.trim() === '') {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">⚠️</div>
+                                <h3>Relatórios com estrutura inválida</h3>
+                                <p>Verifique os dados salvos no GitHub</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function updateStatistics() {
+            if (!Array.isArray(relatorios)) return;
+            
+            const hoje = new Date().toISOString().split('T')[0];
+            const relatoriosHoje = relatorios.filter(r => r.dadosTurno && r.dadosTurno.data === hoje).length;
+            const totalEquipes = relatorios.reduce((sum, r) => sum + (r.equipes ? r.equipes.length : 0), 0);
+            const atividadesConcluidas = relatorios.reduce((sum, r) => 
+                sum + (r.equipes ? r.equipes.filter(e => e.statusAtividade === 'Concluído').length : 0), 0
+            );
+            
+            // Estatísticas da aba Relatórios
+            document.getElementById('totalRelatorios').textContent = relatorios.length;
+            document.getElementById('relatoriosHoje').textContent = relatoriosHoje;
+            document.getElementById('equipesTotal').textContent = totalEquipes;
+            document.getElementById('atividadesConcluidas').textContent = atividadesConcluidas;
+        }
+
+        // CONFIGURAÇÕES
+        function salvarConfigGitHub() {
+            const token = document.getElementById('githubToken').value.trim();
+            
+            if (!token) {
+                showNotification('Informe o token do GitHub!', 'warning');
+                return;
+            }
+            
+            GITHUB_CONFIG.token = token;
+            localStorage.setItem('grupogps_relatorio_githubToken', token);
+            
+            showNotification('Token do GitHub salvo com sucesso!', 'success');
+            document.getElementById('btnInitializeSystem').classList.remove('hidden');
+            
+            setTimeout(() => {
+                testarConexaoGitHub();
+            }, 500);
+        }
+
+        async function initializeSystemFiles() {
+            if (!GITHUB_CONFIG.token) {
+                showNotification('Por favor, insira e salve o token do GitHub primeiro.', 'error');
+                return;
+            }
+            
+            if (!confirm('Isso criará a estrutura de arquivos no repositório. Continuar?')) {
+                return;
+            }
+
+            showLoading('Inicializando arquivos no GitHub...');
+
+            try {
+                // DADOS INICIAIS SANITIZADOS
+                const initialData = {
+                    relatorios: [],
+                    configuracoes: {
+                        nomeEmpresa: 'GrupoGPS',
+                        autoRefreshInterval: 60,
+                        autoBackup: true
+                    },
+                    supervisores: sanitizeObject(DEFAULT_SYSTEM_DATA.supervisores),
+                    vagas: sanitizeObject(DEFAULT_SYSTEM_DATA.vagas),
+                    equipamentos: sanitizeObject(DEFAULT_SYSTEM_DATA.equipamentos)
+                };
+
+                console.log('🧹 Inicializando sistema com dados sanitizados:', initialData);
+
+                await Promise.all(
+                    Object.keys(GITHUB_CONFIG.paths).map(key => 
+                        saveDataToGitHub(key, initialData[key])
+                    )
+                );
+
+                hideLoading();
+                showNotification('Sistema inicializado com dados limpos! Recarregue a página.', 'success');
+                setTimeout(() => location.reload(), 3000);
+
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao inicializar o sistema:', error);
+                showNotification('Erro ao inicializar: ' + error.message, 'error');
+            }
+        }
+
+        function testarConexaoGitHub() {
+            const token = document.getElementById('githubToken').value.trim() || 
+                         GITHUB_CONFIG.token || 
+                         localStorage.getItem('grupogps_relatorio_githubToken');
+            
+            if (!token) {
+                showNotification('Informe o token primeiro!', 'warning');
+                return;
+            }
+            
+            showNotification('Testando conexão...', 'info');
+            
+            fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
+                headers: { 
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json' 
+                }
+            })
+            .then(response => {
+                if (response.ok) { 
+                    return response.json(); 
+                } else { 
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`); 
+                }
+            })
+            .then(data => {
+                showNotification(`✅ Conexão OK! Repositório: ${data.full_name}`, 'success');
+                GITHUB_CONFIG.token = token;
+                localStorage.setItem('grupogps_relatorio_githubToken', token);
+            })
+            .catch(error => {
+                console.error('Erro na conexão:', error);
+                showNotification('❌ Erro na conexão: ' + error.message, 'error');
+            });
+        }
+
+        function loadConfiguracoes() {
+            try {
+                const tokenSalvo = localStorage.getItem('grupogps_relatorio_githubToken');
+                if (tokenSalvo) {
+                    GITHUB_CONFIG.token = tokenSalvo;
+                    const tokenField = document.getElementById('githubToken');
+                    if (tokenField) { 
+                        tokenField.value = tokenSalvo; 
+                    }
+                }
+                
+                if (configuracoes.nomeEmpresa) { 
+                    document.getElementById('nomeEmpresa').value = configuracoes.nomeEmpresa; 
+                }
+                if (configuracoes.autoRefreshInterval) { 
+                    document.getElementById('autoRefreshInterval').value = configuracoes.autoRefreshInterval; 
+                }
+                if (configuracoes.autoBackup !== undefined) { 
+                    document.getElementById('autoBackup').value = configuracoes.autoBackup.toString(); 
+                }
+            } catch (error) {
+                console.error('Erro ao carregar configurações:', error);
+            }
+        }
+
+        async function salvarConfigGerais() {
+            configuracoes.nomeEmpresa = document.getElementById('nomeEmpresa').value;
+            configuracoes.autoRefreshInterval = parseInt(document.getElementById('autoRefreshInterval').value);
+            configuracoes.autoBackup = document.getElementById('autoBackup').value === 'true';
+            
+            try {
+                if (GITHUB_CONFIG.token) {
+                    await saveDataToGitHub('configuracoes', configuracoes);
+                }
+                showNotification('Configurações salvas!', 'success');
+                startAutoRefresh();
+            } catch (error) {
+                console.error('Erro ao salvar configurações:', error);
+                showNotification('Erro ao salvar configurações: ' + error.message, 'error');
+            }
+        }
+
+        // EXPORTAÇÃO
+        function exportarRelatorios() {
+            if (!relatorios || relatorios.length === 0) {
+                showNotification('Nenhum relatório para exportar!', 'warning');
+                return;
+            }
+            
+            const dados = relatorios.map(r => ({
+                'ID': r.id,
+                'Data': formatarData(r.dadosTurno.data),
+                'Horário': r.dadosTurno.horario,
+                'Letra': r.dadosTurno.letra,
+                'Supervisor': r.dadosTurno.supervisor,
+                'Total Equipes': r.equipes.length,
+                'Atividades Concluídas': r.equipes.filter(e => e.statusAtividade === 'Concluído').length,
+                'Trocas Equipamento': r.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0),
+                'Equipamentos com Atraso': r.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length,
+                'Criado Por': r.criadoPor,
+                'Criado Em': formatarDataHora(r.criadoEm)
+            }));
+            
+            exportarCSV(dados, 'relatorios_turno');
+        }
+
+        function exportarCSV(dados, nomeArquivo) {
+            const csvContent = "data:text/csv;charset=utf-8," 
+                + Object.keys(dados[0]).join(",") + "\n"
+                + dados.map(row => Object.values(row).join(",")).join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${nomeArquivo}_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Arquivo exportado com sucesso!', 'success');
+        }
+
+        // ATUALIZAÇÃO AUTOMÁTICA
+        function startAutoRefresh() {
+            if (autoRefreshTimer) {
+                clearInterval(autoRefreshTimer);
+            }
+            
+            const interval = (configuracoes.autoRefreshInterval || 60) * 1000;
+            autoRefreshTimer = setInterval(async () => {
+                if (isOnline && GITHUB_CONFIG.token) {
+                    try {
+                        await loadAllDataFromGitHub();
+                        console.log('🔄 Dados atualizados automaticamente');
+                    } catch (error) {
+                        console.error('Erro na atualização automática:', error);
+                    }
+                }
+            }, interval);
+        }
+
+        async function forceRefresh() {
+            if (!isOnline || !GITHUB_CONFIG.token) {
+                showNotification('Sem conexão ou token não configurado', 'warning');
+                return;
+            }
+            
+            showLoading('Atualizando dados do GitHub...');
+            
+            try {
+                await loadAllDataFromGitHub();
+                hideLoading();
+                showNotification('Dados sincronizados com o GitHub!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao atualizar dados:', error);
+                showNotification('Erro ao sincronizar: ' + error.message, 'error');
+            }
+        }
+
+        // FUNÇÕES UTILITÁRIAS - CORRIGIDAS
+        function formatarData(dataISO) {
+            if (!dataISO) return '-';
+            const [ano, mes, dia] = dataISO.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function formatarDataHora(isoString) {
+            if (!isoString) return '-';
+            try {
+                const data = new Date(isoString);
+                return data.toLocaleString('pt-BR', { 
+                    hour12: false,
+                    timeZone: 'America/Sao_Paulo'
+                });
+            } catch (error) {
+                return isoString;
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { 
+                notification.remove(); 
+            }, 4000);
+        }
+
+        function showLoading(message = 'Carregando...') {
+            document.getElementById('loadingText').textContent = message;
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
+        }
+
+        function updateSyncStatus(status, message) {
+            const dot = document.getElementById('syncDot');
+            const statusText = document.getElementById('syncStatus');
+            
+            dot.className = 'sync-dot';
+            if (status === 'loading') {
+                dot.classList.add('loading');
+            } else if (status === 'error') {
+                dot.classList.add('error');
+            }
+            
+            statusText.textContent = message;
+        }
+
+        console.log('🚀 Sistema de Relatório de Turno - GrupoGPS ATUALIZADO');
+        console.log('🔧 Refinamentos aplicados:');
+        console.log('✓ Botão resetar sistema removido');
+        console.log('✓ Caracteres especiais totalmente corrigidos');
+        console.log('✓ Versões removidas do cabeçalho e rodapé');
+        console.log('✓ Interface limpa e responsiva');
+        console.log('✓ Compatibilidade mobile/desktop aprimorada');
+        console.log('✨ Sistema profissional finalizado');
+    </script>
+</body>
+</html>
