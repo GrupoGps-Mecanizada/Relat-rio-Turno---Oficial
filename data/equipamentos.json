@@ -1,0 +1,59 @@
+{
+  "ASPIRADOR": [
+    "ASP02",
+    "ASP03",
+    "ASP04",
+    "ASP06",
+    "ASP07",
+    "ASP08",
+    "ASP09",
+    "ASP10",
+    "ASP12",
+    "ASPII"
+  ],
+  "CAMINHÃO ALTA PRESSÃO": [
+    "CZC0453",
+    "DSY6472",
+    "DSY6474",
+    "DSY6475",
+    "DSY6F81",
+    "EAM3253",
+    "EAM3255",
+    "EAM3256",
+    "EAM3262",
+    "EGC2978",
+    "EGC2983",
+    "EGC2985",
+    "EGC2989",
+    "EOF5C06",
+    "EZS8764",
+    "LUX3201",
+    "PUB2F80"
+  ],
+  "CAMINHÃO AUTO VÁCUO": [
+    "ALY5322",
+    "ANF2676",
+    "CUB0763",
+    "DSY6473",
+    "DSY6577",
+    "DYB7210",
+    "EAM3251",
+    "EAM3257",
+    "EGC2979",
+    "EGC2993",
+    "FSA3D71",
+    "HJS1097"
+  ],
+  "CAMINHÃO BROOK": [
+    "DAH1072",
+    "DSY6477",
+    "EGC2984",
+    "EPN2463",
+    "HKH2H79"
+  ],
+  "CAMINHÃO HIPER VÁCUO": [
+    "DSY6471",
+    "EZS9753",
+    "FMD2200"
+  ]
+}
