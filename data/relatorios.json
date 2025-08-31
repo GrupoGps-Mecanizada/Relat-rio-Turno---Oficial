@@ -1,5 +1,205 @@
 [
   {
+    "id": "REL1756674840591",
+    "dadosTurno": {
+      "data": "2025-08-31",
+      "horario": "07:00 - 19:00",
+      "letra": "A",
+      "supervisor": "Ozias"
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Gerlanio Silves",
+        "operadores": "Fabricio Fabiano e Vinicios Valentim",
+        "area": "Sinterizaao",
+        "atividade": "Limpeza de estruturas , sistema c",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 01 - 24 HS",
+        "equipamento": "DSY6F81",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [
+          {
+            "motivo": "Defeitos Em Geral",
+            "placaNova": "EAM 3262",
+            "defeito": "DSY6F81 estourou ouring do cabeote.\nFoi passado pra manuteno",
+            "dataHoraInicio": "2025-08-31T10:00",
+            "dataHoraFim": "2025-08-31T10:10"
+          }
+        ],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "4",
+          "plaquetas": "3"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Adelson Alves",
+        "operadores": "Paulo Cesar e David Silveira Vasconcelos",
+        "area": "Sinterizao",
+        "atividade": "Limpeza de estruturas",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 08 - 24 HS",
+        "equipamento": "EAM3253",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "6",
+          "plaquetas": "7"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "N/A",
+        "operadores": "Claudinei de Souza e Joao Paulo de Castro Vasconcelos",
+        "area": "Coqueria 02",
+        "atividade": "Limpeza de portas e pisos",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "Moto bomba 01",
+        "equipamento": "Moto bomba 01",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "11",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Maxwuel Afonso",
+        "operadores": "Renato silva",
+        "area": "rea interna usiminas",
+        "atividade": "Suco de condensado de BFG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 02 - 16 HS",
+        "equipamento": "ALY5322",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "N/A",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "N/A",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Walace das Graas",
+        "operadores": "Romulo de Souza",
+        "area": "ENA e sinterizao",
+        "atividade": "Sucao de lama na ena e agua no silo 44 na sinter",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 08 - 24 HS",
+        "equipamento": "EAM3251",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "20 metros",
+          "implemento_Mangotes_4_": "20 metros",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "observacoesGerais": "",
+    "estatisticas": {
+      "totalEquipes": 5,
+      "equipesAltaPressao": 3,
+      "equipesVacuo": 0,
+      "equipesExtras": 0,
+      "atividadesConcluidas": 5,
+      "totalTrocas": 1,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-08-31T21:14:00.591Z"
+  },
+  {
     "id": "REL1756287704344",
     "dadosTurno": {
       "data": "2025-08-26",
