@@ -1,5 +1,205 @@
 [
   {
+    "id": "REL1758878499778",
+    "dadosTurno": {
+      "data": "2025-09-25",
+      "horario": "19:00 - 07:00",
+      "letra": "C",
+      "supervisor": "Israel"
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Sergio",
+        "operadores": "Ado e Marcos Vinicius",
+        "area": "Sinterizao e Caldeira 140",
+        "atividade": "Limpeza de estruturas e Rede de BFG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 08 - 24 HS",
+        "equipamento": "EGC2985",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "OK",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "6",
+          "plaquetas": "6"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Marcelo",
+        "operadores": "Bruno Matias e Alderino",
+        "area": "Alto forno e ETol",
+        "atividade": "Limpeza de peneiras , estruturas e Piso",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 01 - 24 HS",
+        "equipamento": "EAM3253",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "4",
+          "plaquetas": "3"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "N/A",
+        "operadores": "Cristiano e Kevin",
+        "area": "Coqueria 02",
+        "atividade": "Limpeza de Portas",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "Moto Bomba",
+        "equipamento": "Moto Bomba",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "11",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Walisson Lucas",
+        "operadores": "Jos Eugnio",
+        "area": "Sinterizao e Caldeira 140",
+        "atividade": "Limpeza de Rede de BFG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "De 19:30 as 01:30 EGC 2993 \nDe 02:00 as 06:30 CUB 0763",
+        "vaga": "AUTO VACUO - GPS - 08 - 24 HS",
+        "equipamento": "EGC2993",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [
+          {
+            "motivo": "Defeitos Em Geral",
+            "placaNova": "CUB 0763",
+            "defeito": "Arrebentou s correias da Bomba",
+            "dataHoraInicio": "2025-09-26T01:30",
+            "dataHoraFim": "2025-09-26T02:00"
+          }
+        ],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "10 metros",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Leonardo",
+        "operadores": "Fernando",
+        "area": "rea interna Usiminas",
+        "atividade": "Suco de Condensado de COG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 01 - 16 HS",
+        "equipamento": "EAM3257",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "observacoesGerais": "",
+    "estatisticas": {
+      "totalEquipes": 5,
+      "equipesAltaPressao": 3,
+      "equipesVacuo": 0,
+      "equipesExtras": 0,
+      "atividadesConcluidas": 5,
+      "totalTrocas": 1,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-09-26T09:21:39.779Z"
+  },
+  {
     "id": "REL1758834920369",
     "dadosTurno": {
       "data": "2025-09-25",
