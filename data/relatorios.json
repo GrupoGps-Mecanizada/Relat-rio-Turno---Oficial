@@ -1,5 +1,264 @@
 [
   {
+    "id": "REL1759234404835",
+    "dadosTurno": {
+      "data": "2025-09-29",
+      "horario": "19:00 - 07:00",
+      "letra": "D",
+      "supervisor": "Wellison"
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Sarley",
+        "operadores": "Vincius e Jos Carlos",
+        "area": "Porto 119 e Etol",
+        "atividade": "Limpeza de piso",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 08 - 24 HS",
+        "equipamento": "EGC2985",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "OK",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "5",
+          "plaquetas": "6"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Gilkiarley",
+        "operadores": "Anestor e Eduardo",
+        "area": "Alto forno",
+        "atividade": "Limpeza de peneira e estruturas.",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 01 - 24 HS",
+        "equipamento": "DSY6F81",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "3",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "3",
+          "plaquetas": "4"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "Mayk",
+        "operadores": "Cadimiel",
+        "area": "Caldeira 140",
+        "atividade": "Limpeza de piso",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 06",
+        "equipamento": "DSY6472",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "5",
+          "plaquetas": "5"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "motorista": "N/A",
+        "operadores": "Hudson e Adenilson",
+        "area": "Coqueria 02",
+        "atividade": "Limpeza de porta",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "Motor bomba",
+        "equipamento": "Motor bomba",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "10",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Jos Roberto",
+        "operadores": "Sandro Cruz",
+        "area": "Porto 119 e BG",
+        "atividade": "Suco de gua com leo",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 08 - 24 HS",
+        "equipamento": "ANF2676",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "OK",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "20 metros",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Jose Eustaquio",
+        "operadores": "Joo Ambrsio",
+        "area": "rea interna da usina",
+        "atividade": "Suco de condensado de COG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 01 - 16 HS",
+        "equipamento": "EAM3257",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "motorista": "Rogrio Augusto",
+        "operadores": "Thiago",
+        "area": "Caldeira 140",
+        "atividade": "Suco de gua lama em canaletas e piso",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VACUO - GPS - 05",
+        "equipamento": "FSA3D71",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Reducoes": "N/A",
+          "implemento_Mangotes_3_": "N/A",
+          "implemento_Mangotes_4_": "20 metros",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "observacoesGerais": "",
+    "estatisticas": {
+      "totalEquipes": 7,
+      "equipesAltaPressao": 4,
+      "equipesVacuo": 0,
+      "equipesExtras": 0,
+      "atividadesConcluidas": 7,
+      "totalTrocas": 0,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-09-30T12:13:24.835Z"
+  },
+  {
     "id": "REL1759196709715",
     "dadosTurno": {
       "data": "2025-09-29",
