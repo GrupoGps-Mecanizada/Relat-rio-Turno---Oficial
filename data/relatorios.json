@@ -1,5 +1,106 @@
 [
   {
+    "id": "REL1759882330749",
+    "dadosTurno": {
+      "data": "2025-10-07",
+      "horario": "07:00 - 19:00",
+      "letra": "A",
+      "supervisor": "Ozias"
+    },
+    "testeEtilometro": {
+      "realizado": false,
+      "horarioTeste": "07:00",
+      "responsavel": "Ozias",
+      "observacoes": "",
+      "colaboradoresAusentes": [
+        {
+          "nome": "warlison",
+          "motivo": "Afastamento Mdico",
+          "observacao": ""
+        }
+      ]
+    },
+    "faltasColaboradores": {
+      "houveFaltas": true,
+      "faltas": [
+        {
+          "nomeColaborador": "Warlison Abreu",
+          "funcao": "Operador",
+          "motivo": "Frias",
+          "justificada": true,
+          "houveSubstituicao": true,
+          "nomeSubstituto": "Warlison Abreu",
+          "observacoes": ""
+        }
+      ]
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "teste",
+        "atividade": "teste",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concludo",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSAO - GPS - 01 - 24 HS",
+        "equipamento": "CZC0453",
+        "regimeTrabalho": {
+          "tipo": "multi-turno",
+          "turnos": [
+            {
+              "horarioInicio": "07:00",
+              "horarioFim": "15:00",
+              "motorista": "teste",
+              "operadores": "teste",
+              "observacoes": ""
+            },
+            {
+              "horarioInicio": "15:00",
+              "horarioFim": "23:00",
+              "motorista": "teste",
+              "operadores": "teste",
+              "observacoes": ""
+            }
+          ]
+        },
+        "motorista": "teste / teste",
+        "operadores": "teste / teste",
+        "atraso": {
+          "houve": "No",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "N/A",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "N/A",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "No",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "observacoesGerais": "",
+    "estatisticas": {
+      "totalEquipes": 1,
+      "atividadesConcluidas": 1,
+      "totalTrocas": 0,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-10-08T00:12:10.749Z"
+  },
+  {
     "id": "REL1759741388380",
     "dadosTurno": {
       "data": "2025-10-05",
