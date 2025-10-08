@@ -219,7 +219,7 @@
             background: var(--white);
             border: 1px solid var(--gray-200);
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             margin-bottom: 2rem;
             overflow: hidden;
         }
@@ -797,6 +797,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 1rem;
+            position: relative;
         }
 
         .troca-title {
@@ -808,10 +809,11 @@
             background: var(--danger-color);
             color: var(--white);
             border: none;
-            padding: 0.25rem 0.5rem;
+            padding: 0.25rem 0.75rem;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.875rem;
+            z-index: 1;
         }
 
         /* Atraso Section */
@@ -877,6 +879,40 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: var(--gray-900);
         }
+        
+        /* CSS Adicional da Implementação */
+        .turno-fields {
+            transition: all 0.3s ease;
+        }
+
+        .turno-fields.hidden {
+            display: none;
+        }
+
+        .troca-item[id^="turnoTrabalho_"] {
+            position: relative;
+        }
+
+        .troca-item[id^="turnoTrabalho_"]::before {
+            content: '🔄';
+            position: absolute;
+            top: 1rem;
+            right: 8rem;
+            font-size: 1.5rem;
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        .badge-multiturno {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--info-color) 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
 
         /* Responsive Design - Melhorado */
         @media (max-width: 1024px) {
@@ -919,6 +955,10 @@
                 padding: 1rem;
             }
 
+            .card-content {
+                padding: 1rem;
+            }
+
             .nav-tab {
                 padding: 0.75rem 1rem;
                 font-size: 0.875rem;
@@ -941,6 +981,8 @@
             .btn {
                 padding: 0.875rem 1.5rem;
                 font-size: 0.95rem;
+                width: 100%;
+                justify-content: center;
             }
 
             .card-header {
@@ -966,6 +1008,11 @@
                 grid-template-columns: 1fr;
             }
 
+            .modal-content {
+                margin: 0.5rem;
+                max-height: 90vh;
+            }
+            
             .modal-body {
                 padding: 1rem;
             }
@@ -1172,14 +1219,148 @@
                                     </select>
                                 </div>
                             </div>
-                            
-                            <div class="form-actions">
-                                <button type="button" class="btn btn-lg" onclick="nextStep()">
-                                    Próximo: Adicionar Equipes
-                                </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção Teste de Etilômetro -->
+                    <div class="card" style="margin-top: 2rem;">
+                        <div class="card-header" style="background: var(--warning-color); color: white;">
+                            <h3 class="card-title">🧪 Teste de Etilômetro Diário (OBRIGATÓRIO)</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 700; color: var(--danger-color);">
+                                    * Todos os colaboradores realizaram o teste de etilômetro hoje?
+                                </label>
+                                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                                    <div class="form-radio">
+                                        <input type="radio" name="etilometroRealizado" id="etilometroSim" value="Sim" checked onchange="toggleEtilometroAusencias()">
+                                        <label for="etilometroSim">Sim, todos realizaram</label>
+                                    </div>
+                                    <div class="form-radio">
+                                        <input type="radio" name="etilometroRealizado" id="etilometroNao" value="Não" onchange="toggleEtilometroAusencias()">
+                                        <label for="etilometroNao">Não, há ausências</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Horário de Realização do Teste *</label>
+                                <input type="time" id="horarioEtilometro" class="form-input" required value="07:00">
+                            </div>
+
+                            <!-- Container para colaboradores ausentes -->
+                            <div id="etilometroAusenciasContainer" class="hidden" style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--danger-color);">⚠️ Colaboradores que NÃO realizaram o teste</h5>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="adicionarAusenciaEtilometro()">
+                                        + Adicionar Colaborador
+                                    </button>
+                                </div>
+                                
+                                <div id="listaAusenciasEtilometro">
+                                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                                        Nenhuma ausência registrada. Se houver ausências, clique em "Adicionar Colaborador".
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 1.5rem;">
+                                <label class="form-label">Observações sobre o teste (opcional)</label>
+                                <textarea id="observacoesEtilometro" class="form-textarea" rows="2" placeholder="Observações gerais sobre o teste de etilômetro..."></textarea>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Seção Faltas de Colaboradores -->
+                    <div class="card" style="margin-top: 2rem;">
+                        <div class="card-header" style="background: var(--danger-color); color: white;">
+                            <h3 class="card-title">👥 Gestão de Faltas e Substituições</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 700;">
+                                    * Houve falta de algum colaborador neste turno?
+                                </label>
+                                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                                    <div class="form-radio">
+                                        <input type="radio" name="houveFaltas" id="faltasNao" value="Não" checked onchange="toggleFaltasContainer()">
+                                        <label for="faltasNao">Não</label>
+                                    </div>
+                                    <div class="form-radio">
+                                        <input type="radio" name="houveFaltas" id="faltasSim" value="Sim" onchange="toggleFaltasContainer()">
+                                        <label for="faltasSim">Sim</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Container para faltas -->
+                            <div id="faltasContainer" class="hidden" style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--danger-color);">📋 Registro de Faltas</h5>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="adicionarFalta()">
+                                        + Registrar Falta
+                                    </button>
+                                </div>
+                                
+                                <div id="listaFaltas">
+                                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                                        Nenhuma falta registrada. Clique em "Registrar Falta" para adicionar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Equipamentos Devendo -->
+                    <div class="card" style="margin-top: 2rem;">
+                        <div class="card-header" style="background: var(--danger-color); color: white;">
+                            <h3 class="card-title">⚠️ Equipamentos Não Atendidos (Devendo)</h3>
+                        </div>
+                        <div class="card-content">
+                            <p style="margin-bottom: 1rem; color: var(--gray-600);">
+                                Registre vagas/equipamentos que não puderam ser atendidos por falta de equipamento ou mão de obra.
+                            </p>
+                            
+                            <div class="form-group">
+                                <label class="form-label" style="font-weight: 700;">
+                                    * Ficou algum equipamento devendo neste turno?
+                                </label>
+                                <div style="display: flex; gap: 2rem; margin-top: 1rem;">
+                                    <div class="form-radio">
+                                        <input type="radio" name="equipamentosDevendo" id="devendoNao" value="Não" checked onchange="toggleEquipamentosDevendo()">
+                                        <label for="devendoNao">Não</label>
+                                    </div>
+                                    <div class="form-radio">
+                                        <input type="radio" name="equipamentosDevendo" id="devendoSim" value="Sim" onchange="toggleEquipamentosDevendo()">
+                                        <label for="devendoSim">Sim</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="equipamentosDevendoContainer" class="hidden" style="margin-top: 2rem; padding: 1.5rem; background: var(--gray-50); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--danger-color);">📋 Registro de Equipamentos Devendo</h5>
+                                    <button type="button" class="btn btn-sm btn-danger" onclick="adicionarEquipamentoDevendo()">
+                                        + Adicionar Equipamento
+                                    </button>
+                                </div>
+                                
+                                <div id="listaEquipamentosDevendo">
+                                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                                        Nenhum equipamento registrado. Clique em "+ Adicionar Equipamento".
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-lg" onclick="nextStep()">
+                            Próximo: Adicionar Equipes
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- Etapa 2: Equipes -->
@@ -1520,7 +1701,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title" id="modalEquipeTitle">Adicionar Equipe</h3>
-                <button class="modal-close" onclick="closeModal('modalEquipe')">&times;</button>
+                <button class="modal-close" onclick="confirmCloseModal('modalEquipe')">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="formEquipe" onsubmit="salvarEquipe(event)">
@@ -1538,14 +1719,64 @@
                                 <small style="color: var(--gray-500); font-size: 0.8rem;">Gerado automaticamente baseado no tipo e quantidade de equipes</small>
                             </div>
                             
-                            <div class="form-group">
-                                <label class="form-label">Motorista *</label>
-                                <input type="text" id="equipeMotorista" class="form-input" required placeholder="Nome do motorista">
+                            <div class="form-group" style="background: var(--info-color); color: white; padding: 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                                <label class="form-label" style="color: white; font-size: 1.1rem;">
+                                    🔄 Regime de Trabalho desta Vaga
+                                </label>
+                                <p style="font-size: 0.875rem; margin-bottom: 1rem; opacity: 0.9;">
+                                    Selecione se esta vaga trabalha em turno único ou se há troca de equipe durante o dia (múltiplos turnos).
+                                </p>
+                                
+                                <div style="display: flex; gap: 2rem; margin-bottom: 1rem;">
+                                    <div class="form-radio">
+                                        <input type="radio" name="regimeTrabalho" id="turnoUnico" value="turno-unico" checked onchange="toggleRegimeTurno()">
+                                        <label for="turnoUnico" style="color: white;">Turno Único (equipe trabalha o turno todo)</label>
+                                    </div>
+                                    <div class="form-radio">
+                                        <input type="radio" name="regimeTrabalho" id="multiTurno" value="multi-turno" onchange="toggleRegimeTurno()">
+                                        <label for="multiTurno" style="color: white;">Múltiplos Turnos (troca de equipe durante o dia)</label>
+                                    </div>
+                                </div>
+                                
+                                <div id="infoMultiTurno" class="hidden" style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 6px;">
+                                    <small style="color: white; font-weight: 600;">
+                                        ℹ️ No modo Múltiplos Turnos, você poderá registrar diferentes motoristas e operadores para cada período de trabalho (ex: 07-15h, 15-23h, 23-07h).
+                                    </small>
+                                </div>
                             </div>
                             
-                            <div class="form-group">
-                                <label class="form-label">Operador(es) *</label>
-                                <textarea id="equipeOperadores" class="form-textarea" required placeholder="Nome dos operadores"></textarea>
+                            <div id="turnoUnicoFields" class="turno-fields">
+                                <div class="form-group">
+                                    <label class="form-label">Motorista *</label>
+                                    <input type="text" id="equipeMotorista" class="form-input" placeholder="Nome do motorista">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Operador(es) *</label>
+                                    <textarea id="equipeOperadores" class="form-textarea" placeholder="Nome dos operadores"></textarea>
+                                </div>
+                            </div>
+
+                            <div id="multiTurnoFields" class="turno-fields hidden">
+                                <div style="margin-bottom: 1.5rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;">
+                                    <h5 style="margin-bottom: 0.5rem;">⚠️ Modo Múltiplos Turnos Ativado</h5>
+                                    <p style="font-size: 0.875rem; margin: 0;">
+                                        Defina os horários e equipes para cada turno. Clique em "+ Adicionar Turno" para registrar cada período de trabalho.
+                                    </p>
+                                </div>
+                                
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                    <h5 style="color: var(--primary-color);">Turnos de Trabalho</h5>
+                                    <button type="button" class="btn btn-sm btn-success" onclick="adicionarTurnoTrabalho()">
+                                        + Adicionar Turno
+                                    </button>
+                                </div>
+                                
+                                <div id="turnosTrabalhoContainer">
+                                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                                        Clique em "+ Adicionar Turno" para registrar o primeiro turno de trabalho.
+                                    </p>
+                                </div>
                             </div>
                             
                             <div class="form-group">
@@ -1683,7 +1914,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('modalEquipe')">
+                <button type="button" class="btn btn-secondary" onclick="confirmCloseModal('modalEquipe')">
                     Cancelar
                 </button>
                 <button type="submit" form="formEquipe" class="btn btn-success">
@@ -1718,6 +1949,40 @@
         </div>
     </div>
 
+    <!-- Modal Confirmar Exclusão -->
+    <div class="modal" id="modalConfirmarExclusao">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: var(--danger-color);">⚠️ Excluir Relatório</h3>
+                <button class="modal-close" onclick="closeModal('modalConfirmarExclusao')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--danger-color); font-weight: 600;">
+                    Esta ação é IRREVERSÍVEL!
+                </p>
+                <p style="margin-bottom: 1.5rem;">
+                    Digite a senha de autorização para excluir este relatório:
+                </p>
+                
+                <input type="hidden" id="relatorioParaExcluir" value="">
+                
+                <div class="form-group">
+                    <label class="form-label">Senha de Autorização *</label>
+                    <input type="password" id="senhaExclusao" class="form-input" placeholder="Digite a senha">
+                    <small style="color: var(--gray-500);">Senha necessária: Apagar@GPS</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modalConfirmarExclusao')">
+                    Cancelar
+                </button>
+                <button class="btn btn-danger" onclick="confirmarExclusaoRelatorio()">
+                    Excluir Relatório
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
@@ -1741,46 +2006,30 @@
             dadosTurno: {},
             equipes: []
         };
+        let hasUnsavedChanges = false;
+        let currentModalId = null;
         
         // Controles do sistema
         let isOnline = navigator.onLine;
         let autoRefreshTimer = null;
         
-        // FUNÇÃO DE SANITIZAÇÃO PARA CORRIGIR CARACTERES CORROMPIDOS
         function sanitizeText(text) {
             if (typeof text !== 'string') return text;
             
-            // Remover códigos hexadecimais problemáticos
+            // NOVA LÓGICA: Manter acentuação correta do português
             let cleaned = text
-                .replace(/\\x83O/g, 'AO')        // PRESSÃ\x83O -> PRESSAO
-                .replace(/\\x81/g, '')           // Remove \x81
-                .replace(/\\x83/g, '')           // Remove \x83
-                .replace(/Ã\x83O/g, 'AO')       // Variação alternativa
-                .replace(/Ã\x81/g, 'A')         // Variação alternativa
-                .replace(/VÃ\x81CUO/g, 'VACUO') // VÃ\x81CUO -> VACUO
-                .replace(/PRESSÃ\x83O/g, 'PRESSAO') // Específico para PRESSÃO
-                .replace(/CAMINHÃ\x83O/g, 'CAMINHAO') // Específico para CAMINHÃO
+                // Corrigir apenas codificações problemáticas conhecidas
+                .replace(/\\x83O/g, 'ÃO')
+                .replace(/\\x81/g, 'Á')
+                .replace(/\\x83/g, 'Ã')
+                .replace(/Ã\x83O/g, 'ÃO')
+                .replace(/Ã\x81/g, 'Á')
                 
-            // Limpar acentos e caracteres especiais comuns
-            cleaned = cleaned
-                .replace(/PRESSÃO/g, 'PRESSAO')
-                .replace(/VÁCUO/g, 'VACUO')
-                .replace(/CAMINHÃO/g, 'CAMINHAO')
-                .replace(/REDUÇÕES/g, 'REDUCOES')
-                .replace(/ASPIRAÇÃO/g, 'ASPIRACAO')
-                .replace(/SUCÇÃO/g, 'SUCCAO')
-                .replace(/AÇÃO/g, 'ACAO')
-                .replace(/OPERAÇÃO/g, 'OPERACAO')
-                .replace(/MANUTENÇÃO/g, 'MANUTENCAO')
-                .replace(/SITUAÇÃO/g, 'SITUACAO')
-                .replace(/INFORMAÇÃO/g, 'INFORMACAO')
-                
-            // Limpar caracteres UTF-8 mal formados
-            cleaned = cleaned
-                .replace(/[\u0080-\u00FF]/g, '') // Remove caracteres estendidos
-                .replace(/\uFFFD/g, '')          // Remove caracteres de substituição
+                // Remover APENAS caracteres de controle e substituição Unicode inválidos
+                .replace(/[\u0000-\u001F\u007F-\u009F]/g, '') // Remove caracteres de controle
+                .replace(/\uFFFD/g, '')  // Remove caractere de substituição
                 .trim();
-                
+            
             return cleaned;
         }
 
@@ -1829,16 +2078,16 @@
                 'Matuzalem' 
             ],
             vagas: [
-                'ALTA PRESSAO - GPS - 01 - 24 HS',
-                'ALTA PRESSAO - GPS - 02',
-                'ALTA PRESSAO - GPS - 03',
-                'ALTA PRESSAO - GPS - 04',
-                'ALTA PRESSAO - GPS - 05',
-                'ALTA PRESSAO - GPS - 06',
-                'ALTA PRESSAO - GPS - 07 - 16 HS',
-                'ALTA PRESSAO - GPS - 08 - 24 HS',
-                'ALTA PRESSAO - GPS - 09',
-                'ALTA PRESSAO - GPS - 10',
+                'ALTA PRESSÃO - GPS - 01 - 24 HS',
+                'ALTA PRESSÃO - GPS - 02',
+                'ALTA PRESSÃO - GPS - 03',
+                'ALTA PRESSÃO - GPS - 04',
+                'ALTA PRESSÃO - GPS - 05',
+                'ALTA PRESSÃO - GPS - 06',
+                'ALTA PRESSÃO - GPS - 07 - 16 HS',
+                'ALTA PRESSÃO - GPS - 08 - 24 HS',
+                'ALTA PRESSÃO - GPS - 09',
+                'ALTA PRESSÃO - GPS - 10',
                 'ASPIRADOR INDUSTRIAL - GPS - 01',
                 'ASPIRADOR INDUSTRIAL - GPS - 02',
                 'ASPIRADOR INDUSTRIAL - GPS - 03',
@@ -1850,32 +2099,32 @@
                 'ASPIRADOR INDUSTRIAL - GPS - 09',
                 'ASPIRADOR INDUSTRIAL - GPS - 10',
                 'ASPIRADOR INDUSTRIAL - GPS - SPOT',
-                'AUTO VACUO - GPS - 01 - 16 HS',
-                'AUTO VACUO - GPS - 02 - 16 HS',
-                'AUTO VACUO - GPS - 03',
-                'AUTO VACUO - GPS - 04',
-                'AUTO VACUO - GPS - 05',
-                'AUTO VACUO - GPS - 06',
-                'AUTO VACUO - GPS - 07 - 16 HS',
-                'AUTO VACUO - GPS - 08 - 24 HS',
-                'CAMINHAO BROOK - GPS - 01',
-                'CAMINHAO BROOK - GPS - 02',
-                'CAMINHAO BROOK - GPS - 03',
-                'HIPER VACUO - GPS - 01',
-                'HIPER VACUO - GPS - 02'
+                'AUTO VÁCUO - GPS - 01 - 16 HS',
+                'AUTO VÁCUO - GPS - 02 - 16 HS',
+                'AUTO VÁCUO - GPS - 03',
+                'AUTO VÁCUO - GPS - 04',
+                'AUTO VÁCUO - GPS - 05',
+                'AUTO VÁCUO - GPS - 06',
+                'AUTO VÁCUO - GPS - 07 - 16 HS',
+                'AUTO VÁCUO - GPS - 08 - 24 HS',
+                'CAMINHÃO BROOK - GPS - 01',
+                'CAMINHÃO BROOK - GPS - 02',
+                'CAMINHÃO BROOK - GPS - 03',
+                'HIPER VÁCUO - GPS - 01',
+                'HIPER VÁCUO - GPS - 02'
             ],
             equipamentos: {
-                'Alta Pressao': [
+                'Alta Pressão': [
                     'EZC-0453', 'DSY-6474', 'DSY-6475', 'EAM-3253', 'EAM-3255', 'EAM-3256', 'EAM-3262',
                     'EGC-2978', 'EGC-2985', 'EGC-2983', 'EGC-2986', 'FLX-7616', 'FLX-7617', 'GVB-2102',
                     'EZS-9784', 'JUX-3201', 'PUB-2502', 'PUB-2780'
                 ],
-                'Auto Vacuo': [
+                'Auto Vácuo': [
                     'ANF-5922', 'ANF-2876', 'CUB-0763', 'DSY-6473', 'DSY-6577', 'DYS-7210', 'EAM-3251',
                     'EAM-3257', 'EGC-2979', 'EGC-2953', 'EGC-3071', 'HDS-1097', 'EZS-9753', 'EZS-9924',
                     'EHD-9264', 'FMD-2200', 'FTD-6358', 'FTW-4999', 'GAJ-1204'
                 ],
-                'Hiper Vacuo': [
+                'Hiper Vácuo': [
                     'HVX-1001', 'HVX-1002', 'HVX-1003', 'HVX-1004', 'HVX-1005'
                 ]
             }
@@ -1901,7 +2150,7 @@
             },
             'Auto Vacuo / Hiper Vacuo': {
                 'Mangotes': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
-                'Reducoes': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
+                'Reduções': { type: 'select', options: ['N/A', 'OK', 'Falta'] },
                 'Mangotes 3"': { 
                     type: 'select', 
                     options: ['N/A', '10 metros', '20 metros', '30 metros', '40 metros', '50 metros', 
@@ -2002,18 +2251,18 @@
         }
 
         function setupEventListeners() {
-            // Fechar modais ao clicar fora
+            // Fechar modais ao clicar fora - COM CONFIRMAÇÃO
             document.addEventListener('click', (e) => {
                 if (e.target.classList.contains('modal')) {
-                    e.target.classList.remove('show');
+                    confirmCloseModal(e.target.id);
                 }
             });
 
-            // Atalhos de teclado
+            // Atalhos de teclado - COM CONFIRMAÇÃO
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape') {
                     document.querySelectorAll('.modal.show').forEach(modal => {
-                        modal.classList.remove('show');
+                        confirmCloseModal(modal.id);
                     });
                 }
             });
@@ -2086,8 +2335,557 @@
                 document.getElementById('equipeEquipamentoOutro').value = '';
             }
         }
+        
+        // --- INÍCIO: Funções da Implementação ---
 
-        // CARREGAMENTO DE DADOS - CORRIGIDO
+        // 1. Funções do Teste de Etilômetro
+        function toggleEtilometroAusencias() {
+            const etilometroRealizado = document.querySelector('input[name="etilometroRealizado"]:checked').value;
+            const container = document.getElementById('etilometroAusenciasContainer');
+            
+            if (etilometroRealizado === 'Não') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                // Limpar lista de ausências se todos realizaram
+                document.getElementById('listaAusenciasEtilometro').innerHTML = `
+                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                        Nenhuma ausência registrada. Se houver ausências, clique em "Adicionar Colaborador".
+                    </p>
+                `;
+            }
+        }
+
+        function adicionarAusenciaEtilometro() {
+            const lista = document.getElementById('listaAusenciasEtilometro');
+            
+            if (lista.innerHTML.includes('Nenhuma ausência')) {
+                lista.innerHTML = '';
+            }
+            
+            const index = lista.children.length;
+            const ausenciaHtml = `
+                <div class="troca-item" id="ausenciaEtilometro_${index}" style="background: white;">
+                    <div class="troca-header">
+                        <h6 class="troca-title">Colaborador ${index + 1}</h6>
+                        <button type="button" class="btn-remove-troca" onclick="removerAusenciaEtilometro(${index})">Remover</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Nome do Colaborador *</label>
+                            <input type="text" name="ausenciaEtilometro_nome_${index}" class="form-input" required placeholder="Nome completo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Motivo da Ausência *</label>
+                            <select name="ausenciaEtilometro_motivo_${index}" class="form-select" required>
+                                <option value="">Selecione o motivo...</option>
+                                <option value="Afastamento Médico">Afastamento Médico</option>
+                                <option value="Atestado">Atestado</option>
+                                <option value="Falta Justificada">Falta Justificada</option>
+                                <option value="Falta Não Justificada">Falta Não Justificada</option>
+                                <option value="Férias">Férias</option>
+                                <option value="Chegou Após Teste">Chegou Após o Teste</option>
+                                <option value="Recusou Realizar">Recusou Realizar o Teste</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observações Adicionais</label>
+                        <textarea name="ausenciaEtilometro_obs_${index}" class="form-textarea" rows="2" placeholder="Detalhes adicionais sobre a ausência..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            lista.innerHTML += ausenciaHtml;
+        }
+
+        function removerAusenciaEtilometro(index) {
+            const ausenciaElement = document.getElementById(`ausenciaEtilometro_${index}`);
+            if (ausenciaElement) {
+                ausenciaElement.remove();
+                
+                const lista = document.getElementById('listaAusenciasEtilometro');
+                if (lista.children.length === 0) {
+                    lista.innerHTML = `
+                        <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                            Nenhuma ausência registrada. Se houver ausências, clique em "Adicionar Colaborador".
+                        </p>
+                    `;
+                }
+            }
+        }
+
+        function coletarDadosEtilometro() {
+            const etilometroRealizado = document.querySelector('input[name="etilometroRealizado"]:checked').value;
+            const horario = document.getElementById('horarioEtilometro').value;
+            const observacoes = document.getElementById('observacoesEtilometro').value;
+            
+            const dadosEtilometro = {
+                realizado: etilometroRealizado === 'Sim',
+                horarioTeste: horario,
+                responsavel: document.getElementById('supervisorTurno').value,
+                observacoes: observacoes,
+                colaboradoresAusentes: []
+            };
+            
+            if (etilometroRealizado === 'Não') {
+                const lista = document.getElementById('listaAusenciasEtilometro');
+                const ausencias = lista.querySelectorAll('.troca-item');
+                
+                ausencias.forEach((item, index) => {
+                    const nome = item.querySelector(`[name="ausenciaEtilometro_nome_${index}"]`)?.value;
+                    const motivo = item.querySelector(`[name="ausenciaEtilometro_motivo_${index}"]`)?.value;
+                    const obs = item.querySelector(`[name="ausenciaEtilometro_obs_${index}"]`)?.value;
+                    
+                    if (nome && motivo) {
+                        dadosEtilometro.colaboradoresAusentes.push({
+                            nome: nome,
+                            motivo: motivo,
+                            observacao: obs
+                        });
+                    }
+                });
+            }
+            
+            return dadosEtilometro;
+        }
+
+        // 2. Funções de Gestão de Faltas
+        function toggleFaltasContainer() {
+            const houveFaltas = document.querySelector('input[name="houveFaltas"]:checked').value;
+            const container = document.getElementById('faltasContainer');
+            
+            if (houveFaltas === 'Sim') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('listaFaltas').innerHTML = `
+                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                        Nenhuma falta registrada. Clique em "Registrar Falta" para adicionar.
+                    </p>
+                `;
+            }
+        }
+
+        function adicionarFalta() {
+            const lista = document.getElementById('listaFaltas');
+            
+            if (lista.innerHTML.includes('Nenhuma falta')) {
+                lista.innerHTML = '';
+            }
+            
+            const index = lista.children.length;
+            const faltaHtml = `
+                <div class="troca-item" id="falta_${index}" style="background: white; border-left: 4px solid var(--danger-color);">
+                    <div class="troca-header">
+                        <h6 class="troca-title">Falta ${index + 1}</h6>
+                        <button type="button" class="btn-remove-troca" onclick="removerFalta(${index})">Remover</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Nome do Colaborador *</label>
+                            <input type="text" name="falta_nome_${index}" class="form-input" required placeholder="Nome completo do colaborador">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Função/Cargo *</label>
+                            <select name="falta_funcao_${index}" class="form-select" required>
+                                <option value="">Selecione a função...</option>
+                                <option value="Motorista">Motorista</option>
+                                <option value="Operador">Operador</option>
+                                <option value="Auxiliar">Auxiliar</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Motivo da Falta *</label>
+                            <select name="falta_motivo_${index}" class="form-select" required>
+                                <option value="">Selecione o motivo...</option>
+                                <option value="Atestado Médico">Atestado Médico</option>
+                                <option value="Doença">Doença</option>
+                                <option value="Questões Familiares">Questões Familiares</option>
+                                <option value="Acidente">Acidente</option>
+                                <option value="Problemas Pessoais">Problemas Pessoais</option>
+                                <option value="Falta Não Justificada">Falta Não Justificada</option>
+                                <option value="Férias">Férias</option>
+                                <option value="Licença">Licença</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Falta Justificada? *</label>
+                            <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                                <div class="form-radio">
+                                    <input type="radio" name="falta_justificada_${index}" value="Sim" checked>
+                                    <label>Sim</label>
+                                </div>
+                                <div class="form-radio">
+                                    <input type="radio" name="falta_justificada_${index}" value="Não">
+                                    <label>Não</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--info-color); color: white; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label" style="color: white;">Houve substituição deste colaborador? *</label>
+                            <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                                <div class="form-radio">
+                                    <input type="radio" name="falta_substituicao_${index}" value="Sim" onchange="toggleSubstituto(${index})">
+                                    <label style="color: white;">Sim</label>
+                                </div>
+                                <div class="form-radio">
+                                    <input type="radio" name="falta_substituicao_${index}" value="Não" checked onchange="toggleSubstituto(${index})">
+                                    <label style="color: white;">Não</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="substitutoContainer_${index}" class="hidden" style="margin-top: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label" style="color: white;">Nome do Substituto *</label>
+                                <input type="text" name="falta_substituto_${index}" class="form-input" placeholder="Nome completo do substituto">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observações Adicionais</label>
+                        <textarea name="falta_observacoes_${index}" class="form-textarea" rows="2" placeholder="Detalhes adicionais sobre a falta ou substituição..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            lista.innerHTML += faltaHtml;
+        }
+
+        function removerFalta(index) {
+            const faltaElement = document.getElementById(`falta_${index}`);
+            if (faltaElement) {
+                faltaElement.remove();
+                
+                const lista = document.getElementById('listaFaltas');
+                if (lista.children.length === 0) {
+                    lista.innerHTML = `
+                        <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                            Nenhuma falta registrada. Clique em "Registrar Falta" para adicionar.
+                        </p>
+                    `;
+                }
+            }
+        }
+
+        function toggleSubstituto(index) {
+            const houveSubstituicao = document.querySelector(`input[name="falta_substituicao_${index}"]:checked`).value;
+            const container = document.getElementById(`substitutoContainer_${index}`);
+            
+            if (houveSubstituicao === 'Sim') {
+                container.classList.remove('hidden');
+                container.querySelector('input').required = true;
+            } else {
+                container.classList.add('hidden');
+                container.querySelector('input').required = false;
+                container.querySelector('input').value = '';
+            }
+        }
+
+        function coletarDadosFaltas() {
+            const houveFaltas = document.querySelector('input[name="houveFaltas"]:checked').value;
+            
+            const dadosFaltas = {
+                houveFaltas: houveFaltas === 'Sim',
+                faltas: []
+            };
+            
+            if (houveFaltas === 'Sim') {
+                const lista = document.getElementById('listaFaltas');
+                const faltas = lista.querySelectorAll('.troca-item');
+                
+                faltas.forEach((item, index) => {
+                    const nome = item.querySelector(`[name="falta_nome_${index}"]`)?.value;
+                    const funcao = item.querySelector(`[name="falta_funcao_${index}"]`)?.value;
+                    const motivo = item.querySelector(`[name="falta_motivo_${index}"]`)?.value;
+                    const justificada = item.querySelector(`input[name="falta_justificada_${index}"]:checked`)?.value;
+                    const houveSubstituicao = item.querySelector(`input[name="falta_substituicao_${index}"]:checked`)?.value;
+                    const substituto = item.querySelector(`[name="falta_substituto_${index}"]`)?.value;
+                    const observacoes = item.querySelector(`[name="falta_observacoes_${index}"]`)?.value;
+                    
+                    if (nome && funcao && motivo) {
+                        dadosFaltas.faltas.push({
+                            nomeColaborador: nome,
+                            funcao: funcao,
+                            motivo: motivo,
+                            justificada: justificada === 'Sim',
+                            houveSubstituicao: houveSubstituicao === 'Sim',
+                            nomeSubstituto: substituto || null,
+                            observacoes: observacoes
+                        });
+                    }
+                });
+            }
+            
+            return dadosFaltas;
+        }
+
+        // 3. Funções de Múltiplos Turnos
+        function toggleRegimeTurno() {
+            const regime = document.querySelector('input[name="regimeTrabalho"]:checked').value;
+            const turnoUnicoFields = document.getElementById('turnoUnicoFields');
+            const multiTurnoFields = document.getElementById('multiTurnoFields');
+            const infoMultiTurno = document.getElementById('infoMultiTurno');
+            
+            if (regime === 'turno-unico') {
+                turnoUnicoFields.classList.remove('hidden');
+                multiTurnoFields.classList.add('hidden');
+                infoMultiTurno.classList.add('hidden');
+                
+                document.getElementById('turnosTrabalhoContainer').innerHTML = `
+                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                        Clique em "+ Adicionar Turno" para registrar o primeiro turno de trabalho.
+                    </p>
+                `;
+            } else {
+                turnoUnicoFields.classList.add('hidden');
+                multiTurnoFields.classList.remove('hidden');
+                infoMultiTurno.classList.remove('hidden');
+                
+                document.getElementById('equipeMotorista').value = '';
+                document.getElementById('equipeOperadores').value = '';
+            }
+        }
+
+        function adicionarTurnoTrabalho() {
+            const container = document.getElementById('turnosTrabalhoContainer');
+            
+            if (container.innerHTML.includes('Clique em')) {
+                container.innerHTML = '';
+            }
+            
+            const index = container.children.length;
+            
+            const horariosComuns = [
+                { inicio: '07:00', fim: '15:00', label: '07:00 - 15:00 (Turno Manhã)' },
+                { inicio: '15:00', fim: '23:00', label: '15:00 - 23:00 (Turno Tarde)' },
+                { inicio: '23:00', fim: '07:00', label: '23:00 - 07:00 (Turno Noite)' },
+                { inicio: '07:00', fim: '19:00', label: '07:00 - 19:00 (Turno 12h Dia)' },
+                { inicio: '19:00', fim: '07:00', label: '19:00 - 07:00 (Turno 12h Noite)' }
+            ];
+            
+            const turnoHtml = `
+                <div class="troca-item" id="turnoTrabalho_${index}" style="background: white; border-left: 4px solid var(--primary-color);">
+                    <div class="troca-header">
+                        <h6 class="troca-title">⏰ Turno ${index + 1}</h6>
+                        <button type="button" class="btn-remove-troca" onclick="removerTurnoTrabalho(${index})">Remover</button>
+                    </div>
+                    
+                    <div style="background: var(--gray-50); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                        <div class="form-group" style="margin-bottom: 1rem;">
+                            <label class="form-label">Período Pré-definido (opcional)</label>
+                            <select class="form-select" onchange="preencherHorarioTurno(${index}, this.value)">
+                                <option value="">Selecione um período comum ou preencha manualmente...</option>
+                                ${horariosComuns.map((h, i) => `
+                                    <option value="${i}">${h.label}</option>
+                                `).join('')}
+                                <option value="custom">Personalizado (preencher manualmente)</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">Horário Início *</label>
+                                <input type="time" name="turno_inicio_${index}" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Horário Fim *</label>
+                                <input type="time" name="turno_fim_${index}" class="form-input" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Motorista do Turno *</label>
+                            <input type="text" name="turno_motorista_${index}" class="form-input" required placeholder="Nome do motorista deste turno">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Operador(es) do Turno *</label>
+                            <textarea name="turno_operadores_${index}" class="form-textarea" required placeholder="Nome dos operadores deste turno" rows="2"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observações deste Turno</label>
+                        <textarea name="turno_observacoes_${index}" class="form-textarea" rows="2" placeholder="Observações específicas deste período..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML += turnoHtml;
+        }
+
+        function preencherHorarioTurno(index, optionValue) {
+            if (!optionValue || optionValue === 'custom') return;
+            
+            const horariosComuns = [
+                { inicio: '07:00', fim: '15:00' },
+                { inicio: '15:00', fim: '23:00' },
+                { inicio: '23:00', fim: '07:00' },
+                { inicio: '07:00', fim: '19:00' },
+                { inicio: '19:00', fim: '07:00' }
+            ];
+            
+            const horario = horariosComuns[parseInt(optionValue)];
+            if (horario) {
+                document.querySelector(`[name="turno_inicio_${index}"]`).value = horario.inicio;
+                document.querySelector(`[name="turno_fim_${index}"]`).value = horario.fim;
+            }
+        }
+
+        function removerTurnoTrabalho(index) {
+            const turnoElement = document.getElementById(`turnoTrabalho_${index}`);
+            if (turnoElement) {
+                turnoElement.remove();
+                
+                const container = document.getElementById('turnosTrabalhoContainer');
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                        <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                            Clique em "+ Adicionar Turno" para registrar o primeiro turno de trabalho.
+                        </p>
+                    `;
+                }
+            }
+        }
+        
+        // 4. Funções de Equipamentos Devendo
+        function toggleEquipamentosDevendo() {
+            const ficouDevendo = document.querySelector('input[name="equipamentosDevendo"]:checked').value;
+            const container = document.getElementById('equipamentosDevendoContainer');
+            
+            if (ficouDevendo === 'Sim') {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+                document.getElementById('listaEquipamentosDevendo').innerHTML = `
+                    <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                        Nenhum equipamento registrado. Clique em "+ Adicionar Equipamento".
+                    </p>
+                `;
+            }
+        }
+
+        function adicionarEquipamentoDevendo() {
+            const lista = document.getElementById('listaEquipamentosDevendo');
+            
+            if (lista.innerHTML.includes('Nenhum equipamento')) {
+                lista.innerHTML = '';
+            }
+            
+            const index = lista.children.length;
+            const equipamentoHtml = `
+                <div class="troca-item" id="equipamentoDevendo_${index}" style="background: white; border-left: 4px solid var(--danger-color);">
+                    <div class="troca-header">
+                        <h6 class="troca-title">Equipamento ${index + 1}</h6>
+                        <button type="button" class="btn-remove-troca" onclick="removerEquipamentoDevendo(${index})">Remover</button>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Vaga/Equipamento *</label>
+                            <select name="equipamentoDevendo_vaga_${index}" class="form-select" required>
+                                <option value="">Selecione a vaga...</option>
+                                ${(systemData.vagas || DEFAULT_SYSTEM_DATA.vagas).map(vaga => 
+                                    `<option value="${sanitizeText(vaga)}">${sanitizeText(vaga)}</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Motivo *</label>
+                            <select name="equipamentoDevendo_motivo_${index}" class="form-select" required>
+                                <option value="">Selecione o motivo...</option>
+                                <option value="Falta de Equipamento">Falta de Equipamento</option>
+                                <option value="Falta de Mão de Obra">Falta de Mão de Obra</option>
+                                <option value="Equipamento em Manutenção">Equipamento em Manutenção</option>
+                                <option value="Falta de Motorista">Falta de Motorista</option>
+                                <option value="Falta de Operador">Falta de Operador</option>
+                                <option value="Outros">Outros</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Observações/Detalhes *</label>
+                        <textarea name="equipamentoDevendo_obs_${index}" class="form-textarea" required rows="2" placeholder="Detalhe o que faltou e outras informações relevantes..."></textarea>
+                    </div>
+                </div>
+            `;
+            
+            lista.innerHTML += equipamentoHtml;
+        }
+
+        function removerEquipamentoDevendo(index) {
+            const elemento = document.getElementById(`equipamentoDevendo_${index}`);
+            if (elemento) {
+                elemento.remove();
+                
+                const lista = document.getElementById('listaEquipamentosDevendo');
+                if (lista.children.length === 0) {
+                    lista.innerHTML = `
+                        <p style="color: var(--gray-500); text-align: center; font-style: italic;">
+                            Nenhum equipamento registrado. Clique em "+ Adicionar Equipamento".
+                        </p>
+                    `;
+                }
+            }
+        }
+
+        function coletarDadosEquipamentosDevendo() {
+            const ficouDevendo = document.querySelector('input[name="equipamentosDevendo"]:checked').value;
+            
+            const dadosDevendo = {
+                ficouDevendo: ficouDevendo === 'Sim',
+                equipamentos: []
+            };
+            
+            if (ficouDevendo === 'Sim') {
+                const lista = document.getElementById('listaEquipamentosDevendo');
+                const equipamentos = lista.querySelectorAll('.troca-item');
+                
+                equipamentos.forEach((item, index) => {
+                    const vaga = item.querySelector(`[name="equipamentoDevendo_vaga_${index}"]`)?.value;
+                    const motivo = item.querySelector(`[name="equipamentoDevendo_motivo_${index}"]`)?.value;
+                    const obs = item.querySelector(`[name="equipamentoDevendo_obs_${index}"]`)?.value;
+                    
+                    if (vaga && motivo && obs) {
+                        dadosDevendo.equipamentos.push({
+                            vaga: vaga,
+                            motivo: motivo,
+                            observacoes: obs
+                        });
+                    }
+                });
+            }
+            
+            return dadosDevendo;
+        }
+        
+        // --- FIM: Funções da Implementação ---
+
+        // CARREGAMENTO DE DADOS
         async function loadAllDataFromGitHub() {
             if (!GITHUB_CONFIG.token) {
                 throw new Error('Token do GitHub não configurado');
@@ -2110,86 +2908,46 @@
                     getDataFromGitHub('equipamentos')
                 ]);
                 
-                // CORREÇÃO: Tratar dados de relatórios corretamente
-                console.log('🔍 Debug: Dados brutos de relatórios:', relatoriosData, typeof relatoriosData);
-                
                 if (relatoriosData === null || relatoriosData === undefined) {
                     relatorios = [];
-                    console.log('📝 Relatórios: arquivo não existe ainda, iniciando com array vazio');
                 } else if (Array.isArray(relatoriosData)) {
                     relatorios = relatoriosData;
-                    console.log('📝 Relatórios: array válido carregado com', relatorios.length, 'itens');
                 } else if (typeof relatoriosData === 'object') {
-                    // Verificar se é um object com metadados (_lastUpdate, etc)
                     if (Array.isArray(relatoriosData.data)) {
                         relatorios = relatoriosData.data;
-                        console.log('📝 Relatórios: extraindo array da propriedade .data com', relatorios.length, 'itens');
                     } else if (relatoriosData._lastUpdate && Array.isArray(relatoriosData.relatorios)) {
                         relatorios = relatoriosData.relatorios;
-                        console.log('📝 Relatórios: extraindo array da propriedade .relatorios com', relatorios.length, 'itens');
                     } else {
-                        // Tentar extrair qualquer array do objeto
                         const possibleArrays = Object.values(relatoriosData).filter(val => Array.isArray(val));
-                        if (possibleArrays.length > 0) {
-                            relatorios = possibleArrays[0];
-                            console.log('📝 Relatórios: encontrado array em propriedade do objeto com', relatorios.length, 'itens');
-                        } else {
-                            // Verificar se o objeto tem propriedades que parecem relatórios
-                            const keys = Object.keys(relatoriosData).filter(key => !key.startsWith('_'));
-                            if (keys.length > 0) {
-                                relatorios = keys.map(key => relatoriosData[key]).filter(item => item && typeof item === 'object');
-                                console.log('📝 Relatórios: convertendo propriedades do objeto em array com', relatorios.length, 'itens');
-                            } else {
-                                relatorios = [];
-                                console.log('📝 Relatórios: objeto sem dados válidos, usando array vazio');
-                            }
-                        }
+                        relatorios = possibleArrays.length > 0 ? possibleArrays[0] : [];
                     }
                 } else {
                     relatorios = [];
-                    console.warn('📝 Relatórios: formato não reconhecido, usando array vazio');
                 }
                 
-                // Garantir que relatorios seja sempre um array válido
                 if (!Array.isArray(relatorios)) {
-                    console.warn('🚨 Forçando relatorios a ser array. Era:', typeof relatorios);
                     relatorios = [];
                 }
                 
-                // SANITIZAR DADOS CARREGADOS
                 relatorios = sanitizeObject(relatorios);
                 configuracoes = sanitizeObject(configuracoes || {});
                 
-                // SANITIZAR E VALIDAR DADOS DO SISTEMA
                 let systemDataTemp = {
                     supervisores: supervisoresData || DEFAULT_SYSTEM_DATA.supervisores,
                     vagas: vagasData || DEFAULT_SYSTEM_DATA.vagas,
                     equipamentos: equipamentosData || DEFAULT_SYSTEM_DATA.equipamentos
                 };
                 
-                // Aplicar sanitização nos dados do sistema
                 systemDataTemp = sanitizeObject(systemDataTemp);
                 
-                // Verificar se dados estão corrompidos e usar padrões limpos se necessário
-                if (systemDataTemp.vagas && systemDataTemp.vagas.length > 0) {
-                    const primeiraVaga = systemDataTemp.vagas[0];
-                    if (primeiraVaga.includes('\\x') || primeiraVaga.includes('Ã')) {
-                        console.warn('🧹 Dados corrompidos detectados, usando dados padrão limpos');
-                        systemDataTemp = sanitizeObject(DEFAULT_SYSTEM_DATA);
-                    }
+                if (systemDataTemp.vagas && systemDataTemp.vagas.length > 0 && (systemDataTemp.vagas[0].includes('\\x') || systemDataTemp.vagas[0].includes('Ã'))) {
+                    systemDataTemp = sanitizeObject(DEFAULT_SYSTEM_DATA);
                 }
                 
                 systemData = systemDataTemp;
                 
                 updateSyncStatus('success', 'Dados atualizados');
                 updateInterface();
-                
-                console.log('✅ Dados carregados do GitHub:', {
-                    relatorios: relatorios.length,
-                    configuracoes: Object.keys(configuracoes).length,
-                    tipoRelatorios: typeof relatorios,
-                    isArrayRelatorios: Array.isArray(relatorios)
-                });
                 
             } catch (error) {
                 updateSyncStatus('error', 'Erro ao carregar');
@@ -2213,13 +2971,7 @@
                     const fileData = await response.json();
                     const content = atob(fileData.content);
                     let parsedData = JSON.parse(content);
-                    
-                    // APLICAR SANITIZAÇÃO NOS DADOS CARREGADOS
                     parsedData = sanitizeObject(parsedData);
-                    
-                    // Log para debug
-                    console.log(`📁 Dados carregados e sanitizados do GitHub (${dataType}):`, parsedData);
-                    
                     return parsedData;
                 } else if (response.status === 404) {
                     console.warn(`Arquivo ${path} não encontrado. Será criado na próxima salvação.`);
@@ -2241,13 +2993,9 @@
             const path = GITHUB_CONFIG.paths[dataType];
             
             try {
-                // Obter SHA atual do arquivo
                 let sha = null;
                 const getResponse = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`, {
-                    headers: { 
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json' 
-                    }
+                    headers: { 'Authorization': `token ${GITHUB_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
 
                 if (getResponse.ok) {
@@ -2255,25 +3003,14 @@
                     sha = fileData.sha;
                 }
 
-                // SANITIZAR DADOS ANTES DE SALVAR
-                let dataToSave;
-                if (dataType === 'relatorios') {
-                    // Salvar apenas o array de relatórios sanitizado
-                    dataToSave = sanitizeObject(data);
-                } else {
-                    // Para outros tipos, manter metadados mas sanitizar conteúdo
-                    const sanitizedData = sanitizeObject(data);
-                    dataToSave = {
-                        ...sanitizedData,
-                        _lastUpdate: new Date().toISOString(),
-                        _updatedBy: currentUser
-                    };
-                }
-
-                console.log(`💾 Salvando dados sanitizados (${dataType}):`, dataToSave);
+                let dataToSave = (dataType === 'relatorios') ? sanitizeObject(data) : { ...sanitizeObject(data), _lastUpdate: new Date().toISOString(), _updatedBy: currentUser };
 
                 const jsonContent = JSON.stringify(dataToSave, null, 2);
-                const base64Content = btoa(unescape(encodeURIComponent(jsonContent)));
+                const encoder = new TextEncoder();
+                const utf8Bytes = encoder.encode(jsonContent);
+                let binary = '';
+                utf8Bytes.forEach(byte => binary += String.fromCharCode(byte));
+                const base64Content = btoa(binary);
                 
                 const body = {
                     message: `${sha ? 'Atualizar' : 'Criar'} ${dataType} - ${new Date().toLocaleString('pt-BR')}`,
@@ -2281,17 +3018,11 @@
                     branch: GITHUB_CONFIG.branch
                 };
                 
-                if (sha) {
-                    body.sha = sha;
-                }
+                if (sha) body.sha = sha;
 
                 const response = await fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${path}`, {
                     method: 'PUT',
-                    headers: { 
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json' 
-                    },
+                    headers: { 'Authorization': `token ${GITHUB_CONFIG.token}`, 'Accept': 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
 
@@ -2300,7 +3031,6 @@
                     throw new Error(`Erro ${response.status}: ${errorData.message}`);
                 }
                 
-                console.log(`✅ ${dataType} salvo no GitHub com dados sanitizados`);
                 return await response.json();
 
             } catch (error) {
@@ -2333,28 +3063,17 @@
         }
 
         function showStep(step) {
-            // Ocultar todas as etapas
-            document.querySelectorAll('.step-content').forEach(content => {
-                content.style.display = 'none';
-            });
-            
-            // Mostrar etapa atual
+            document.querySelectorAll('.step-content').forEach(content => content.style.display = 'none');
             document.getElementById(`etapa${step}`).style.display = 'block';
-            
-            // Atualizar indicador
             updateStepIndicator(step);
-            
             currentStep = step;
         }
 
         function updateStepIndicator(step) {
             document.querySelectorAll('.step-item').forEach((item, index) => {
                 item.classList.remove('active', 'completed');
-                if (index + 1 < step) {
-                    item.classList.add('completed');
-                } else if (index + 1 === step) {
-                    item.classList.add('active');
-                }
+                if (index + 1 < step) item.classList.add('completed');
+                else if (index + 1 === step) item.classList.add('active');
             });
         }
 
@@ -2363,12 +3082,76 @@
             const horario = document.getElementById('horarioTurno').value;
             const letra = document.getElementById('letraTurno').value;
             const supervisor = document.getElementById('supervisorTurno').value;
+            const horarioEtilometro = document.getElementById('horarioEtilometro')?.value;
             
             if (!data || !horario || !letra || !supervisor) {
-                showNotification('Preencha todos os campos obrigatórios!', 'warning');
+                showNotification('⚠️ Preencha todos os campos obrigatórios básicos!', 'error');
                 return false;
             }
+            if (!horarioEtilometro) {
+                showNotification('⚠️ Informe o horário do teste de etilômetro!', 'error');
+                return false;
+            }
+
+            const etilometroRealizado = document.querySelector('input[name="etilometroRealizado"]:checked').value;
+            if (etilometroRealizado === 'Não') {
+                const ausencias = document.getElementById('listaAusenciasEtilometro').querySelectorAll('.troca-item');
+                if (ausencias.length === 0) {
+                    showNotification('⚠️ Você indicou que nem todos realizaram o teste de etilômetro.\n\nPor favor, registre QUAIS colaboradores não realizaram clicando em "+ Adicionar Colaborador".', 'error');
+                    return false;
+                }
+                let camposIncompletos = [];
+                ausencias.forEach((item, index) => {
+                    if (!item.querySelector(`[name="ausenciaEtilometro_nome_${index}"]`)?.value?.trim()) camposIncompletos.push(`Ausência ${index + 1}: Nome não informado`);
+                    if (!item.querySelector(`[name="ausenciaEtilometro_motivo_${index}"]`)?.value) camposIncompletos.push(`Ausência ${index + 1}: Motivo não selecionado`);
+                });
+                if (camposIncompletos.length > 0) {
+                    showNotification('⚠️ Campos incompletos no teste de etilômetro:\n\n' + camposIncompletos.join('\n'), 'error');
+                    return false;
+                }
+            }
+
+            const houveFaltas = document.querySelector('input[name="houveFaltas"]:checked').value;
+            if (houveFaltas === 'Sim') {
+                const faltas = document.getElementById('listaFaltas').querySelectorAll('.troca-item');
+                if (faltas.length === 0) {
+                    showNotification('⚠️ Você indicou que houve faltas de colaboradores.\n\nPor favor, registre AS FALTAS clicando em "+ Registrar Falta".', 'error');
+                    return false;
+                }
+                let camposIncompletos = [];
+                faltas.forEach((item, index) => {
+                    if (!item.querySelector(`[name="falta_nome_${index}"]`)?.value?.trim()) camposIncompletos.push(`Falta ${index + 1}: Nome do colaborador não informado`);
+                    if (!item.querySelector(`[name="falta_funcao_${index}"]`)?.value) camposIncompletos.push(`Falta ${index + 1}: Função não selecionada`);
+                    if (!item.querySelector(`[name="falta_motivo_${index}"]`)?.value) camposIncompletos.push(`Falta ${index + 1}: Motivo não selecionado`);
+                    if (item.querySelector(`input[name="falta_substituicao_${index}"]:checked`)?.value === 'Sim' && !item.querySelector(`[name="falta_substituto_${index}"]`)?.value?.trim()) {
+                        camposIncompletos.push(`Falta ${index + 1}: Nome do substituto não informado`);
+                    }
+                });
+                if (camposIncompletos.length > 0) {
+                    showNotification('⚠️ Campos incompletos nas faltas:\n\n' + camposIncompletos.join('\n'), 'error');
+                    return false;
+                }
+            }
             
+            const ficouDevendo = document.querySelector('input[name="equipamentosDevendo"]:checked').value;
+            if (ficouDevendo === 'Sim') {
+                const equipamentos = document.getElementById('listaEquipamentosDevendo').querySelectorAll('.troca-item');
+                if (equipamentos.length === 0) {
+                    showNotification('⚠️ Você indicou que ficaram equipamentos devendo.\n\nPor favor, registre OS EQUIPAMENTOS clicando em "+ Adicionar Equipamento".', 'error');
+                    return false;
+                }
+                let camposIncompletos = [];
+                equipamentos.forEach((item, index) => {
+                    if (!item.querySelector(`[name="equipamentoDevendo_vaga_${index}"]`)?.value) camposIncompletos.push(`Equipamento ${index + 1}: Vaga não selecionada`);
+                    if (!item.querySelector(`[name="equipamentoDevendo_motivo_${index}"]`)?.value) camposIncompletos.push(`Equipamento ${index + 1}: Motivo não selecionado`);
+                    if (!item.querySelector(`[name="equipamentoDevendo_obs_${index}"]`)?.value?.trim()) camposIncompletos.push(`Equipamento ${index + 1}: Observações não preenchidas`);
+                });
+                if (camposIncompletos.length > 0) {
+                    showNotification('⚠️ Campos incompletos em equipamentos devendo:\n\n' + camposIncompletos.join('\n'), 'error');
+                    return false;
+                }
+            }
+
             return true;
         }
 
@@ -2388,46 +3171,45 @@
                     letra: document.getElementById('letraTurno').value,
                     supervisor: document.getElementById('supervisorTurno').value
                 };
+                currentRelatorio.testeEtilometro = coletarDadosEtilometro();
+                currentRelatorio.faltasColaboradores = coletarDadosFaltas();
+                currentRelatorio.equipamentosDevendo = coletarDadosEquipamentosDevendo();
             }
         }
 
         // GESTÃO DE EQUIPES
         function adicionarEquipe(tipo) {
+            hasUnsavedChanges = false;
+            currentModalId = 'modalEquipe';
+            
             document.getElementById('modalEquipeTitle').textContent = `Adicionar Equipe - ${tipo}`;
             document.getElementById('equipeTipo').value = tipo;
             document.getElementById('equipeIndex').value = '-1';
             
-            // Gerar número automático da equipe - CORRIGIDO
             const numeroEquipe = gerarNumeroEquipe(tipo);
             document.getElementById('equipeNumero').value = numeroEquipe;
             
-            // Preencher opções baseadas no tipo
             populateEquipeOptions(tipo);
-            
-            // Limpar formulário
             clearEquipeForm();
-            
-            // Configurar implementos
             setupImplementos(tipo);
+
+            setTimeout(() => {
+                const form = document.getElementById('formEquipe');
+                form.addEventListener('input', () => {
+                    hasUnsavedChanges = true;
+                });
+            }, 100);
             
             document.getElementById('modalEquipe').classList.add('show');
         }
 
-        // CORREÇÃO: Geração automática e inteligente do número da equipe
         function gerarNumeroEquipe(tipo) {
             const equipesDoTipo = currentRelatorio.equipes.filter(e => e.tipo === tipo);
             const numero = equipesDoTipo.length + 1;
-            
-            const prefixos = {
-                'Alta Pressao': 'AP',
-                'Auto Vacuo / Hiper Vacuo': 'AV',
-                'Horas Extras': 'HE'
-            };
-            
+            const prefixos = { 'Alta Pressao': 'AP', 'Auto Vacuo / Hiper Vacuo': 'AV', 'Horas Extras': 'HE' };
             const dataAtual = new Date();
             const dia = dataAtual.getDate().toString().padStart(2, '0');
             const mes = (dataAtual.getMonth() + 1).toString().padStart(2, '0');
-            
             return `${prefixos[tipo]}-${dia}${mes}-${numero.toString().padStart(2, '0')}`;
         }
 
@@ -2435,28 +3217,18 @@
             const vagaSelect = document.getElementById('equipeVaga');
             const equipamentoSelect = document.getElementById('equipeEquipamento');
             
-            // Vagas - todas as vagas disponíveis para todos os tipos (SANITIZADAS)
             vagaSelect.innerHTML = '<option value="">Selecione a vaga...</option>';
             let vagas = systemData.vagas || DEFAULT_SYSTEM_DATA.vagas || [];
-            
-            // Sanitizar vagas antes de exibir
             vagas = sanitizeObject(vagas);
-            
             vagas.forEach(vaga => {
                 const vagaLimpa = sanitizeText(vaga);
                 vagaSelect.innerHTML += `<option value="${vagaLimpa}">${vagaLimpa}</option>`;
             });
             vagaSelect.innerHTML += '<option value="Outro">Outro (digite manualmente)</option>';
             
-            // Equipamentos - todos os equipamentos de todas as categorias (SANITIZADOS)
             equipamentoSelect.innerHTML = '<option value="">Selecione o equipamento...</option>';
-            
             let equipamentos = systemData.equipamentos || DEFAULT_SYSTEM_DATA.equipamentos;
-            
-            // Sanitizar equipamentos antes de exibir
             equipamentos = sanitizeObject(equipamentos);
-            
-            // Adicionar todas as categorias de equipamentos
             Object.keys(equipamentos).forEach(categoria => {
                 const categoriaLimpa = sanitizeText(categoria);
                 equipamentoSelect.innerHTML += `<optgroup label="${categoriaLimpa}">`;
@@ -2466,25 +3238,35 @@
                 });
                 equipamentoSelect.innerHTML += '</optgroup>';
             });
-            
             equipamentoSelect.innerHTML += '<option value="Outro">Outro (digite manualmente)</option>';
-            
-            console.log('🧹 Opções de equipamentos sanitizadas e carregadas');
         }
 
         function clearEquipeForm() {
+            const turnosContainer = document.getElementById('turnosTrabalhoContainer');
+            const turnosBackup = turnosContainer.innerHTML;
+            
             document.getElementById('formEquipe').reset();
+
+            const isMultiTurno = document.getElementById('multiTurno')?.checked;
+            if (isMultiTurno && !turnosBackup.includes('Clique em')) {
+                setTimeout(() => {
+                    turnosContainer.innerHTML = turnosBackup;
+                }, 50);
+            }
+            
             document.getElementById('pendenciaContainer').classList.add('hidden');
             document.getElementById('atrasoEquipeDetalhes').classList.add('hidden');
             document.getElementById('campoOutroVaga').classList.add('hidden');
             document.getElementById('campoOutroEquipamento').classList.add('hidden');
             document.getElementById('trocasContainer').innerHTML = '<p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>';
             
-            // Resetar controles de atraso
             document.getElementById('atrasoEquipeNao').checked = true;
             document.getElementById('horarioDirecionamento').value = '';
             document.getElementById('motivoAtrasoEquipe').value = '';
             document.getElementById('justificativaAtrasoEquipe').value = '';
+            
+            document.getElementById('turnoUnico').checked = true;
+            toggleRegimeTurno();
         }
 
         function setupImplementos(tipo) {
@@ -2497,67 +3279,12 @@
             }
             
             let html = '<div class="implementos-grid">';
-            
             for (const [nome, config] of Object.entries(implementos)) {
-                html += `
-                    <div class="implemento-item">
-                        <label>${nome}:</label>
-                        <select name="implemento_${nome.replace(/[^a-zA-Z0-9]/g, '_')}" class="form-select">
-                            ${config.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                        </select>
-                    </div>
-                `;
+                html += `<div class="implemento-item"><label>${nome}:</label><select name="implemento_${nome.replace(/[^a-zA-Z0-9]/g, '_')}" class="form-select">${config.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}</select></div>`;
             }
-            
             html += '</div>';
             
-            // Adicionar campos comuns
-            html += `
-                <div class="form-group" style="margin-top: 1rem;">
-                    <label class="form-label">Justificativa (se algum material em Falta):</label>
-                    <textarea name="justificativa_implementos" class="form-textarea" rows="2" placeholder="Descreva os motivos caso algum item esteja em falta..."></textarea>
-                </div>
-                
-                <div style="margin-top: 1.5rem;">
-                    <h6 style="margin-bottom: 1rem; color: var(--secondary-color);">Segurança</h6>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;">
-                        <div>
-                            <label class="form-label">Caixa Bloqueio:</label>
-                            <div style="display: flex; gap: 1rem;">
-                                <div class="form-radio">
-                                    <input type="radio" name="caixa_bloqueio" value="Sim">
-                                    <label>Sim</label>
-                                </div>
-                                <div class="form-radio">
-                                    <input type="radio" name="caixa_bloqueio" value="Não" checked>
-                                    <label>Não</label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Cadeados:</label>
-                            <select name="cadeados" class="form-select">
-                                <option value="N/A">N/A</option>
-                                <option value="Em Falta">Em Falta</option>
-                                ${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}
-                                <option value="Mais de 30">Mais de 30</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="form-label">Plaquetas:</label>
-                            <select name="plaquetas" class="form-select">
-                                <option value="N/A">N/A</option>
-                                <option value="Em Falta">Em Falta</option>
-                                ${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}
-                                <option value="Mais de 30">Mais de 30</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
+            html += `<div class="form-group" style="margin-top: 1rem;"><label class="form-label">Justificativa (se algum material em Falta):</label><textarea name="justificativa_implementos" class="form-textarea" rows="2" placeholder="Descreva os motivos caso algum item esteja em falta..."></textarea></div><div style="margin-top: 1.5rem;"><h6 style="margin-bottom: 1rem; color: var(--secondary-color);">Segurança</h6><div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;"><div><label class="form-label">Caixa Bloqueio:</label><div style="display: flex; gap: 1rem;"><div class="form-radio"><input type="radio" name="caixa_bloqueio" value="Sim"><label>Sim</label></div><div class="form-radio"><input type="radio" name="caixa_bloqueio" value="Não" checked><label>Não</label></div></div></div><div><label class="form-label">Cadeados:</label><select name="cadeados" class="form-select"><option value="N/A">N/A</option><option value="Em Falta">Em Falta</option>${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}<option value="Mais de 30">Mais de 30</option></select></div><div><label class="form-label">Plaquetas:</label><select name="plaquetas" class="form-select"><option value="N/A">N/A</option><option value="Em Falta">Em Falta</option>${Array.from({length: 31}, (_, i) => `<option value="${i}">${i}</option>`).join('')}<option value="Mais de 30">Mais de 30</option></select></div></div></div>`;
             container.innerHTML = html;
         }
 
@@ -2567,6 +3294,7 @@
             
             if (status === 'Concluído') {
                 container.classList.add('hidden');
+                document.getElementById('equipePendencia').required = false;
             } else {
                 container.classList.remove('hidden');
                 document.getElementById('equipePendencia').required = true;
@@ -2575,99 +3303,36 @@
 
         function adicionarTroca() {
             const container = document.getElementById('trocasContainer');
-            
-            // Se for a primeira troca, limpar mensagem
-            if (container.innerHTML.includes('Nenhuma troca registrada')) {
-                container.innerHTML = '';
-            }
-            
+            if (container.innerHTML.includes('Nenhuma troca registrada')) container.innerHTML = '';
             const trocaIndex = container.children.length;
-            const trocaHtml = `
-                <div class="troca-item" id="troca_${trocaIndex}">
-                    <div class="troca-header">
-                        <h6 class="troca-title">Troca ${trocaIndex + 1}</h6>
-                        <button type="button" class="btn-remove-troca" onclick="removerTroca(${trocaIndex})">Remover</button>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label">Motivo *</label>
-                            <select name="troca_motivo_${trocaIndex}" class="form-select" required>
-                                <option value="">Selecione o motivo...</option>
-                                <option value="Manutenção Preventiva">Manutenção Preventiva</option>
-                                <option value="Manutenção Corretiva">Manutenção Corretiva</option>
-                                <option value="Solicitação Do Cliente">Solicitação Do Cliente</option>
-                                <option value="Defeitos Em Geral">Defeitos Em Geral</option>
-                                <option value="Outros Motivos">Outros Motivos</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Nova Placa</label>
-                            <input type="text" name="troca_placa_${trocaIndex}" class="form-input" placeholder="AAA-0000">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Defeito / Medidas Tomadas *</label>
-                        <textarea name="troca_defeito_${trocaIndex}" class="form-textarea" required placeholder="Descreva o defeito encontrado e as medidas tomadas"></textarea>
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                        <div class="form-group">
-                            <label class="form-label">Data/Hora INÍCIO</label>
-                            <input type="datetime-local" name="troca_inicio_${trocaIndex}" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Data/Hora FIM</label>
-                            <input type="datetime-local" name="troca_fim_${trocaIndex}" class="form-input">
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            container.innerHTML += trocaHtml;
+            container.innerHTML += `<div class="troca-item" id="troca_${trocaIndex}"><div class="troca-header"><h6 class="troca-title">Troca ${trocaIndex + 1}</h6><button type="button" class="btn-remove-troca" onclick="removerTroca(${trocaIndex})">Remover</button></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div class="form-group"><label class="form-label">Motivo *</label><select name="troca_motivo_${trocaIndex}" class="form-select" required><option value="">Selecione...</option><option>Manutenção Preventiva</option><option>Manutenção Corretiva</option><option>Solicitação Do Cliente</option><option>Defeitos Em Geral</option><option>Outros Motivos</option></select></div><div class="form-group"><label class="form-label">Nova Placa</label><input type="text" name="troca_placa_${trocaIndex}" class="form-input" placeholder="AAA-0000"></div></div><div class="form-group"><label class="form-label">Defeito / Medidas Tomadas *</label><textarea name="troca_defeito_${trocaIndex}" class="form-textarea" required placeholder="Descreva o defeito e as medidas"></textarea></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;"><div class="form-group"><label class="form-label">Data/Hora INÍCIO</label><input type="datetime-local" name="troca_inicio_${trocaIndex}" class="form-input"></div><div class="form-group"><label class="form-label">Data/Hora FIM</label><input type="datetime-local" name="troca_fim_${trocaIndex}" class="form-input"></div></div></div>`;
         }
 
         function removerTroca(index) {
             const trocaElement = document.getElementById(`troca_${index}`);
             if (trocaElement) {
                 trocaElement.remove();
-                
                 const container = document.getElementById('trocasContainer');
-                if (container.children.length === 0) {
-                    container.innerHTML = '<p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>';
-                }
+                if (container.children.length === 0) container.innerHTML = '<p style="color: var(--gray-500); text-align: center; font-style: italic;">Nenhuma troca registrada</p>';
             }
         }
 
         function salvarEquipe(event) {
             event.preventDefault();
-            
-            if (!validateEquipeForm()) {
-                return;
-            }
-            
+            if (!validateEquipeForm()) return;
+            hasUnsavedChanges = false;
             const equipeData = collectEquipeData();
             const index = parseInt(document.getElementById('equipeIndex').value);
-            
-            if (index === -1) {
-                // Nova equipe
-                currentRelatorio.equipes.push(equipeData);
-            } else {
-                // Editar equipe
-                currentRelatorio.equipes[index] = equipeData;
-            }
-            
+            if (index === -1) currentRelatorio.equipes.push(equipeData);
+            else currentRelatorio.equipes[index] = equipeData;
             updateTeamsDisplay();
             closeModal('modalEquipe');
             showNotification('Equipe salva com sucesso!', 'success');
         }
 
         function validateEquipeForm() {
-            const required = document.querySelectorAll('#formEquipe [required]');
+            const required = document.querySelectorAll('#formEquipe [required]:not(.hidden [required])');
             let valid = true;
-            
             required.forEach(field => {
                 if (!field.value.trim()) {
                     field.style.borderColor = 'var(--danger-color)';
@@ -2676,21 +3341,22 @@
                     field.style.borderColor = 'var(--gray-200)';
                 }
             });
-            
-            if (!valid) {
-                showNotification('Preencha todos os campos obrigatórios!', 'warning');
+            const regime = document.querySelector('input[name="regimeTrabalho"]:checked').value;
+            if (regime === 'multi-turno') {
+                const turnos = document.getElementById('turnosTrabalhoContainer').querySelectorAll('.troca-item');
+                if (turnos.length === 0) {
+                    showNotification('⚠️ No modo Múltiplos Turnos, você deve adicionar pelo menos um turno!', 'error');
+                    return false;
+                }
             }
-            
+            if (!valid) showNotification('Preencha todos os campos obrigatórios!', 'warning');
             return valid;
         }
 
         function collectEquipeData() {
-            // Coletar dados básicos
             const equipeData = {
                 tipo: document.getElementById('equipeTipo').value,
                 numero: document.getElementById('equipeNumero').value,
-                motorista: document.getElementById('equipeMotorista').value,
-                operadores: document.getElementById('equipeOperadores').value,
                 area: document.getElementById('equipeArea').value,
                 atividade: document.getElementById('equipeAtividade').value,
                 tipoAtividade: document.getElementById('equipeTipoAtividade').value,
@@ -2698,180 +3364,77 @@
                 pendencia: document.getElementById('equipePendencia').value,
                 observacoes: document.getElementById('equipeObservacoes').value
             };
-
-            // Coletar vaga (verificar se é "Outro")
             const vagaSelect = document.getElementById('equipeVaga');
-            if (vagaSelect.value === 'Outro') {
-                equipeData.vaga = document.getElementById('equipeVagaOutro').value;
-            } else {
-                equipeData.vaga = vagaSelect.value;
-            }
-
-            // Coletar equipamento (verificar se é "Outro")
+            equipeData.vaga = vagaSelect.value === 'Outro' ? document.getElementById('equipeVagaOutro').value : vagaSelect.value;
             const equipamentoSelect = document.getElementById('equipeEquipamento');
-            if (equipamentoSelect.value === 'Outro') {
-                equipeData.equipamento = document.getElementById('equipeEquipamentoOutro').value;
+            equipeData.equipamento = equipamentoSelect.value === 'Outro' ? document.getElementById('equipeEquipamentoOutro').value : equipamentoSelect.value;
+            const regime = document.querySelector('input[name="regimeTrabalho"]:checked').value;
+            equipeData.regimeTrabalho = { tipo: regime, turnos: [] };
+            if (regime === 'turno-unico') {
+                equipeData.motorista = document.getElementById('equipeMotorista').value;
+                equipeData.operadores = document.getElementById('equipeOperadores').value;
             } else {
-                equipeData.equipamento = equipamentoSelect.value;
+                const turnos = document.getElementById('turnosTrabalhoContainer').querySelectorAll('.troca-item');
+                turnos.forEach((turno, index) => {
+                    const inicio = turno.querySelector(`[name="turno_inicio_${index}"]`)?.value;
+                    const fim = turno.querySelector(`[name="turno_fim_${index}"]`)?.value;
+                    const motorista = turno.querySelector(`[name="turno_motorista_${index}"]`)?.value;
+                    const operadores = turno.querySelector(`[name="turno_operadores_${index}"]`)?.value;
+                    const obs = turno.querySelector(`[name="turno_observacoes_${index}"]`)?.value;
+                    if (inicio && fim && motorista && operadores) equipeData.regimeTrabalho.turnos.push({ horarioInicio: inicio, horarioFim: fim, motorista, operadores, observacoes: obs });
+                });
+                equipeData.motorista = equipeData.regimeTrabalho.turnos.map(t => t.motorista).join(' / ');
+                equipeData.operadores = equipeData.regimeTrabalho.turnos.map(t => t.operadores).join(' / ');
             }
-
-            // Coletar dados de atraso - ATUALIZADO COM HORÁRIO
-            const houveAtraso = document.querySelector('input[name="houveAtrasoEquipe"]:checked').value;
-            equipeData.atraso = {
-                houve: houveAtraso,
-                horarioDirecionamento: document.getElementById('horarioDirecionamento').value,
-                motivo: document.getElementById('motivoAtrasoEquipe').value,
-                justificativa: document.getElementById('justificativaAtrasoEquipe').value
-            };
-            
-            // Coletar trocas de equipamento
+            equipeData.atraso = { houve: document.querySelector('input[name="houveAtrasoEquipe"]:checked').value, horarioDirecionamento: document.getElementById('horarioDirecionamento').value, motivo: document.getElementById('motivoAtrasoEquipe').value, justificativa: document.getElementById('justificativaAtrasoEquipe').value };
             const trocas = [];
-            const trocasContainer = document.getElementById('trocasContainer');
-            const trocaItems = trocasContainer.querySelectorAll('.troca-item');
-            
-            trocaItems.forEach((item, index) => {
+            document.getElementById('trocasContainer').querySelectorAll('.troca-item').forEach((item, index) => {
                 const motivo = item.querySelector(`[name="troca_motivo_${index}"]`)?.value;
                 const placa = item.querySelector(`[name="troca_placa_${index}"]`)?.value;
                 const defeito = item.querySelector(`[name="troca_defeito_${index}"]`)?.value;
                 const inicio = item.querySelector(`[name="troca_inicio_${index}"]`)?.value;
                 const fim = item.querySelector(`[name="troca_fim_${index}"]`)?.value;
-                
-                if (motivo && defeito) {
-                    trocas.push({
-                        motivo,
-                        placaNova: placa,
-                        defeito,
-                        dataHoraInicio: inicio,
-                        dataHoraFim: fim
-                    });
-                }
+                if (motivo && defeito) trocas.push({ motivo, placaNova: placa, defeito, dataHoraInicio: inicio, dataHoraFim: fim });
             });
-            
             equipeData.trocas = trocas;
-            
-            // Coletar implementos
             const implementos = {};
-            const implementosContainer = document.getElementById('implementosContainer');
-            const implementosInputs = implementosContainer.querySelectorAll('select, textarea, input[type="radio"]:checked');
-            
-            implementosInputs.forEach(input => {
-                if (input.name) {
-                    implementos[input.name] = input.value;
-                }
+            document.getElementById('implementosContainer').querySelectorAll('select, textarea, input[type="radio"]:checked').forEach(input => {
+                if (input.name) implementos[input.name] = input.value;
             });
-            
             equipeData.implementos = implementos;
-            
             return equipeData;
         }
 
         function updateTeamsDisplay() {
             const container = document.getElementById('teamsContainer');
             const btnProximo = document.getElementById('btnProximoRevisao');
-            
             if (currentRelatorio.equipes.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <h3>Nenhuma equipe adicionada</h3>
-                        <p>Clique nos botões acima para adicionar equipes ao relatório</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>Nenhuma equipe adicionada</h3><p>Clique nos botões acima para adicionar equipes ao relatório</p></div>`;
                 btnProximo.disabled = true;
-            } else {
-                container.innerHTML = currentRelatorio.equipes.map((equipe, index) => `
-                    <div class="team-card ${equipe.tipo.includes('Alta') ? 'alta-pressao' : equipe.tipo.includes('Vacuo') ? 'vacuo' : 'horas-extras'}">
-                        <div class="team-header">
-                            <div class="team-info">
-                                <h3>${equipe.numero} - ${equipe.tipo}</h3>
-                                <p>Motorista: ${equipe.motorista} | Área: ${equipe.area}</p>
-                            </div>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-sm btn-info" onclick="editarEquipe(${index})">
-                                    Editar
-                                </button>
-                                <button class="btn btn-sm btn-danger" onclick="removerEquipe(${index})">
-                                    Remover
-                                </button>
-                            </div>
-                        </div>
-                        <div class="team-content">
-                            <div class="team-details">
-                                <div class="detail-item">
-                                    <div class="detail-label">Operadores</div>
-                                    <div class="detail-value">${equipe.operadores}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Atividade</div>
-                                    <div class="detail-value">${equipe.atividade}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Tipo</div>
-                                    <div class="detail-value">
-                                        <span class="badge badge-info">${equipe.tipoAtividade}</span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Status</div>
-                                    <div class="detail-value">
-                                        <span class="badge badge-${equipe.statusAtividade === 'Concluído' ? 'success' : 'warning'}">${equipe.statusAtividade}</span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Equipamento</div>
-                                    <div class="detail-value">${equipe.equipamento}</div>
-                                </div>
-                                <div class="detail-item">
-                                    <div class="detail-label">Vaga</div>
-                                    <div class="detail-value">${equipe.vaga}</div>
-                                </div>
-                            </div>
-                            ${equipe.atraso && equipe.atraso.houve === 'Sim' ? `
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;">
-                                    <strong>Atraso Registrado:</strong><br>
-                                    ${equipe.atraso.horarioDirecionamento ? `Direcionado às: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}<br>` : ''}
-                                    Motivo: ${equipe.atraso.motivo}<br>
-                                    ${equipe.atraso.justificativa ? `<small>${equipe.atraso.justificativa}</small>` : ''}
-                                </div>
-                            ` : ''}
-                            ${equipe.pendencia ? `
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;">
-                                    <strong>Pendência:</strong> ${equipe.pendencia}
-                                </div>
-                            ` : ''}
-                            ${equipe.trocas && equipe.trocas.length > 0 ? `
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--info-color); color: white; border-radius: 8px;">
-                                    <strong>Trocas de Equipamento:</strong> ${equipe.trocas.length} troca(s) registrada(s)
-                                </div>
-                            ` : ''}
-                            ${equipe.observacoes ? `
-                                <div style="margin-top: 1rem; padding: 1rem; background: var(--gray-100); border-radius: 8px;">
-                                    <strong>Observações:</strong> ${equipe.observacoes}
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `).join('');
-                btnProximo.disabled = false;
+                return;
             }
+            container.innerHTML = currentRelatorio.equipes.map((equipe, index) => {
+                const isMultiTurno = equipe.regimeTrabalho?.tipo === 'multi-turno';
+                let equipePessoalHTML = '';
+                if (isMultiTurno && equipe.regimeTrabalho.turnos?.length > 0) {
+                    equipePessoalHTML = equipe.regimeTrabalho.turnos.map((turno, tIndex) => `<div class="detail-item" style="grid-column: 1 / -1; background: var(--info-color); color: white; padding: 1rem; border-radius: 6px;"><div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;"><strong style="font-size: 0.95rem;">⏰ TURNO ${tIndex + 1}: ${turno.horarioInicio} - ${turno.horarioFim}</strong></div><div style="font-size: 0.875rem;"><div><strong>Motorista:</strong> ${turno.motorista}</div><div><strong>Operadores:</strong> ${turno.operadores}</div>${turno.observacoes ? `<div style="margin-top: 0.5rem;"><em>${turno.observacoes}</em></div>` : ''}</div></div>`).join('');
+                } else {
+                    equipePessoalHTML = `<div class="detail-item"><div class="detail-label">Motorista</div><div class="detail-value">${equipe.motorista}</div></div><div class="detail-item"><div class="detail-label">Operadores</div><div class="detail-value">${equipe.operadores}</div></div>`;
+                }
+                return `<div class="team-card ${equipe.tipo.includes('Alta') ? 'alta-pressao' : equipe.tipo.includes('Vacuo') ? 'vacuo' : 'horas-extras'}"><div class="team-header"><div class="team-info"><h3>${equipe.numero} - ${equipe.tipo}</h3><p>${isMultiTurno ? `🔄 MÚLTIPLOS TURNOS (${equipe.regimeTrabalho.turnos.length} turnos) | Área: ${equipe.area}` : `Motorista: ${equipe.motorista} | Área: ${equipe.area}`}</p></div><div style="display: flex; gap: 0.5rem;"><button class="btn btn-sm btn-info" onclick="editarEquipe(${index})">Editar</button><button class="btn btn-sm btn-danger" onclick="removerEquipe(${index})">Remover</button></div></div><div class="team-content"><div class="team-details">${equipePessoalHTML}<div class="detail-item"><div class="detail-label">Atividade</div><div class="detail-value">${equipe.atividade}</div></div><div class="detail-item"><div class="detail-label">Tipo</div><div class="detail-value"><span class="badge badge-info">${equipe.tipoAtividade}</span></div></div><div class="detail-item"><div class="detail-label">Status</div><div class="detail-value"><span class="badge badge-${equipe.statusAtividade === 'Concluído' ? 'success' : 'warning'}">${equipe.statusAtividade}</span></div></div><div class="detail-item"><div class="detail-label">Equipamento</div><div class="detail-value">${equipe.equipamento}</div></div><div class="detail-item"><div class="detail-label">Vaga</div><div class="detail-value">${equipe.vaga}</div></div></div>${equipe.atraso && equipe.atraso.houve === 'Sim' ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;"><strong>Atraso Registrado:</strong><br>${equipe.atraso.horarioDirecionamento ? `Direcionado às: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}<br>` : ''}Motivo: ${equipe.atraso.motivo}<br>${equipe.atraso.justificativa ? `<small>${equipe.atraso.justificativa}</small>` : ''}</div>` : ''}${equipe.pendencia ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--warning-color); color: white; border-radius: 8px;"><strong>Pendência:</strong> ${equipe.pendencia}</div>` : ''}${equipe.trocas && equipe.trocas.length > 0 ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--info-color); color: white; border-radius: 8px;"><strong>Trocas de Equipamento:</strong> ${equipe.trocas.length} troca(s) registrada(s)</div>` : ''}${equipe.observacoes ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--gray-100); border-radius: 8px;"><strong>Observações:</strong> ${equipe.observacoes}</div>` : ''}</div></div>`;
+            }).join('');
+            btnProximo.disabled = false;
         }
 
         function editarEquipe(index) {
             const equipe = currentRelatorio.equipes[index];
-            
             document.getElementById('modalEquipeTitle').textContent = `Editar Equipe - ${equipe.tipo}`;
             document.getElementById('equipeTipo').value = equipe.tipo;
             document.getElementById('equipeIndex').value = index;
-            
-            // Preencher opções
             populateEquipeOptions(equipe.tipo);
             setupImplementos(equipe.tipo);
-            
-            // Preencher dados
             setTimeout(() => {
                 document.getElementById('equipeNumero').value = equipe.numero;
-                document.getElementById('equipeMotorista').value = equipe.motorista;
-                document.getElementById('equipeOperadores').value = equipe.operadores;
                 document.getElementById('equipeArea').value = equipe.area;
                 document.getElementById('equipeAtividade').value = equipe.atividade;
                 document.getElementById('equipeTipoAtividade').value = equipe.tipoAtividade;
@@ -2880,8 +3443,27 @@
                 document.getElementById('equipeVaga').value = equipe.vaga;
                 document.getElementById('equipeEquipamento').value = equipe.equipamento;
                 document.getElementById('equipeObservacoes').value = equipe.observacoes || '';
-                
-                // Configurar atraso
+                if (equipe.regimeTrabalho?.tipo === 'multi-turno') {
+                    document.getElementById('multiTurno').checked = true;
+                    toggleRegimeTurno();
+                    const turnosContainer = document.getElementById('turnosTrabalhoContainer');
+                    turnosContainer.innerHTML = '';
+                    equipe.regimeTrabalho.turnos.forEach((turno, turnoIndex) => {
+                        adicionarTurnoTrabalho();
+                        setTimeout(() => {
+                            document.querySelector(`[name="turno_inicio_${turnoIndex}"]`).value = turno.horarioInicio;
+                            document.querySelector(`[name="turno_fim_${turnoIndex}"]`).value = turno.horarioFim;
+                            document.querySelector(`[name="turno_motorista_${turnoIndex}"]`).value = turno.motorista;
+                            document.querySelector(`[name="turno_operadores_${turnoIndex}"]`).value = turno.operadores;
+                            document.querySelector(`[name="turno_observacoes_${turnoIndex}"]`).value = turno.observacoes || '';
+                        }, 50);
+                    });
+                } else {
+                    document.getElementById('turnoUnico').checked = true;
+                    toggleRegimeTurno();
+                    document.getElementById('equipeMotorista').value = equipe.motorista;
+                    document.getElementById('equipeOperadores').value = equipe.operadores;
+                }
                 if (equipe.atraso && equipe.atraso.houve === 'Sim') {
                     document.getElementById('atrasoEquipeSim').checked = true;
                     toggleAtrasoEquipe();
@@ -2889,15 +3471,11 @@
                     document.getElementById('motivoAtrasoEquipe').value = equipe.atraso.motivo || '';
                     document.getElementById('justificativaAtrasoEquipe').value = equipe.atraso.justificativa || '';
                 }
-                
-                // Restaurar trocas
                 if (equipe.trocas && equipe.trocas.length > 0) {
                     const trocasContainer = document.getElementById('trocasContainer');
                     trocasContainer.innerHTML = '';
-                    
                     equipe.trocas.forEach((troca, trocaIndex) => {
                         adicionarTroca();
-                        // Preencher dados da troca
                         setTimeout(() => {
                             const trocaElement = document.getElementById(`troca_${trocaIndex}`);
                             if (trocaElement) {
@@ -2910,8 +3488,6 @@
                         }, 100);
                     });
                 }
-                
-                // Restaurar implementos
                 if (equipe.implementos) {
                     Object.entries(equipe.implementos).forEach(([name, value]) => {
                         const input = document.querySelector(`[name="${name}"]`);
@@ -2925,11 +3501,8 @@
                         }
                     });
                 }
-                
-                // Configurar pendência
                 togglePendencia();
             }, 100);
-            
             document.getElementById('modalEquipe').classList.add('show');
         }
 
@@ -2945,28 +3518,17 @@
         function generateReview() {
             const resumoTurno = document.getElementById('resumoTurno');
             const resumoEquipes = document.getElementById('resumoEquipes');
-            
-            // Resumo do turno
-            resumoTurno.innerHTML = `
-                <div class="detail-item">
-                    <div class="detail-label">Data</div>
-                    <div class="detail-value">${formatarData(currentRelatorio.dadosTurno.data)}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Horário</div>
-                    <div class="detail-value">${currentRelatorio.dadosTurno.horario}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Letra</div>
-                    <div class="detail-value">${currentRelatorio.dadosTurno.letra}</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Supervisor</div>
-                    <div class="detail-value">${currentRelatorio.dadosTurno.supervisor}</div>
-                </div>
-            `;
-            
-            // Resumo das equipes
+            resumoTurno.innerHTML = `<div class="detail-item"><div class="detail-label">Data</div><div class="detail-value">${formatarData(currentRelatorio.dadosTurno.data)}</div></div><div class="detail-item"><div class="detail-label">Horário</div><div class="detail-value">${currentRelatorio.dadosTurno.horario}</div></div><div class="detail-item"><div class="detail-label">Letra</div><div class="detail-value">${currentRelatorio.dadosTurno.letra}</div></div><div class="detail-item"><div class="detail-label">Supervisor</div><div class="detail-value">${currentRelatorio.dadosTurno.supervisor}</div></div>`;
+            if (currentRelatorio.testeEtilometro) {
+                const etilometro = currentRelatorio.testeEtilometro;
+                const ausencias = etilometro.colaboradoresAusentes?.length || 0;
+                resumoTurno.innerHTML += `<div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Teste de Etilômetro</div><div class="detail-value"><span class="badge badge-${etilometro.realizado ? 'success' : 'warning'}">${etilometro.realizado ? 'Todos Realizaram' : `${ausencias} Ausência(s)`}</span><small style="display: block; margin-top: 0.5rem; color: var(--gray-600);">Realizado às ${etilometro.horarioTeste}</small></div></div>`;
+            }
+            if (currentRelatorio.faltasColaboradores) {
+                const faltas = currentRelatorio.faltasColaboradores;
+                const numFaltas = faltas.faltas?.length || 0;
+                resumoTurno.innerHTML += `<div class="detail-item" style="grid-column: 1 / -1;"><div class="detail-label">Faltas de Colaboradores</div><div class="detail-value"><span class="badge badge-${faltas.houveFaltas ? 'danger' : 'success'}">${faltas.houveFaltas ? `${numFaltas} Falta(s)` : 'Sem Faltas'}</span></div></div>`;
+            }
             const totalEquipes = currentRelatorio.equipes.length;
             const equipesAltaPressao = currentRelatorio.equipes.filter(e => e.tipo.includes('Alta')).length;
             const equipesVacuo = currentRelatorio.equipes.filter(e => e.tipo.includes('Vacuo')).length;
@@ -2974,74 +3536,27 @@
             const atividadesConcluidas = currentRelatorio.equipes.filter(e => e.statusAtividade === 'Concluído').length;
             const totalTrocas = currentRelatorio.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
             const equipesComAtraso = currentRelatorio.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
-            
-            resumoEquipes.innerHTML = `
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value">${totalEquipes}</div>
-                        <div class="stat-label">Total de Equipes</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${equipesAltaPressao}</div>
-                        <div class="stat-label">Alta Pressão</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${equipesVacuo}</div>
-                        <div class="stat-label">Vacuo/Hiper</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${equipesExtras}</div>
-                        <div class="stat-label">Horas Extras</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${atividadesConcluidas}</div>
-                        <div class="stat-label">Concluídas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${totalTrocas}</div>
-                        <div class="stat-label">Trocas de Equipamento</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value">${equipesComAtraso}</div>
-                        <div class="stat-label">Equipamentos com Atraso</div>
-                    </div>
-                </div>
-            `;
+            resumoEquipes.innerHTML = `<div class="stats-grid"><div class="stat-card"><div class="stat-value">${totalEquipes}</div><div class="stat-label">Total de Equipes</div></div><div class="stat-card"><div class="stat-value">${equipesAltaPressao}</div><div class="stat-label">Alta Pressão</div></div><div class="stat-card"><div class="stat-value">${equipesVacuo}</div><div class="stat-label">Vacuo/Hiper</div></div><div class="stat-card"><div class="stat-value">${equipesExtras}</div><div class="stat-label">Horas Extras</div></div><div class="stat-card"><div class="stat-value">${atividadesConcluidas}</div><div class="stat-label">Concluídas</div></div><div class="stat-card"><div class="stat-value">${totalTrocas}</div><div class="stat-label">Trocas de Equipamento</div></div><div class="stat-card"><div class="stat-value">${equipesComAtraso}</div><div class="stat-label">Equipamentos com Atraso</div></div></div>`;
         }
 
         async function salvarRelatorio() {
+            if (!currentRelatorio.testeEtilometro) {
+                showNotification('❌ Dados do teste de etilômetro não foram coletados!', 'error'); return;
+            }
+            if (!currentRelatorio.faltasColaboradores) {
+                showNotification('❌ Dados de faltas não foram coletados!', 'error'); return;
+            }
+            for (const equipe of currentRelatorio.equipes) {
+                if (equipe.regimeTrabalho?.tipo === 'multi-turno' && (!equipe.regimeTrabalho.turnos || equipe.regimeTrabalho.turnos.length === 0)) {
+                    showNotification(`❌ Equipe ${equipe.numero} está em modo multi-turno mas não tem turnos registrados!`, 'error'); return;
+                }
+            }
             showLoading('Salvando relatório...');
-            
             try {
-                // Gerar ID único
                 const relatorioId = `REL${Date.now()}`;
-                
-                // Coletar observações gerais
                 const observacoesGerais = document.getElementById('observacoesGeraisTurno').value;
-                
-                // Preparar dados do relatório
-                const relatorio = {
-                    id: relatorioId,
-                    dadosTurno: currentRelatorio.dadosTurno,
-                    equipes: currentRelatorio.equipes,
-                    observacoesGerais: observacoesGerais,
-                    estatisticas: {
-                        totalEquipes: currentRelatorio.equipes.length,
-                        equipesAltaPressao: currentRelatorio.equipes.filter(e => e.tipo.includes('Alta')).length,
-                        equipesVacuo: currentRelatorio.equipes.filter(e => e.tipo.includes('Vácuo')).length,
-                        equipesExtras: currentRelatorio.equipes.filter(e => e.tipo.includes('Extras')).length,
-                        atividadesConcluidas: currentRelatorio.equipes.filter(e => e.statusAtividade === 'Concluído').length,
-                        totalTrocas: currentRelatorio.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0),
-                        equipesComAtraso: currentRelatorio.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length
-                    },
-                    criadoPor: currentUser,
-                    criadoEm: new Date().toISOString()
-                };
-                
-                // Adicionar ao array local primeiro
+                const relatorio = { id: relatorioId, ...currentRelatorio, observacoesGerais, estatisticas: { totalEquipes: currentRelatorio.equipes.length, atividadesConcluidas: currentRelatorio.equipes.filter(e => e.statusAtividade === 'Concluído').length, totalTrocas: currentRelatorio.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0), equipesComAtraso: currentRelatorio.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length }, criadoPor: currentUser, criadoEm: new Date().toISOString() };
                 relatorios.unshift(relatorio);
-                
-                // Tentar salvar no GitHub
                 if (GITHUB_CONFIG.token) {
                     try {
                         await saveDataToGitHub('relatorios', relatorios);
@@ -3049,56 +3564,28 @@
                     } catch (gitError) {
                         console.error('Erro ao salvar no GitHub:', gitError);
                         showNotification('⚠️ Erro ao salvar no GitHub. Salvo localmente.', 'warning');
-                        
-                        // Remover do array se falhou no GitHub para tentar novamente
                         relatorios.shift();
                         throw gitError;
                     }
                 } else {
                     throw new Error('Token do GitHub não configurado');
                 }
-                
-                // Salvar localmente como backup (SANITIZADO)
-                const dadosLimpos = sanitizeObject(relatorios);
-                localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(dadosLimpos));
-                
-                // Mostrar sucesso
+                localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(sanitizeObject(relatorios)));
                 document.getElementById('relatorioIdDisplay').textContent = relatorioId;
                 showStep(4);
-                
-                // Atualizar interface
                 updateInterface();
-                
                 hideLoading();
-                
             } catch (error) {
                 hideLoading();
                 console.error('Erro ao salvar relatório:', error);
-                
-                // Tentar salvar localmente
                 try {
                     const localRelatorios = JSON.parse(localStorage.getItem('grupogps_relatorio_backup') || '[]');
-                    const relatorioLocal = {
-                        id: `LOCAL${Date.now()}`,
-                        dadosTurno: currentRelatorio.dadosTurno,
-                        equipes: currentRelatorio.equipes,
-                        observacoesGerais: document.getElementById('observacoesGeraisTurno').value,
-                        salvoLocalmente: true,
-                        criadoPor: currentUser,
-                        criadoEm: new Date().toISOString()
-                    };
-                    
-                    // SANITIZAR ANTES DE SALVAR LOCALMENTE
+                    const relatorioLocal = { id: `LOCAL${Date.now()}`, ...currentRelatorio, observacoesGerais: document.getElementById('observacoesGeraisTurno').value, salvoLocalmente: true, criadoPor: currentUser, criadoEm: new Date().toISOString() };
                     const relatorioLimpo = sanitizeObject(relatorioLocal);
                     localRelatorios.unshift(relatorioLimpo);
-                    
-                    const dadosLimpos = sanitizeObject(localRelatorios);
-                    localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(dadosLimpos));
-                    
-                    // Adicionar também ao array global para aparecer na interface
+                    localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(sanitizeObject(localRelatorios)));
                     relatorios.unshift(relatorioLimpo);
                     updateInterface();
-                    
                     document.getElementById('relatorioIdDisplay').textContent = relatorioLimpo.id + ' (Local)';
                     showStep(4);
                     showNotification('Relatório salvo localmente. Será sincronizado quando houver conexão.', 'warning');
@@ -3109,179 +3596,67 @@
         }
 
         function novoRelatorio() {
-            currentRelatorio = {
-                dadosTurno: {},
-                equipes: []
-            };
-            
-            // Limpar formulários
+            currentRelatorio = { dadosTurno: {}, equipes: [] };
             document.getElementById('formEquipe').reset();
             document.getElementById('observacoesGeraisTurno').value = '';
-            
-            // Configurar data padrão
             setupDefaultDate();
-            
-            // Voltar para primeira etapa
             showStep(1);
-            
-            // Limpar displays
             updateTeamsDisplay();
         }
 
         function visualizarRelatorio() {
-            const relatorio = gerarTextoRelatorio();
+            currentRelatorio.observacoesGerais = document.getElementById('observacoesGeraisTurno').value;
+            const relatorio = gerarTextoRelatorio(currentRelatorio);
             document.getElementById('relatorioTexto').textContent = relatorio;
             document.getElementById('modalVisualizarRelatorio').classList.add('show');
         }
 
-        function gerarTextoRelatorio() {
-            const dados = currentRelatorio.dadosTurno;
-            const equipes = currentRelatorio.equipes;
-            const observacoesGerais = document.getElementById('observacoesGeraisTurno')?.value || '';
-            
-            let relatorio = `RELATÓRIO DE TURNO - GRUPOGPS\n`;
-            relatorio += `========================================\n`;
-            relatorio += `Data: ${formatarData(dados.data)}\n`;
-            relatorio += `Horário: ${dados.horario}\n`;
-            relatorio += `Letra do Turno: ${dados.letra}\n`;
-            relatorio += `Supervisor: ${dados.supervisor}\n`;
-            
-            relatorio += `\nRESUMO GERAL:\n`;
-            relatorio += `------------------------------\n`;
-            relatorio += `Total de Equipes: ${equipes.length}\n`;
-            relatorio += `Equipes Alta Pressão: ${equipes.filter(e => e.tipo.includes('Alta')).length}\n`;
-            relatorio += `Equipes Vacuo/Hiper: ${equipes.filter(e => e.tipo.includes('Vacuo')).length}\n`;
-            
-            const equipesExtras = equipes.filter(e => e.tipo.includes('Extras')).length;
-            if (equipesExtras > 0) {
-                relatorio += `Equipes Horas Extras: ${equipesExtras}\n`;
+        function gerarTextoRelatorio(relatorioData) {
+            const { dadosTurno, equipes, observacoesGerais, testeEtilometro, faltasColaboradores, equipamentosDevendo } = relatorioData;
+            let relatorio = `RELATÓRIO DE TURNO - GRUPOGPS\n========================================\nData: ${formatarData(dadosTurno.data)}\nHorário: ${dadosTurno.horario}\nLetra do Turno: ${dadosTurno.letra}\nSupervisor: ${dadosTurno.supervisor}\n`;
+            if (testeEtilometro) {
+                relatorio += `\nTESTE DE ETILÔMETRO:\n------------------------------\nHorário do Teste: ${testeEtilometro.horarioTeste}\nResponsável: ${testeEtilometro.responsavel}\nStatus: ${testeEtilometro.realizado ? 'Todos realizaram' : 'Houve ausências'}\n`;
+                if (!testeEtilometro.realizado && testeEtilometro.colaboradoresAusentes?.length > 0) {
+                    relatorio += `\nCOLABORADORES AUSENTES:\n`;
+                    testeEtilometro.colaboradoresAusentes.forEach((a, i) => { relatorio += `${i + 1}. ${a.nome}\n   Motivo: ${a.motivo}\n${a.observacao ? `   Obs: ${a.observacao}\n` : ''}`; });
+                }
+                if (testeEtilometro.observacoes) relatorio += `Observações: ${testeEtilometro.observacoes}\n`;
             }
-            
-            relatorio += `Atividades Concluídas: ${equipes.filter(e => e.statusAtividade === 'Concluído').length}\n`;
-            
-            const totalTrocas = equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
-            relatorio += `Trocas de Equipamento: ${totalTrocas}\n`;
-
-            const equipesComAtraso = equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
-            relatorio += `Equipamentos com Atraso: ${equipesComAtraso}\n`;
-            
-            relatorio += `\nDETALHES DAS EQUIPES:\n`;
-            relatorio += `========================================\n`;
-            
+            if (faltasColaboradores && faltasColaboradores.houveFaltas) {
+                relatorio += `\nFALTAS E SUBSTITUIÇÕES:\n------------------------------\nTotal: ${faltasColaboradores.faltas.length}\n\n`;
+                faltasColaboradores.faltas.forEach((f, i) => { relatorio += `FALTA ${i + 1}:\nColaborador: ${f.nomeColaborador}\nFunção: ${f.funcao}\nMotivo: ${f.motivo}\nJustificada: ${f.justificada ? 'Sim' : 'Não'}\nSubstituição: ${f.houveSubstituicao ? `Sim, por ${f.nomeSubstituto}` : 'Não houve'}\n${f.observacoes ? `Obs: ${f.observacoes}\n` : ''}\n`; });
+            } else {
+                relatorio += `\nFALTAS: Não houve faltas neste turno.\n`;
+            }
+            if (equipamentosDevendo && equipamentosDevendo.ficouDevendo) {
+                relatorio += `\nEQUIPAMENTOS NÃO ATENDIDOS (DEVENDO):\n------------------------------\nTotal: ${equipamentosDevendo.equipamentos.length}\n\n`;
+                equipamentosDevendo.equipamentos.forEach((eq, i) => { relatorio += `EQUIPAMENTO ${i + 1}:\nVaga: ${eq.vaga}\nMotivo: ${eq.motivo}\nDetalhes: ${eq.observacoes}\n\n`; });
+            } else {
+                relatorio += `\nEQUIPAMENTOS: Todos atendidos. Nenhum equipamento ficou devendo.\n`;
+            }
+            relatorio += `\nDETALHES DAS EQUIPES:\n========================================\n`;
             equipes.forEach((equipe, index) => {
-                relatorio += `\n${index + 1}. EQUIPE ${equipe.numero} - ${equipe.tipo.toUpperCase()}\n`;
-                relatorio += `----------------------------------------\n`;
-                relatorio += `Motorista: ${equipe.motorista}\n`;
-                relatorio += `Operadores: ${equipe.operadores}\n`;
-                relatorio += `Área de Atuação: ${equipe.area}\n`;
-                relatorio += `Atividade: ${equipe.atividade}\n`;
-                relatorio += `Tipo: ${equipe.tipoAtividade}\n`;
-                relatorio += `Status: ${equipe.statusAtividade}\n`;
-                
-                if (equipe.pendencia) {
-                    relatorio += `PENDÊNCIA: ${equipe.pendencia}\n`;
+                relatorio += `\n${index + 1}. EQUIPE ${equipe.numero} - ${equipe.tipo.toUpperCase()}\n----------------------------------------\n`;
+                const isMultiTurno = equipe.regimeTrabalho?.tipo === 'multi-turno';
+                if (isMultiTurno && equipe.regimeTrabalho.turnos?.length > 0) {
+                    relatorio += `REGIME: MÚLTIPLOS TURNOS (${equipe.regimeTrabalho.turnos.length} turnos)\n\n`;
+                    equipe.regimeTrabalho.turnos.forEach((t, i) => { relatorio += `   TURNO ${i + 1}: ${t.horarioInicio} - ${t.horarioFim}\n   Motorista: ${t.motorista}\n   Operadores: ${t.operadores}\n${t.observacoes ? `   Obs: ${t.observacoes}\n` : ''}\n`; });
+                } else {
+                    relatorio += `Motorista: ${equipe.motorista}\nOperadores: ${equipe.operadores}\n`;
                 }
-                
-                relatorio += `Vaga: ${equipe.vaga}\n`;
-                relatorio += `Equipamento: ${equipe.equipamento}\n`;
-
-                // Adicionar informações de atraso com horário
-                if (equipe.atraso && equipe.atraso.houve === 'Sim') {
-                    relatorio += `\nATRASO REGISTRADO:\n`;
-                    if (equipe.atraso.horarioDirecionamento) {
-                        relatorio += `Horário de Direcionamento: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}\n`;
-                    }
-                    relatorio += `Motivo: ${equipe.atraso.motivo}\n`;
-                    if (equipe.atraso.justificativa) {
-                        relatorio += `Justificativa: ${equipe.atraso.justificativa}\n`;
-                    }
-                }
-                
-                // Adicionar implementos (apenas os que não são N/A)
-                if (equipe.implementos) {
-                    const implementosRelevantes = [];
-                    
-                    Object.entries(equipe.implementos).forEach(([key, value]) => {
-                        // Filtrar apenas implementos que não são N/A e não são campos especiais
-                        if (value && value !== 'N/A' && !key.includes('justificativa') && !key.includes('caixa_bloqueio') && !key.includes('cadeados') && !key.includes('plaquetas')) {
-                            const nomeImplemento = key.replace('implemento_', '').replace(/_/g, ' ');
-                            implementosRelevantes.push(`${nomeImplemento}: ${value}`);
-                        }
-                    });
-                    
-                    if (implementosRelevantes.length > 0) {
-                        relatorio += `\nIMPLEMENTOS:\n`;
-                        implementosRelevantes.forEach(impl => {
-                            relatorio += `- ${impl}\n`;
-                        });
-                    }
-                    
-                    // Adicionar informações de segurança se relevantes
-                    const seguranca = [];
-                    if (equipe.implementos.caixa_bloqueio && equipe.implementos.caixa_bloqueio !== 'N/A') {
-                        seguranca.push(`Caixa Bloqueio: ${equipe.implementos.caixa_bloqueio}`);
-                    }
-                    if (equipe.implementos.cadeados && equipe.implementos.cadeados !== 'N/A') {
-                        seguranca.push(`Cadeados: ${equipe.implementos.cadeados}`);
-                    }
-                    if (equipe.implementos.plaquetas && equipe.implementos.plaquetas !== 'N/A') {
-                        seguranca.push(`Plaquetas: ${equipe.implementos.plaquetas}`);
-                    }
-                    
-                    if (seguranca.length > 0) {
-                        relatorio += `\nSEGURANÇA:\n`;
-                        seguranca.forEach(seg => {
-                            relatorio += `- ${seg}\n`;
-                        });
-                    }
-                    
-                    // Justificativa de implementos se houver
-                    if (equipe.implementos.justificativa_implementos && equipe.implementos.justificativa_implementos.trim()) {
-                        relatorio += `\nJUSTIFICATIVA IMPLEMENTOS: ${equipe.implementos.justificativa_implementos}\n`;
-                    }
-                }
-                
-                // Adicionar trocas de equipamento
-                if (equipe.trocas && equipe.trocas.length > 0) {
-                    equipe.trocas.forEach((troca, trocaIndex) => {
-                        relatorio += `\nTROCA DE EQUIPAMENTO ${trocaIndex + 1}:\n`;
-                        relatorio += `Motivo: ${troca.motivo}\n`;
-                        if (troca.placaNova) {
-                            relatorio += `Nova Placa: ${troca.placaNova}\n`;
-                        }
-                        if (troca.dataHoraInicio) {
-                            relatorio += `Início: ${formatarDataHora(troca.dataHoraInicio)}\n`;
-                        }
-                        if (troca.dataHoraFim) {
-                            relatorio += `Fim: ${formatarDataHora(troca.dataHoraFim)}\n`;
-                        }
-                        relatorio += `Defeito/Medidas: ${troca.defeito}\n`;
-                    });
-                }
-                
-                if (equipe.observacoes) {
-                    relatorio += `\nObservações: ${equipe.observacoes}\n`;
-                }
+                relatorio += `Área: ${equipe.area}\nAtividade: ${equipe.atividade}\nTipo: ${equipe.tipoAtividade}\nStatus: ${equipe.statusAtividade}\n${equipe.pendencia ? `PENDÊNCIA: ${equipe.pendencia}\n` : ''}Vaga: ${equipe.vaga}\nEquipamento: ${equipe.equipamento}\n`;
+                if (equipe.atraso && equipe.atraso.houve === 'Sim') relatorio += `\nATRASO: ${equipe.atraso.motivo} - ${equipe.atraso.justificativa}\n`;
+                if (equipe.trocas && equipe.trocas.length > 0) equipe.trocas.forEach((t, i) => { relatorio += `\nTROCA ${i + 1}: ${t.motivo}\n${t.placaNova ? `Nova Placa: ${t.placaNova}\n` : ''}Defeito: ${t.defeito}\n`; });
+                if (equipe.observacoes) relatorio += `\nObservações: ${equipe.observacoes}\n`;
             });
-
-            // Adicionar observações gerais
-            if (observacoesGerais) {
-                relatorio += `\nOBSERVAÇÕES GERAIS DO TURNO:\n`;
-                relatorio += `========================================\n`;
-                relatorio += `${observacoesGerais}\n`;
-            }
-            
-            relatorio += `\n========================================\n`;
-            relatorio += `Relatório gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
-            relatorio += `Sistema: GrupoGPS - Relatório de Turno\n`;
-            
+            if (observacoesGerais) relatorio += `\nOBSERVAÇÕES GERAIS:\n========================================\n${observacoesGerais}\n`;
+            relatorio += `\n========================================\nGerado em: ${new Date().toLocaleString('pt-BR')}\n`;
             return relatorio;
         }
 
         function copiarRelatorio() {
-            const texto = document.getElementById('relatorioTexto').textContent;
-            navigator.clipboard.writeText(texto).then(() => {
-                showNotification('Relatório copiado para a área de transferência!', 'success');
+            navigator.clipboard.writeText(document.getElementById('relatorioTexto').textContent).then(() => {
+                showNotification('Relatório copiado!', 'success');
             });
         }
 
@@ -3289,148 +3664,54 @@
         function switchTab(tabName) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             document.querySelector(`[onclick="switchTab('${tabName}')"]`)?.classList.add('active');
             document.getElementById(tabName + '-tab')?.classList.add('active');
-            
-            // Debug info
-            if (tabName === 'relatorios') {
-                console.log('🔍 Aba relatórios aberta. Debug info:');
-                console.log('Array relatorios:', relatorios);
-                console.log('É array?', Array.isArray(relatorios));
-                console.log('Quantidade:', relatorios.length);
-                if (relatorios.length > 0) {
-                    console.log('Primeiro relatório:', relatorios[0]);
-                }
-            }
-            
-            // Atualizar dados ao trocar de aba
-            if (tabName === 'relatorios') {
-                updateInterface();
-            }
+            if (tabName === 'relatorios') updateInterface();
         }
 
         // PESQUISA
         function ajustarCampoPesquisa() {
             const tipo = document.getElementById('tipoPesquisa').value;
-            
-            // Ocultar todos os campos
-            document.querySelectorAll('[id^="campoPesquisa"]').forEach(campo => {
-                campo.classList.add('hidden');
-            });
-            
-            // Mostrar campo apropriado
-            if (tipo === 'data') {
-                document.getElementById('campoPesquisaData').classList.remove('hidden');
-            } else if (tipo === 'periodo') {
+            document.querySelectorAll('[id^="campoPesquisa"]').forEach(c => c.classList.add('hidden'));
+            if (tipo === 'data') document.getElementById('campoPesquisaData').classList.remove('hidden');
+            else if (tipo === 'periodo') {
                 document.getElementById('campoPesquisaPeriodo').classList.remove('hidden');
                 document.getElementById('campoPesquisaPeriodoFim').classList.remove('hidden');
-            } else {
-                document.getElementById('campoPesquisaGeral').classList.remove('hidden');
-            }
+            } else document.getElementById('campoPesquisaGeral').classList.remove('hidden');
         }
 
         function executarPesquisa() {
             const tipo = document.getElementById('tipoPesquisa').value;
             let resultados = [];
-            
-            // Verificar se temos dados para pesquisar
             if (!Array.isArray(relatorios) || relatorios.length === 0) {
-                showNotification('Nenhum relatório encontrado para pesquisar.', 'info');
-                mostrarResultadosPesquisa([]);
-                return;
+                mostrarResultadosPesquisa([]); return;
             }
-            
+            const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
             if (tipo === 'data') {
                 const data = document.getElementById('dataPesquisa').value;
-                if (!data) {
-                    showNotification('Informe uma data para pesquisar.', 'warning');
-                    return;
-                }
-                resultados = relatorios.filter(r => r.dadosTurno && r.dadosTurno.data === data);
+                resultados = relatorios.filter(r => r.dadosTurno?.data === data);
             } else if (tipo === 'periodo') {
                 const dataInicial = document.getElementById('dataInicialPesquisa').value;
                 const dataFinal = document.getElementById('dataFinalPesquisa').value;
-                if (!dataInicial || !dataFinal) {
-                    showNotification('Informe as datas inicial e final.', 'warning');
-                    return;
-                }
-                resultados = relatorios.filter(r => 
-                    r.dadosTurno && r.dadosTurno.data >= dataInicial && r.dadosTurno.data <= dataFinal
-                );
+                resultados = relatorios.filter(r => r.dadosTurno?.data >= dataInicial && r.dadosTurno?.data <= dataFinal);
             } else if (tipo === 'supervisor') {
-                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
-                if (!termo) {
-                    showNotification('Informe o nome do supervisor.', 'warning');
-                    return;
-                }
-                resultados = relatorios.filter(r => 
-                    r.dadosTurno && r.dadosTurno.supervisor && r.dadosTurno.supervisor.toLowerCase().includes(termo)
-                );
+                resultados = relatorios.filter(r => r.dadosTurno?.supervisor?.toLowerCase().includes(termo));
             } else if (tipo === 'letra') {
-                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
-                if (!termo) {
-                    showNotification('Informe a letra do turno.', 'warning');
-                    return;
-                }
-                resultados = relatorios.filter(r => 
-                    r.dadosTurno && r.dadosTurno.letra && r.dadosTurno.letra.toLowerCase().includes(termo)
-                );
+                resultados = relatorios.filter(r => r.dadosTurno?.letra?.toLowerCase().includes(termo));
             } else {
-                // Pesquisa geral
-                const termo = document.getElementById('termoPesquisa').value.toLowerCase().trim();
-                if (!termo) {
-                    showNotification('Informe um termo para pesquisar.', 'warning');
-                    return;
-                }
-                resultados = relatorios.filter(r => {
-                    if (!r.dadosTurno) return false;
-                    return (
-                        (r.id && r.id.toLowerCase().includes(termo)) ||
-                        (r.dadosTurno.supervisor && r.dadosTurno.supervisor.toLowerCase().includes(termo)) ||
-                        (r.dadosTurno.letra && r.dadosTurno.letra.toLowerCase().includes(termo))
-                    );
-                });
+                resultados = relatorios.filter(r => JSON.stringify(r).toLowerCase().includes(termo));
             }
-            
-            console.log('Resultados da pesquisa:', resultados);
             mostrarResultadosPesquisa(resultados);
         }
 
         function mostrarResultadosPesquisa(resultados) {
             const container = document.getElementById('resultadosPesquisa');
             const tbody = document.getElementById('pesquisaTableBody');
-            
             if (resultados.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">🔍</div>
-                                <h3>Nenhum resultado encontrado</h3>
-                                <p>Tente ajustar os critérios de pesquisa</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><h3>Nenhum resultado</h3></div></td></tr>`;
             } else {
-                tbody.innerHTML = resultados.map(relatorio => `
-                    <tr>
-                        <td>${relatorio.id}</td>
-                        <td>${formatarData(relatorio.dadosTurno.data)}</td>
-                        <td>${relatorio.dadosTurno.horario}</td>
-                        <td>${relatorio.dadosTurno.letra}</td>
-                        <td>${relatorio.dadosTurno.supervisor}</td>
-                        <td>${relatorio.equipes.length}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info" onclick="visualizarRelatorioSalvo('${relatorio.id}')">
-                                Ver
-                            </button>
-                        </td>
-                    </tr>
-                `).join('');
+                tbody.innerHTML = resultados.map(r => `<tr><td>${r.id}</td><td>${formatarData(r.dadosTurno.data)}</td><td>${r.dadosTurno.horario}</td><td>${r.dadosTurno.letra}</td><td>${r.dadosTurno.supervisor}</td><td>${r.equipes.length}</td><td><button class="btn btn-sm" onclick="visualizarRelatorioSalvo('${r.id}')">Ver</button></td></tr>`).join('');
             }
-            
             container.classList.remove('hidden');
         }
 
@@ -3446,127 +3727,52 @@
 
         function visualizarRelatorioSalvo(id) {
             const relatorio = relatorios.find(r => r.id === id);
-            if (!relatorio) {
-                showNotification('Relatório não encontrado!', 'error');
+            if (!relatorio) { showNotification('Relatório não encontrado!', 'error'); return; }
+            const relatorioTexto = gerarTextoRelatorio(relatorio);
+            document.getElementById('relatorioTexto').textContent = relatorioTexto;
+            document.getElementById('modalVisualizarRelatorio').classList.add('show');
+        }
+        
+        // EXCLUSÃO DE RELATÓRIO
+        function solicitarExclusaoRelatorio(relatorioId) {
+            document.getElementById('relatorioParaExcluir').value = relatorioId;
+            document.getElementById('senhaExclusao').value = '';
+            document.getElementById('modalConfirmarExclusao').classList.add('show');
+        }
+
+        async function confirmarExclusaoRelatorio() {
+            const relatorioId = document.getElementById('relatorioParaExcluir').value;
+            const senhaDigitada = document.getElementById('senhaExclusao').value;
+            const SENHA_CORRETA = 'Apagar@GPS';
+            
+            if (senhaDigitada !== SENHA_CORRETA) {
+                showNotification('❌ Senha incorreta! Exclusão não autorizada.', 'error');
+                document.getElementById('senhaExclusao').value = '';
+                document.getElementById('senhaExclusao').focus();
                 return;
             }
             
-            // Gerar texto do relatório salvo
-            const dados = relatorio.dadosTurno;
-            const equipes = relatorio.equipes;
-            const observacoesGerais = relatorio.observacoesGerais || '';
-            
-            let relatorioTexto = `RELATÓRIO DE TURNO - GRUPOGPS\n`;
-            relatorioTexto += `========================================\n`;
-            relatorioTexto += `Data: ${formatarData(dados.data)}\n`;
-            relatorioTexto += `Horário: ${dados.horario}\n`;
-            relatorioTexto += `Letra do Turno: ${dados.letra}\n`;
-            relatorioTexto += `Supervisor: ${dados.supervisor}\n`;
-            
-            relatorioTexto += `\nRESUMO GERAL:\n`;
-            relatorioTexto += `------------------------------\n`;
-            relatorioTexto += `Total de Equipes: ${equipes.length}\n`;
-            relatorioTexto += `Equipes Alta Pressão: ${equipes.filter(e => e.tipo.includes('Alta')).length}\n`;
-            relatorioTexto += `Equipes Vacuo/Hiper: ${equipes.filter(e => e.tipo.includes('Vacuo')).length}\n`;
-            
-            const equipesExtras = equipes.filter(e => e.tipo.includes('Extras')).length;
-            if (equipesExtras > 0) {
-                relatorioTexto += `Equipes Horas Extras: ${equipesExtras}\n`;
+            const index = relatorios.findIndex(r => r.id === relatorioId);
+            if (index === -1) {
+                showNotification('❌ Relatório não encontrado!', 'error');
+                closeModal('modalConfirmarExclusao');
+                return;
             }
             
-            relatorioTexto += `Atividades Concluídas: ${equipes.filter(e => e.statusAtividade === 'Concluído').length}\n`;
-            
-            const totalTrocas = equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0);
-            relatorioTexto += `Trocas de Equipamento: ${totalTrocas}\n`;
-
-            const equipesComAtraso = equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length;
-            relatorioTexto += `Equipamentos com Atraso: ${equipesComAtraso}\n`;
-            
-            relatorioTexto += `\nDETALHES DAS EQUIPES:\n`;
-            relatorioTexto += `========================================\n`;
-            
-            equipes.forEach((equipe, index) => {
-                relatorioTexto += `\n${index + 1}. EQUIPE ${equipe.numero} - ${equipe.tipo.toUpperCase()}\n`;
-                relatorioTexto += `----------------------------------------\n`;
-                relatorioTexto += `Motorista: ${equipe.motorista}\n`;
-                relatorioTexto += `Operadores: ${equipe.operadores}\n`;
-                relatorioTexto += `Área de Atuação: ${equipe.area}\n`;
-                relatorioTexto += `Atividade: ${equipe.atividade}\n`;
-                relatorioTexto += `Tipo: ${equipe.tipoAtividade}\n`;
-                relatorioTexto += `Status: ${equipe.statusAtividade}\n`;
-                
-                if (equipe.pendencia) {
-                    relatorioTexto += `PENDÊNCIA: ${equipe.pendencia}\n`;
-                }
-                
-                relatorioTexto += `Vaga: ${equipe.vaga}\n`;
-                relatorioTexto += `Equipamento: ${equipe.equipamento}\n`;
-
-                // Adicionar informações de atraso com horário
-                if (equipe.atraso && equipe.atraso.houve === 'Sim') {
-                    relatorioTexto += `\nATRASO REGISTRADO:\n`;
-                    if (equipe.atraso.horarioDirecionamento) {
-                        relatorioTexto += `Horário de Direcionamento: ${formatarDataHora(equipe.atraso.horarioDirecionamento)}\n`;
-                    }
-                    relatorioTexto += `Motivo: ${equipe.atraso.motivo}\n`;
-                    if (equipe.atraso.justificativa) {
-                        relatorioTexto += `Justificativa: ${equipe.atraso.justificativa}\n`;
-                    }
-                }
-                
-                // Implementos e trocas...
-                if (equipe.implementos) {
-                    const implementosRelevantes = [];
-                    
-                    Object.entries(equipe.implementos).forEach(([key, value]) => {
-                        if (value && value !== 'N/A' && !key.includes('justificativa') && !key.includes('caixa_bloqueio') && !key.includes('cadeados') && !key.includes('plaquetas')) {
-                            const nomeImplemento = key.replace('implemento_', '').replace(/_/g, ' ');
-                            implementosRelevantes.push(`${nomeImplemento}: ${value}`);
-                        }
-                    });
-                    
-                    if (implementosRelevantes.length > 0) {
-                        relatorioTexto += `\nIMPLEMENTOS:\n`;
-                        implementosRelevantes.forEach(impl => {
-                            relatorioTexto += `- ${impl}\n`;
-                        });
-                    }
-                }
-                
-                if (equipe.trocas && equipe.trocas.length > 0) {
-                    equipe.trocas.forEach((troca, trocaIndex) => {
-                        relatorioTexto += `\nTROCA DE EQUIPAMENTO ${trocaIndex + 1}:\n`;
-                        relatorioTexto += `Motivo: ${troca.motivo}\n`;
-                        if (troca.placaNova) {
-                            relatorioTexto += `Nova Placa: ${troca.placaNova}\n`;
-                        }
-                        if (troca.dataHoraInicio) {
-                            relatorioTexto += `Início: ${formatarDataHora(troca.dataHoraInicio)}\n`;
-                        }
-                        if (troca.dataHoraFim) {
-                            relatorioTexto += `Fim: ${formatarDataHora(troca.dataHoraFim)}\n`;
-                        }
-                        relatorioTexto += `Defeito/Medidas: ${troca.defeito}\n`;
-                    });
-                }
-                
-                if (equipe.observacoes) {
-                    relatorioTexto += `\nObservações: ${equipe.observacoes}\n`;
-                }
-            });
-
-            if (observacoesGerais) {
-                relatorioTexto += `\nOBSERVAÇÕES GERAIS DO TURNO:\n`;
-                relatorioTexto += `========================================\n`;
-                relatorioTexto += `${observacoesGerais}\n`;
+            showLoading('Excluindo relatório...');
+            try {
+                relatorios.splice(index, 1);
+                if (GITHUB_CONFIG.token) await saveDataToGitHub('relatorios', relatorios);
+                localStorage.setItem('grupogps_relatorio_backup', JSON.stringify(sanitizeObject(relatorios)));
+                hideLoading();
+                closeModal('modalConfirmarExclusao');
+                updateInterface();
+                showNotification('✅ Relatório excluído com sucesso!', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Erro ao excluir relatório:', error);
+                showNotification('❌ Erro ao excluir: ' + error.message, 'error');
             }
-            
-            relatorioTexto += `\n========================================\n`;
-            relatorioTexto += `Relatório gerado em: ${new Date().toLocaleString('pt-BR')}\n`;
-            relatorioTexto += `Sistema: GrupoGPS - Relatório de Turno\n`;
-            
-            document.getElementById('relatorioTexto').textContent = relatorioTexto;
-            document.getElementById('modalVisualizarRelatorio').classList.add('show');
         }
 
         // INTERFACE E ESTATÍSTICAS
@@ -3582,80 +3788,23 @@
 
         function updateRelatoriosTable() {
             const tbody = document.getElementById('relatoriosTableBody');
-            
-            console.log('Atualizando tabela de relatórios. Total:', relatorios.length);
-            
             if (!Array.isArray(relatorios) || relatorios.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">📋</div>
-                                <h3>Nenhum relatório encontrado</h3>
-                                <p>Crie seu primeiro relatório na aba "Novo Relatório"</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><h3>Nenhum relatório encontrado</h3></div></td></tr>`;
                 return;
             }
-            
-            tbody.innerHTML = relatorios.slice(0, 50).map(relatorio => {
-                // Verificar se o relatório tem a estrutura correta
-                if (!relatorio.dadosTurno) {
-                    console.warn('Relatório com estrutura inválida:', relatorio);
-                    return '';
-                }
-                
-                return `
-                    <tr>
-                        <td>${relatorio.id || 'N/A'}</td>
-                        <td>${formatarData(relatorio.dadosTurno.data)}</td>
-                        <td>${relatorio.dadosTurno.horario || 'N/A'}</td>
-                        <td>${relatorio.dadosTurno.letra || 'N/A'}</td>
-                        <td>${relatorio.dadosTurno.supervisor || 'N/A'}</td>
-                        <td>${relatorio.equipes ? relatorio.equipes.length : 0}</td>
-                        <td>
-                            <span class="badge badge-${relatorio.salvoLocalmente ? 'warning' : 'success'}">
-                                ${relatorio.salvoLocalmente ? 'Local' : 'Sincronizado'}
-                            </span>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-info" onclick="visualizarRelatorioSalvo('${relatorio.id}')">
-                                Ver
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            }).filter(row => row !== '').join('');
-            
-            // Se após filtrar não sobrou nada, mostrar mensagem
-            if (tbody.innerHTML.trim() === '') {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8">
-                            <div class="empty-state">
-                                <div class="empty-state-icon">⚠️</div>
-                                <h3>Relatórios com estrutura inválida</h3>
-                                <p>Verifique os dados salvos no GitHub</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
+            tbody.innerHTML = relatorios.slice(0, 50).map(r => {
+                if (!r.dadosTurno) return '';
+                return `<tr><td>${r.id || 'N/A'}</td><td>${formatarData(r.dadosTurno.data)}</td><td>${r.dadosTurno.horario || 'N/A'}</td><td>${r.dadosTurno.letra || 'N/A'}</td><td>${r.dadosTurno.supervisor || 'N/A'}</td><td>${r.equipes ? r.equipes.length : 0}</td><td><span class="badge badge-${r.salvoLocalmente ? 'warning' : 'success'}">${r.salvoLocalmente ? 'Local' : 'Sincronizado'}</span></td><td><button class="btn btn-sm btn-info" onclick="visualizarRelatorioSalvo('${r.id}')">Ver</button><button class="btn btn-sm btn-danger" onclick="solicitarExclusaoRelatorio('${r.id}')" style="margin-left: 0.5rem;">Excluir</button></td></tr>`;
+            }).filter(row => row).join('');
+            if (tbody.innerHTML.trim() === '') tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><h3>Relatórios com estrutura inválida</h3></div></td></tr>`;
         }
 
         function updateStatistics() {
             if (!Array.isArray(relatorios)) return;
-            
             const hoje = new Date().toISOString().split('T')[0];
-            const relatoriosHoje = relatorios.filter(r => r.dadosTurno && r.dadosTurno.data === hoje).length;
-            const totalEquipes = relatorios.reduce((sum, r) => sum + (r.equipes ? r.equipes.length : 0), 0);
-            const atividadesConcluidas = relatorios.reduce((sum, r) => 
-                sum + (r.equipes ? r.equipes.filter(e => e.statusAtividade === 'Concluído').length : 0), 0
-            );
-            
-            // Estatísticas da aba Relatórios
+            const relatoriosHoje = relatorios.filter(r => r.dadosTurno?.data === hoje).length;
+            const totalEquipes = relatorios.reduce((sum, r) => sum + (r.equipes?.length || 0), 0);
+            const atividadesConcluidas = relatorios.reduce((sum, r) => sum + (r.equipes?.filter(e => e.statusAtividade === 'Concluído').length || 0), 0);
             document.getElementById('totalRelatorios').textContent = relatorios.length;
             document.getElementById('relatoriosHoje').textContent = relatoriosHoje;
             document.getElementById('equipesTotal').textContent = totalEquipes;
@@ -3665,225 +3814,104 @@
         // CONFIGURAÇÕES
         function salvarConfigGitHub() {
             const token = document.getElementById('githubToken').value.trim();
-            
-            if (!token) {
-                showNotification('Informe o token do GitHub!', 'warning');
-                return;
-            }
-            
+            if (!token) { showNotification('Informe o token do GitHub!', 'warning'); return; }
             GITHUB_CONFIG.token = token;
             localStorage.setItem('grupogps_relatorio_githubToken', token);
-            
-            showNotification('Token do GitHub salvo com sucesso!', 'success');
+            showNotification('Token do GitHub salvo!', 'success');
             document.getElementById('btnInitializeSystem').classList.remove('hidden');
-            
-            setTimeout(() => {
-                testarConexaoGitHub();
-            }, 500);
+            setTimeout(testarConexaoGitHub, 500);
         }
 
         async function initializeSystemFiles() {
-            if (!GITHUB_CONFIG.token) {
-                showNotification('Por favor, insira e salve o token do GitHub primeiro.', 'error');
-                return;
-            }
-            
-            if (!confirm('Isso criará a estrutura de arquivos no repositório. Continuar?')) {
-                return;
-            }
-
-            showLoading('Inicializando arquivos no GitHub...');
-
+            if (!GITHUB_CONFIG.token) { showNotification('Salve o token do GitHub primeiro.', 'error'); return; }
+            if (!confirm('Isso criará a estrutura de arquivos no repositório. Continuar?')) return;
+            showLoading('Inicializando arquivos...');
             try {
-                // DADOS INICIAIS SANITIZADOS
-                const initialData = {
-                    relatorios: [],
-                    configuracoes: {
-                        nomeEmpresa: 'GrupoGPS',
-                        autoRefreshInterval: 60,
-                        autoBackup: true
-                    },
-                    supervisores: sanitizeObject(DEFAULT_SYSTEM_DATA.supervisores),
-                    vagas: sanitizeObject(DEFAULT_SYSTEM_DATA.vagas),
-                    equipamentos: sanitizeObject(DEFAULT_SYSTEM_DATA.equipamentos)
-                };
-
-                console.log('🧹 Inicializando sistema com dados sanitizados:', initialData);
-
-                await Promise.all(
-                    Object.keys(GITHUB_CONFIG.paths).map(key => 
-                        saveDataToGitHub(key, initialData[key])
-                    )
-                );
-
+                const initialData = { relatorios: [], configuracoes: { nomeEmpresa: 'GrupoGPS', autoRefreshInterval: 60, autoBackup: true }, ...sanitizeObject(DEFAULT_SYSTEM_DATA) };
+                await Promise.all(Object.keys(GITHUB_CONFIG.paths).map(key => saveDataToGitHub(key, initialData[key] || [])));
                 hideLoading();
-                showNotification('Sistema inicializado com dados limpos! Recarregue a página.', 'success');
+                showNotification('Sistema inicializado! Recarregue a página.', 'success');
                 setTimeout(() => location.reload(), 3000);
-
             } catch (error) {
                 hideLoading();
-                console.error('Erro ao inicializar o sistema:', error);
                 showNotification('Erro ao inicializar: ' + error.message, 'error');
             }
         }
 
         function testarConexaoGitHub() {
-            const token = document.getElementById('githubToken').value.trim() || 
-                         GITHUB_CONFIG.token || 
-                         localStorage.getItem('grupogps_relatorio_githubToken');
-            
-            if (!token) {
-                showNotification('Informe o token primeiro!', 'warning');
-                return;
-            }
-            
+            const token = document.getElementById('githubToken').value.trim() || GITHUB_CONFIG.token || localStorage.getItem('grupogps_relatorio_githubToken');
+            if (!token) { showNotification('Informe o token!', 'warning'); return; }
             showNotification('Testando conexão...', 'info');
-            
-            fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, {
-                headers: { 
-                    'Authorization': `token ${token}`,
-                    'Accept': 'application/vnd.github.v3+json' 
-                }
-            })
-            .then(response => {
-                if (response.ok) { 
-                    return response.json(); 
-                } else { 
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`); 
-                }
-            })
+            fetch(`https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}`, { headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' } })
+            .then(res => res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}: ${res.statusText}`)))
             .then(data => {
                 showNotification(`✅ Conexão OK! Repositório: ${data.full_name}`, 'success');
                 GITHUB_CONFIG.token = token;
                 localStorage.setItem('grupogps_relatorio_githubToken', token);
             })
-            .catch(error => {
-                console.error('Erro na conexão:', error);
-                showNotification('❌ Erro na conexão: ' + error.message, 'error');
-            });
+            .catch(error => showNotification('❌ Erro na conexão: ' + error.message, 'error'));
         }
 
         function loadConfiguracoes() {
-            try {
-                const tokenSalvo = localStorage.getItem('grupogps_relatorio_githubToken');
-                if (tokenSalvo) {
-                    GITHUB_CONFIG.token = tokenSalvo;
-                    const tokenField = document.getElementById('githubToken');
-                    if (tokenField) { 
-                        tokenField.value = tokenSalvo; 
-                    }
-                }
-                
-                if (configuracoes.nomeEmpresa) { 
-                    document.getElementById('nomeEmpresa').value = configuracoes.nomeEmpresa; 
-                }
-                if (configuracoes.autoRefreshInterval) { 
-                    document.getElementById('autoRefreshInterval').value = configuracoes.autoRefreshInterval; 
-                }
-                if (configuracoes.autoBackup !== undefined) { 
-                    document.getElementById('autoBackup').value = configuracoes.autoBackup.toString(); 
-                }
-            } catch (error) {
-                console.error('Erro ao carregar configurações:', error);
-            }
+            const tokenSalvo = localStorage.getItem('grupogps_relatorio_githubToken');
+            if (tokenSalvo) { GITHUB_CONFIG.token = tokenSalvo; document.getElementById('githubToken').value = tokenSalvo; }
+            if (configuracoes.nomeEmpresa) document.getElementById('nomeEmpresa').value = configuracoes.nomeEmpresa;
+            if (configuracoes.autoRefreshInterval) document.getElementById('autoRefreshInterval').value = configuracoes.autoRefreshInterval;
+            if (configuracoes.autoBackup !== undefined) document.getElementById('autoBackup').value = configuracoes.autoBackup.toString();
         }
 
         async function salvarConfigGerais() {
             configuracoes.nomeEmpresa = document.getElementById('nomeEmpresa').value;
             configuracoes.autoRefreshInterval = parseInt(document.getElementById('autoRefreshInterval').value);
             configuracoes.autoBackup = document.getElementById('autoBackup').value === 'true';
-            
             try {
-                if (GITHUB_CONFIG.token) {
-                    await saveDataToGitHub('configuracoes', configuracoes);
-                }
+                if (GITHUB_CONFIG.token) await saveDataToGitHub('configuracoes', configuracoes);
                 showNotification('Configurações salvas!', 'success');
                 startAutoRefresh();
             } catch (error) {
-                console.error('Erro ao salvar configurações:', error);
                 showNotification('Erro ao salvar configurações: ' + error.message, 'error');
             }
         }
 
         // EXPORTAÇÃO
         function exportarRelatorios() {
-            if (!relatorios || relatorios.length === 0) {
-                showNotification('Nenhum relatório para exportar!', 'warning');
-                return;
-            }
-            
-            const dados = relatorios.map(r => ({
-                'ID': r.id,
-                'Data': formatarData(r.dadosTurno.data),
-                'Horário': r.dadosTurno.horario,
-                'Letra': r.dadosTurno.letra,
-                'Supervisor': r.dadosTurno.supervisor,
-                'Total Equipes': r.equipes.length,
-                'Atividades Concluídas': r.equipes.filter(e => e.statusAtividade === 'Concluído').length,
-                'Trocas Equipamento': r.equipes.reduce((sum, e) => sum + (e.trocas ? e.trocas.length : 0), 0),
-                'Equipamentos com Atraso': r.equipes.filter(e => e.atraso && e.atraso.houve === 'Sim').length,
-                'Criado Por': r.criadoPor,
-                'Criado Em': formatarDataHora(r.criadoEm)
-            }));
-            
+            if (!relatorios || relatorios.length === 0) { showNotification('Nenhum relatório para exportar!', 'warning'); return; }
+            const dados = relatorios.map(r => ({ 'ID': r.id, 'Data': formatarData(r.dadosTurno.data), 'Horário': r.dadosTurno.horario, 'Letra': r.dadosTurno.letra, 'Supervisor': r.dadosTurno.supervisor, 'Total Equipes': r.equipes.length, 'Atividades Concluídas': r.equipes.filter(e => e.statusAtividade === 'Concluído').length, 'Trocas Equipamento': r.equipes.reduce((sum, e) => sum + (e.trocas?.length || 0), 0), 'Equipamentos com Atraso': r.equipes.filter(e => e.atraso?.houve === 'Sim').length, 'Criado Por': r.criadoPor, 'Criado Em': formatarDataHora(r.criadoEm) }));
             exportarCSV(dados, 'relatorios_turno');
         }
 
         function exportarCSV(dados, nomeArquivo) {
-            const csvContent = "data:text/csv;charset=utf-8," 
-                + Object.keys(dados[0]).join(",") + "\n"
-                + dados.map(row => Object.values(row).join(",")).join("\n");
-
-            const encodedUri = encodeURI(csvContent);
+            const csvContent = "data:text/csv;charset=utf-8," + Object.keys(dados[0]).join(",") + "\n" + dados.map(row => Object.values(row).join(",")).join("\n");
             const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
+            link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", `${nomeArquivo}_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            
-            showNotification('Arquivo exportado com sucesso!', 'success');
+            showNotification('Arquivo exportado!', 'success');
         }
 
         // ATUALIZAÇÃO AUTOMÁTICA
         function startAutoRefresh() {
-            if (autoRefreshTimer) {
-                clearInterval(autoRefreshTimer);
-            }
-            
+            if (autoRefreshTimer) clearInterval(autoRefreshTimer);
             const interval = (configuracoes.autoRefreshInterval || 60) * 1000;
-            autoRefreshTimer = setInterval(async () => {
-                if (isOnline && GITHUB_CONFIG.token) {
-                    try {
-                        await loadAllDataFromGitHub();
-                        console.log('🔄 Dados atualizados automaticamente');
-                    } catch (error) {
-                        console.error('Erro na atualização automática:', error);
-                    }
-                }
-            }, interval);
+            autoRefreshTimer = setInterval(async () => { if (isOnline && GITHUB_CONFIG.token) try { await loadAllDataFromGitHub(); } catch (e) {} }, interval);
         }
 
         async function forceRefresh() {
-            if (!isOnline || !GITHUB_CONFIG.token) {
-                showNotification('Sem conexão ou token não configurado', 'warning');
-                return;
-            }
-            
-            showLoading('Atualizando dados do GitHub...');
-            
+            if (!isOnline || !GITHUB_CONFIG.token) { showNotification('Sem conexão ou token', 'warning'); return; }
+            showLoading('Atualizando...');
             try {
                 await loadAllDataFromGitHub();
                 hideLoading();
-                showNotification('Dados sincronizados com o GitHub!', 'success');
+                showNotification('Dados sincronizados!', 'success');
             } catch (error) {
                 hideLoading();
-                console.error('Erro ao atualizar dados:', error);
                 showNotification('Erro ao sincronizar: ' + error.message, 'error');
             }
         }
 
-        // FUNÇÕES UTILITÁRIAS - CORRIGIDAS
+        // FUNÇÕES UTILITÁRIAS
         function formatarData(dataISO) {
             if (!dataISO) return '-';
             const [ano, mes, dia] = dataISO.split('-');
@@ -3892,19 +3920,24 @@
 
         function formatarDataHora(isoString) {
             if (!isoString) return '-';
-            try {
-                const data = new Date(isoString);
-                return data.toLocaleString('pt-BR', { 
-                    hour12: false,
-                    timeZone: 'America/Sao_Paulo'
-                });
-            } catch (error) {
-                return isoString;
+            try { return new Date(isoString).toLocaleString('pt-BR', { hour12: false, timeZone: 'America/Sao_Paulo' }); } catch (e) { return isoString; }
+        }
+
+        function confirmCloseModal(modalId) {
+            if (!hasUnsavedChanges || modalId !== 'modalEquipe') {
+                closeModal(modalId);
+                return;
+            }
+            if (confirm('⚠️ Você tem alterações não salvas. Deseja realmente sair e perder os dados?')) {
+                hasUnsavedChanges = false;
+                closeModal(modalId);
+                clearEquipeForm();
             }
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('show');
+            const modal = document.getElementById(modalId);
+            if (modal) modal.classList.remove('show');
         }
 
         function showNotification(message, type = 'info') {
@@ -3912,9 +3945,7 @@
             notification.className = `notification ${type}`;
             notification.textContent = message;
             document.body.appendChild(notification);
-            setTimeout(() => { 
-                notification.remove(); 
-            }, 4000);
+            setTimeout(() => { notification.remove(); }, 5000);
         }
 
         function showLoading(message = 'Carregando...') {
@@ -3929,24 +3960,14 @@
         function updateSyncStatus(status, message) {
             const dot = document.getElementById('syncDot');
             const statusText = document.getElementById('syncStatus');
-            
             dot.className = 'sync-dot';
-            if (status === 'loading') {
-                dot.classList.add('loading');
-            } else if (status === 'error') {
-                dot.classList.add('error');
-            }
-            
+            if (status === 'loading') dot.classList.add('loading');
+            else if (status === 'error') dot.classList.add('error');
             statusText.textContent = message;
         }
 
         console.log('🚀 Sistema de Relatório de Turno - GrupoGPS ATUALIZADO');
-        console.log('🔧 Refinamentos aplicados:');
-        console.log('✓ Botão resetar sistema removido');
-        console.log('✓ Caracteres especiais totalmente corrigidos');
-        console.log('✓ Versões removidas do cabeçalho e rodapé');
-        console.log('✓ Interface limpa e responsiva');
-        console.log('✓ Compatibilidade mobile/desktop aprimorada');
+        console.log('🔧 Múltiplas correções e novas funcionalidades implementadas.');
         console.log('✨ Sistema profissional finalizado');
     </script>
 </body>
