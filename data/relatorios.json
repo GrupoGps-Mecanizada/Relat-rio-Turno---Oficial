@@ -1,5 +1,116 @@
 [
   {
+    "id": "REL1759887270279",
+    "dadosTurno": {
+      "data": "2025-10-08",
+      "horario": "07:00 - 19:00",
+      "letra": "B",
+      "supervisor": "Ozias"
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "teste",
+        "atividade": "teste",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
+        "equipamento": "EZC-0453",
+        "regimeTrabalho": {
+          "tipo": "multi-turno",
+          "turnos": [
+            {
+              "horarioInicio": "07:00",
+              "horarioFim": "15:00",
+              "motorista": "teste",
+              "operadores": "teste",
+              "observacoes": ""
+            },
+            {
+              "horarioInicio": "07:00",
+              "horarioFim": "15:00",
+              "motorista": "teste",
+              "operadores": "teste",
+              "observacoes": ""
+            }
+          ]
+        },
+        "motorista": "teste / teste",
+        "operadores": "teste / teste",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "N/A",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "N/A",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "testeEtilometro": {
+      "realizado": false,
+      "horarioTeste": "07:00",
+      "responsavel": "Ozias",
+      "observacoes": "",
+      "colaboradoresAusentes": [
+        {
+          "nome": "warlison",
+          "motivo": "Afastamento Médico",
+          "observacao": ""
+        }
+      ]
+    },
+    "faltasColaboradores": {
+      "houveFaltas": true,
+      "faltas": [
+        {
+          "nomeColaborador": "warlison",
+          "funcao": "Motorista",
+          "motivo": "Atestado Médico",
+          "justificada": true,
+          "houveSubstituicao": false,
+          "nomeSubstituto": null,
+          "observacoes": ""
+        }
+      ]
+    },
+    "equipamentosDevendo": {
+      "ficouDevendo": true,
+      "equipamentos": [
+        {
+          "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
+          "motivo": "Falta de Mão de Obra",
+          "observacoes": "teste"
+        }
+      ]
+    },
+    "observacoesGerais": "",
+    "estatisticas": {
+      "totalEquipes": 1,
+      "atividadesConcluidas": 1,
+      "totalTrocas": 0,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-10-08T01:34:30.279Z"
+  },
+  {
     "id": "REL1759882330749",
     "dadosTurno": {
       "data": "2025-10-07",
@@ -3681,7 +3792,7 @@
           {
             "motivo": "Defeitos Em Geral",
             "placaNova": "DSY6577",
-            "defeito": "Correia da bomba esquentando muito caminho fraco para fazer suco. \nMedida tomada feito troca do caminho no imediato.",
+            "defeito": "Correia da bomba esquentando muito caminho fraco para fazer suco. Medida tomada feito troca do caminho no imediato.",
             "dataHoraInicio": "2025-09-29T01:00",
             "dataHoraFim": "2025-09-29T02:15"
           }
@@ -3833,7 +3944,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "Atividade realizada na coqueria\nDe 08:00 as 00:00 limpeza de ptio da DF e ptio do tpg 01, de 00:20 as 04:50  limpeza de 10 portas.",
+        "observacoes": "Atividade realizada na coqueriaDe 08:00 as 00:00 limpeza de ptio da DF e ptio do tpg 01, de 00:20 as 04:50  limpeza de 10 portas.",
         "vaga": "Moto bomba 01",
         "equipamento": "Moto bomba 01",
         "atraso": {
@@ -4266,7 +4377,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "Troca de alta presso por vcuo CUB 0763, as 01:20 trocou por vcuo ALY 5322, devido CUB ter furado pneu, as 03:00 voltou para o alta presso EGC 2985.\nEquipamento foi programado para atender no porto 120, porem foi dispensado e solicitado pra atender OG 02 e cral 03.",
+        "observacoes": "Troca de alta presso por vcuo CUB 0763, as 01:20 trocou por vcuo ALY 5322, devido CUB ter furado pneu, as 03:00 voltou para o alta presso EGC 2985.Equipamento foi programado para atender no porto 120, porem foi dispensado e solicitado pra atender OG 02 e cral 03.",
         "vaga": "ALTA PRESSAO - GPS - 08 - 24 HS",
         "equipamento": "EGC2985",
         "atraso": {
@@ -4399,7 +4510,7 @@
         }
       }
     ],
-    "observacoesGerais": "Fabricio Fabiano barrado na portaria, Bruno Matias realizando hora extra em seu lugar.\nFernando Maria esta de atestado, Jose Eugenio realizando hora extra em seu lugar.",
+    "observacoesGerais": "Fabricio Fabiano barrado na portaria, Bruno Matias realizando hora extra em seu lugar.Fernando Maria esta de atestado, Jose Eugenio realizando hora extra em seu lugar.",
     "estatisticas": {
       "totalEquipes": 5,
       "equipesAltaPressao": 3,
@@ -4495,7 +4606,7 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "motorista": "Crystian /Marcos",
-        "operadores": "Adelson e Matheus \nErison e Adilson Damaceno.",
+        "operadores": "Adelson e Matheus Erison e Adilson Damaceno.",
         "area": "Porto 75 e coqueria 02.",
         "atividade": "Limpeza de piso e rotor",
         "tipoAtividade": "Rotineira",
@@ -4578,7 +4689,7 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "motorista": "Joviano/Jefferson",
-        "operadores": "Evaldo\nJadir",
+        "operadores": "EvaldoJadir",
         "area": "rea interna da usina",
         "atividade": "Suco de fossa e resduo olioso.",
         "tipoAtividade": "Rotineira",
@@ -4811,7 +4922,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "De 19:30 as 01:30 EGC 2993 \nDe 02:00 as 06:30 CUB 0763",
+        "observacoes": "De 19:30 as 01:30 EGC 2993 De 02:00 as 06:30 CUB 0763",
         "vaga": "AUTO VACUO - GPS - 08 - 24 HS",
         "equipamento": "EGC2993",
         "atraso": {
@@ -5627,7 +5738,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "De 7 as 15 DYB 7210\nDe 15 as 23 ALY 5222",
+        "observacoes": "De 7 as 15 DYB 7210De 15 as 23 ALY 5222",
         "vaga": "AUTO VACUO - GPS - 02 - 16 HS",
         "equipamento": "DYB7210",
         "atraso": {
@@ -5926,7 +6037,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "De 7 as 15 EAM 3257 \nDe 15 as 23 DYB 7210",
+        "observacoes": "De 7 as 15 EAM 3257 De 15 as 23 DYB 7210",
         "vaga": "AUTO VACUO - GPS - 02 - 16 HS",
         "equipamento": "EAM3257",
         "atraso": {
@@ -7390,7 +7501,7 @@
         "tipoAtividade": "Rotineira",
         "statusAtividade": "Concludo",
         "pendencia": "",
-        "observacoes": "Atendimento de 07:00 as 15:00.\nEquipamento foi desviado para atender o Yuri na sinterizao as 12;40, porem foi dispensado devido equipe ter que almoar.",
+        "observacoes": "Atendimento de 07:00 as 15:00.Equipamento foi desviado para atender o Yuri na sinterizao as 12;40, porem foi dispensado devido equipe ter que almoar.",
         "vaga": "ALTA PRESSAO - GPS - 02",
         "equipamento": "ALY5322",
         "atraso": {
@@ -8400,7 +8511,7 @@
           {
             "motivo": "Defeitos Em Geral",
             "placaNova": "EAM 3262",
-            "defeito": "DSY6F81 estourou ouring do cabeote.\nFoi passado pra manuteno",
+            "defeito": "DSY6F81 estourou ouring do cabeote.Foi passado pra manuteno",
             "dataHoraInicio": "2025-08-31T10:00",
             "dataHoraFim": "2025-08-31T10:10"
           }
@@ -8763,7 +8874,7 @@
         }
       }
     ],
-    "observacoesGerais": "Troca de alta presso 08 por vcuo as 01:15, vcuo ANF 2676\nAlta presso 01 ,EAM 3262 estourou mangueira do cabeote foi trocado as 01:45 por AP EAM 3253",
+    "observacoesGerais": "Troca de alta presso 08 por vcuo as 01:15, vcuo ANF 2676Alta presso 01 ,EAM 3262 estourou mangueira do cabeote foi trocado as 01:45 por AP EAM 3253",
     "estatisticas": {
       "totalEquipes": 5,
       "equipesAltaPressao": 3,
