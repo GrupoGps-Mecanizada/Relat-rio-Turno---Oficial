@@ -1,5 +1,365 @@
 [
   {
+    "id": "REL1760907677528",
+    "dadosTurno": {
+      "data": "2025-10-19",
+      "horario": "07:00 - 19:00",
+      "letra": "A",
+      "supervisor": "Ozias"
+    },
+    "equipes": [
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "Sinterizaçao",
+        "atividade": "Limpeza de estruturas",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
+        "equipamento": "EAM-3262",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "Gerlanio Silves",
+        "operadores": "Paulo Bras e Adilson Damasceno",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "4",
+          "plaquetas": "6"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "Coqueria 02, TPG 01",
+        "atividade": "Limpeza da caixa de descarte e pisos do TPG 01",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
+        "equipamento": "EAM-3253",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "Adelson Alves",
+        "operadores": "Paulo Cesar e Maicon Viana",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "7",
+          "plaquetas": "6"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "Pátio de carvão",
+        "atividade": "Limpeza de correias transportadoras",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "ALTA PRESSÃO-GPS- 11- 24HS",
+        "equipamento": "EGC 2989",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "David Silveira Vasconcelos",
+        "operadores": "Fabricio Fabiano e Ronald Aparecido",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "OK",
+          "implemento_Pedal": "OK",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "4",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Sim",
+          "cadeados": "2",
+          "plaquetas": "4"
+        }
+      },
+      {
+        "tipo": "Alta Pressao",
+        "numero": "",
+        "area": "Coqueria 02",
+        "atividade": "Limpeza de portas",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "Moto bomba 01",
+        "equipamento": "Moto bomba 01",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "N/A",
+        "operadores": "Joao Paulo e Charles Ferreira",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Pistola": "OK",
+          "implemento_Pistola_C_L_": "N/A",
+          "implemento_Mang__Torpedo": "N/A",
+          "implemento_Pedal": "N/A",
+          "implemento_Varetas": "N/A",
+          "implemento_Rabicho": "N/A",
+          "implemento_Lances_Mangueira": "11",
+          "implemento_Lances_Varetas": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "area": "Area interna usiminas",
+        "atividade": "Sucção de condensado de BFG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
+        "equipamento": "ALY 5322",
+        "regimeTrabalho": {
+          "tipo": "multi-turno",
+          "turnos": [
+            {
+              "horarioInicio": "07:00",
+              "horarioFim": "15:00",
+              "motorista": "Rogerio Augusto",
+              "operadores": "Edson Gomes",
+              "observacoes": ""
+            },
+            {
+              "horarioInicio": "15:00",
+              "horarioFim": "23:00",
+              "motorista": "Maxwel Afonso",
+              "operadores": "Renato Silva",
+              "observacoes": ""
+            }
+          ]
+        },
+        "motorista": "Rogerio Augusto / Maxwel Afonso",
+        "operadores": "Edson Gomes / Renato Silva",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Redu__es": "N/A",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "area": "Area interna usiminas",
+        "atividade": "Sucção de condensado de COG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
+        "equipamento": "EAM-3257",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "Leonardo de Souza",
+        "operadores": "Fernando Maria Ventura",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Redu__es": "N/A",
+          "implemento_Mangotes_3_": "10 metros",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "area": "TPG 01",
+        "atividade": "Limpeza da caixa de descarte no TPG 01",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
+        "equipamento": "EGC 2993",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "Walace das Graças",
+        "operadores": "Romulo de Souza",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Redu__es": "OK",
+          "implemento_Mangotes_3_": "20 metros",
+          "implemento_Mangotes_4_": "N/A",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      },
+      {
+        "tipo": "Auto Vacuo / Hiper Vacuo",
+        "numero": "",
+        "area": "Pátio de carvão",
+        "atividade": "Sucção de poço no BG",
+        "tipoAtividade": "Rotineira",
+        "statusAtividade": "Concluído",
+        "pendencia": "",
+        "observacoes": "",
+        "vaga": "HIPER VACUO -11- 24HS",
+        "equipamento": "FMD 2200",
+        "regimeTrabalho": {
+          "tipo": "turno-unico",
+          "turnos": []
+        },
+        "motorista": "Maik Pereira",
+        "operadores": "Felipe Martins e Erick Henrique",
+        "atraso": {
+          "houve": "Não",
+          "horarioDirecionamento": "",
+          "motivo": "",
+          "justificativa": ""
+        },
+        "trocas": [],
+        "implementos": {
+          "implemento_Mangotes": "OK",
+          "implemento_Redu__es": "OK",
+          "implemento_Mangotes_3_": "N/A",
+          "implemento_Mangotes_4_": "20 metros",
+          "implemento_Mangotes_6_": "N/A",
+          "justificativa_implementos": "",
+          "caixa_bloqueio": "Não",
+          "cadeados": "N/A",
+          "plaquetas": "N/A"
+        }
+      }
+    ],
+    "testeEtilometro": {
+      "realizado": true,
+      "horarioTeste": "07:00",
+      "responsavel": "Ozias",
+      "observacoes": "",
+      "colaboradoresAusentes": []
+    },
+    "faltasColaboradores": {
+      "houveFaltas": true,
+      "faltas": [
+        {
+          "nomeColaborador": "Carlos Eduardo",
+          "funcao": "Operador",
+          "motivo": "Atestado Médico",
+          "justificada": true,
+          "houveSubstituicao": true,
+          "nomeSubstituto": "Adilson Damasceno",
+          "observacoes": ""
+        }
+      ]
+    },
+    "equipamentosDevendo": {
+      "ficouDevendo": false,
+      "equipamentos": []
+    },
+    "observacoesGerais": "Horas extras:Erick Henrique dos Santos- 06:40 as 14:40- lugar do Lucas Pereira que passou para motorista.Ronald Aparecido- 06:40 as 18:50- Falta de colaborador na equipe do plano de chuva.Adilson Damasceno-06:40 as 18:40- lugar do Carlos Eduardo (atestado)",
+    "estatisticas": {
+      "totalEquipes": 8,
+      "atividadesConcluidas": 8,
+      "totalTrocas": 0,
+      "equipesComAtraso": 0
+    },
+    "criadoPor": "GrupoGPS",
+    "criadoEm": "2025-10-19T21:01:17.528Z"
+  },
+  {
     "id": "REL1760863362118",
     "dadosTurno": {
       "data": "2025-10-18",
@@ -14,7 +374,7 @@
         "area": "Alto forno",
         "atividade": "Limpeza de estruturas e Peneiras",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -24,9 +384,9 @@
           "turnos": []
         },
         "motorista": "Marcelo",
-        "operadores": "Adão e Gilson",
+        "operadores": "AdÃ£o e Gilson",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -53,7 +413,7 @@
         "area": "Cralin e OG1",
         "atividade": "Limpeza de tanques",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -65,7 +425,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Lucas Martins",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -89,10 +449,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "Sinterização",
+        "area": "SinterizaÃ§Ã£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AP11",
@@ -102,9 +462,9 @@
           "turnos": []
         },
         "motorista": "Marcos Vinicius",
-        "operadores": "Gabriel e Josué",
+        "operadores": "Gabriel e JosuÃ©",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -129,9 +489,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Cralin e OG1",
-        "atividade": "Sucção de água e lama em tanques",
+        "atividade": "SucÃ§Ã£o de Ã¡gua e lama em tanques",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -143,7 +503,7 @@
         "motorista": "Walisson Lucas",
         "operadores": "Arthur",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -156,7 +516,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "Não",
+          "caixa_bloqueio": "NÃ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -165,9 +525,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna  Usiminas",
-        "atividade": "Sucção de Condensado de COG",
+        "atividade": "SucÃ§Ã£o de Condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -179,7 +539,7 @@
         "motorista": "Lucas",
         "operadores": "Gilson",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -192,7 +552,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "Não",
+          "caixa_bloqueio": "NÃ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -200,10 +560,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "Sinterização",
-        "atividade": "Limpeza das caçambas",
+        "area": "SinterizaÃ§Ã£o",
+        "atividade": "Limpeza das caÃ§ambas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "Concluído",
+        "statusAtividade": "ConcluÃ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "HV 03",
@@ -213,9 +573,9 @@
           "turnos": []
         },
         "motorista": "Diego",
-        "operadores": "José Eugênio",
+        "operadores": "JosÃ© EugÃªnio",
         "atraso": {
-          "houve": "Não",
+          "houve": "NÃ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -228,7 +588,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "Não",
+          "caixa_bloqueio": "NÃ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -271,12 +631,12 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃ§ao",
-        "atividade": "sucÃ§Ã£o de caixa e rede pluvial",
+        "area": "SinterizaÃÂ§ao",
+        "atividade": "sucÃÂ§ÃÂ£o de caixa e rede pluvial",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
-        "observacoes": "Atendemos com vÃ¡cuo de 08:15 as 18:40",
+        "observacoes": "Atendemos com vÃÂ¡cuo de 08:15 as 18:40",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
         "equipamento": "EAM-3262",
         "regimeTrabalho": {
@@ -286,16 +646,16 @@
         "motorista": "Gerlanio Silves",
         "operadores": "Vinicios Junior",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
         },
         "trocas": [
           {
-            "motivo": "SolicitaÃ§Ã£o Do Cliente",
+            "motivo": "SolicitaÃÂ§ÃÂ£o Do Cliente",
             "placaNova": "CUB 0763",
-            "defeito": "Troca de alta pressÃ£o por vÃ¡cuo para atender na sinter",
+            "defeito": "Troca de alta pressÃÂ£o por vÃÂ¡cuo para atender na sinter",
             "dataHoraInicio": "2025-10-18T08:00",
             "dataHoraFim": "2025-10-18T08:15"
           }
@@ -310,7 +670,7 @@
           "implemento_Lances_Mangueira": "N/A",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃ£o",
+          "caixa_bloqueio": "NÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -318,10 +678,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃ§ao",
+        "area": "SinterizaÃÂ§ao",
         "atividade": "Limpeza de rede pluvial",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PESSAO 11",
@@ -333,7 +693,7 @@
         "motorista": "David Silveira",
         "operadores": "Fabricio Fabiano e Cadmiel",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -349,7 +709,7 @@
           "implemento_Lances_Mangueira": "3",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃ£o",
+          "caixa_bloqueio": "NÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -357,10 +717,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "Usina de Ã³leo leve e alcatrÃ£o",
+        "area": "Usina de ÃÂ³leo leve e alcatrÃÂ£o",
         "atividade": "Limpeza de trocador de calor e pisos",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -372,7 +732,7 @@
         "motorista": "Adelson Alves",
         "operadores": "Paulo Cesar e Maicon Viana",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -381,7 +741,7 @@
           {
             "motivo": "Defeitos Em Geral",
             "placaNova": "EAM 3253",
-            "defeito": "CaminhÃ£o furou o Pneu",
+            "defeito": "CaminhÃÂ£o furou o Pneu",
             "dataHoraInicio": "2025-10-18T13:00",
             "dataHoraFim": "2025-10-18T13:15"
           }
@@ -404,10 +764,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "Usina de Ã³leos leves",
-        "atividade": "SucÃ§Ã£o de agua dos coletores",
+        "area": "Usina de ÃÂ³leos leves",
+        "atividade": "SucÃÂ§ÃÂ£o de agua dos coletores",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -416,10 +776,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Walace das GraÃ§as",
+        "motorista": "Walace das GraÃÂ§as",
         "operadores": "Romulo de Souza",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -432,7 +792,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃ£o",
+          "caixa_bloqueio": "NÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -441,9 +801,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna usiminas",
-        "atividade": "SucÃ§Ã£o de condensado de BFG",
+        "atividade": "SucÃÂ§ÃÂ£o de condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -455,7 +815,7 @@
         "motorista": "Rogerio Augusto",
         "operadores": "Edson",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -468,7 +828,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃ£o",
+          "caixa_bloqueio": "NÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -476,10 +836,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "SinterizaÃ§ao",
-        "atividade": "SucÃ§Ã£o de po das caÃ§ambas da MS 01 e 03",
+        "area": "SinterizaÃÂ§ao",
+        "atividade": "SucÃÂ§ÃÂ£o de po das caÃÂ§ambas da MS 01 e 03",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃ­do",
+        "statusAtividade": "ConcluÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Hiper Vacuo 03",
@@ -491,7 +851,7 @@
         "motorista": "Maick Pereira",
         "operadores": "Felipe e Edson",
         "atraso": {
-          "houve": "NÃ£o",
+          "houve": "NÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -504,7 +864,7 @@
           "implemento_Mangotes_4_": "30 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃ£o",
+          "caixa_bloqueio": "NÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -523,7 +883,7 @@
         {
           "nomeColaborador": "Carlos Eduado",
           "funcao": "Operador",
-          "motivo": "Atestado MÃ©dico",
+          "motivo": "Atestado MÃÂ©dico",
           "justificada": true,
           "houveSubstituicao": true,
           "nomeSubstituto": "Vinicios Junior da Costa Martins",
@@ -560,7 +920,7 @@
         "area": "Escarfagem",
         "atividade": "Limpeza de canaletas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -572,7 +932,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Lucas",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -596,10 +956,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÂ§ÃÂ£o",
+        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -609,9 +969,9 @@
           "turnos": []
         },
         "motorista": "Marcelo",
-        "operadores": "AdÃÂ£o e Cristiano",
+        "operadores": "AdÃÃÂ£o e Cristiano",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -635,10 +995,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "PÃÂ¡tio de CarvÃÂ£o e Coqueria 02",
-        "atividade": "Limpeza de poÃÂ§os",
+        "area": "PÃÃÂ¡tio de CarvÃÃÂ£o e Coqueria 02",
+        "atividade": "Limpeza de poÃÃÂ§os",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AP 11",
@@ -648,9 +1008,9 @@
           "turnos": []
         },
         "motorista": "Marcos Vinicius",
-        "operadores": "Gabriel e JosÃÂ© Carlos",
+        "operadores": "Gabriel e JosÃÃÂ© Carlos",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -666,7 +1026,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -674,10 +1034,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÂ§ÃÂ£o",
+        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -689,7 +1049,7 @@
         "motorista": "Marcos 7 as 15 / 15 as 23 Crystian",
         "operadores": "Adilson 7 as 15 / 15 as 23 Mateus",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -705,7 +1065,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -713,10 +1073,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "PÃÂ¡tio de carvÃÂ£o",
-        "atividade": "Limpeza de PoÃÂ§os",
+        "area": "PÃÃÂ¡tio de carvÃÃÂ£o",
+        "atividade": "Limpeza de PoÃÃÂ§os",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "HV 03",
@@ -726,9 +1086,9 @@
           "turnos": []
         },
         "motorista": "Walisson Lucas",
-        "operadores": "JosÃÂ© EugÃÂªnio e Arthur",
+        "operadores": "JosÃÃÂ© EugÃÃÂªnio e Arthur",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -741,7 +1101,7 @@
           "implemento_Mangotes_4_": "20 metros",
           "implemento_Mangotes_6_": "20 metros",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -750,9 +1110,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Carboquimico",
-        "atividade": "SucÃÂ§ÃÂ£o de ÃÂ¡gua",
+        "atividade": "SucÃÃÂ§ÃÃÂ£o de ÃÃÂ¡gua",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -764,7 +1124,7 @@
         "motorista": "Genilson",
         "operadores": "Kevin",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -777,7 +1137,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -786,9 +1146,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÂ§ÃÂ£o de Condensado de BFG",
+        "atividade": "SucÃÃÂ§ÃÃÂ£o de Condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -797,10 +1157,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÂ© Roberto",
+        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÃÂ© Roberto",
         "operadores": "Renato 7 as 15/ 15 as 23 Valdeci",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -813,7 +1173,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -822,9 +1182,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÂ§ÃÂ£o de Condensado de BFG",
+        "atividade": "SucÃÃÂ§ÃÃÂ£o de Condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÂ­do",
+        "statusAtividade": "ConcluÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -836,7 +1196,7 @@
         "motorista": "Lucas",
         "operadores": "Gilson",
         "atraso": {
-          "houve": "NÃÂ£o",
+          "houve": "NÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -849,7 +1209,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÂ£o",
+          "caixa_bloqueio": "NÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -864,7 +1224,7 @@
         {
           "nome": "Bruno Matias",
           "motivo": "Outros",
-          "observacao": "CrachÃÂ¡ bloqueado"
+          "observacao": "CrachÃÃÂ¡ bloqueado"
         }
       ]
     },
@@ -898,10 +1258,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
+        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -913,7 +1273,7 @@
         "motorista": "Marcelo",
         "operadores": "Paulo Cesar",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -937,10 +1297,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
+        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
         "atividade": "Limpeza do misturador",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -952,7 +1312,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Lucas Martins",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -976,10 +1336,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "PortÃÃÂ£o 73",
+        "area": "PortÃÃÃÂ£o 73",
         "atividade": "Limpeza de caixas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AP 11",
@@ -991,7 +1351,7 @@
         "motorista": "Marcos Vinicius",
         "operadores": "Gabriel",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1007,7 +1367,7 @@
           "implemento_Lances_Mangueira": "3",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1015,10 +1375,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
+        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -1030,7 +1390,7 @@
         "motorista": "Marcos Vinicius 7 as 15 / 15 as 23 Crystian",
         "operadores": "Adilson e Erison 7 as 15 / Mateus 15 as 23",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1039,7 +1399,7 @@
           {
             "motivo": "Defeitos Em Geral",
             "placaNova": "EGC 2983",
-            "defeito": "Vazando ÃÃÂ³leo do motor estacionÃÃÂ¡rio",
+            "defeito": "Vazando ÃÃÃÂ³leo do motor estacionÃÃÃÂ¡rio",
             "dataHoraInicio": "2025-10-16T15:20",
             "dataHoraFim": "2025-10-16T15:30"
           }
@@ -1054,7 +1414,7 @@
           "implemento_Lances_Mangueira": "3",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1062,10 +1422,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
-        "atividade": "SucÃÃÂ§ÃÃÂ£o de ÃÃÂ¡gua",
+        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
+        "atividade": "SucÃÃÃÂ§ÃÃÃÂ£o de ÃÃÃÂ¡gua",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -1077,7 +1437,7 @@
         "motorista": "Lucas",
         "operadores": "Cristiano",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1090,7 +1450,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1098,10 +1458,10 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "SinterizaÃÃÂ§ÃÃÂ£o",
-        "atividade": "SucÃÃÂ§ÃÃÂ£o de ÃÃÂ¡gua",
+        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
+        "atividade": "SucÃÃÃÂ§ÃÃÃÂ£o de ÃÃÃÂ¡gua",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "HV 03",
@@ -1111,9 +1471,9 @@
           "turnos": []
         },
         "motorista": "Genilson",
-        "operadores": "JosÃÃÂ© EugÃÃÂªnio e  Artur",
+        "operadores": "JosÃÃÃÂ© EugÃÃÃÂªnio e  Artur",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1126,7 +1486,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1135,9 +1495,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÂ§ÃÃÂ£o de Condensado de BFG",
+        "atividade": "SucÃÃÃÂ§ÃÃÃÂ£o de Condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -1146,10 +1506,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÃÂ© Roberto",
+        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÃÃÂ© Roberto",
         "operadores": "Renato 7 as 15/15 as 23 Valdeci",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1162,7 +1522,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1171,9 +1531,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÂ§ÃÃÂ£o de Condensado de COG",
+        "atividade": "SucÃÃÃÂ§ÃÃÃÂ£o de Condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -1185,7 +1545,7 @@
         "motorista": "Diego",
         "operadores": "",
         "atraso": {
-          "houve": "NÃÃÂ£o",
+          "houve": "NÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1198,7 +1558,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1213,11 +1573,11 @@
         {
           "nome": "Bruno Matias",
           "motivo": "Outros",
-          "observacao": "CrachÃÃÂ¡ bloqueado"
+          "observacao": "CrachÃÃÃÂ¡ bloqueado"
         },
         {
-          "nome": "AdÃÃÂ£o Godoi",
-          "motivo": "Falta NÃÃÂ£o Justificada",
+          "nome": "AdÃÃÃÂ£o Godoi",
+          "motivo": "Falta NÃÃÃÂ£o Justificada",
           "observacao": ""
         }
       ]
@@ -1255,7 +1615,7 @@
         "area": "Alto forno",
         "atividade": "Limpeza de peneira ,estruturas.",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -1267,7 +1627,7 @@
         "motorista": "Gerlanio Silves",
         "operadores": "Paulo Bras e Carlos Eduardo",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1292,9 +1652,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza de um tubo no 3ÃÃÃÂ° andar",
+        "atividade": "Limpeza de um tubo no 3ÃÃÃÃÂ° andar",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -1306,7 +1666,7 @@
         "motorista": "Adelson Alves",
         "operadores": "Paulo Cesar e Maicon Viana",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1330,10 +1690,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÃÂ§ao",
-        "atividade": "Limpeza de estruturas , mÃÃÃÂ¡quina 03",
+        "area": "SinterizaÃÃÃÃÂ§ao",
+        "atividade": "Limpeza de estruturas , mÃÃÃÃÂ¡quina 03",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO -11- GPS - TURNO - 24HS",
@@ -1345,7 +1705,7 @@
         "motorista": "David Silveira Vasconcelos",
         "operadores": "Fabricio Fabiano",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1361,7 +1721,7 @@
           "implemento_Lances_Mangueira": "3",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1372,7 +1732,7 @@
         "area": "Coqueria 02",
         "atividade": "Limpeza de portas e patio",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Moto bomba 01",
@@ -1384,7 +1744,7 @@
         "motorista": "N/A",
         "operadores": "Joao Paulo e Charles Ferreira",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1400,7 +1760,7 @@
           "implemento_Lances_Mangueira": "12",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1411,7 +1771,7 @@
         "area": "Área interna usiminas",
         "atividade": "Limpeza de condensado de COG.",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -1431,7 +1791,7 @@
         "motorista": "Leonardo de Souza",
         "operadores": "Fernando Maria",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1444,7 +1804,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1453,9 +1813,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "ENA",
-        "atividade": "SucÃÃÃÂ§ÃÃÃÂ£o de lama do clarificador",
+        "atividade": "SucÃÃÃÃÂ§ÃÃÃÃÂ£o de lama do clarificador",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -1464,10 +1824,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Walace das GraÃÃÃÂ§as",
+        "motorista": "Walace das GraÃÃÃÃÂ§as",
         "operadores": "Romulo de Souza",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1480,7 +1840,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1488,13 +1848,13 @@
       {
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
-        "area": "SinterizaÃÃÃÂ§ÃÃÃÂ£o",
-        "atividade": "Limpeza de caixa de pÃÃÃÂ³ na MSA 03.",
+        "area": "SinterizaÃÃÃÃÂ§ÃÃÃÃÂ£o",
+        "atividade": "Limpeza de caixa de pÃÃÃÃÂ³ na MSA 03.",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
-        "vaga": "Hiper VÃÃÃÂ¡cuo - 11 - GPS - turno 24HS",
+        "vaga": "Hiper VÃÃÃÃÂ¡cuo - 11 - GPS - turno 24HS",
         "equipamento": "FHD 9264",
         "regimeTrabalho": {
           "tipo": "turno-unico",
@@ -1503,7 +1863,7 @@
         "motorista": "Maick Pereira",
         "operadores": "Edson Soares e Felipe Matias",
         "atraso": {
-          "houve": "NÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1512,7 +1872,7 @@
           {
             "motivo": "Outros Motivos",
             "placaNova": "DSY6471",
-            "defeito": "Equipamento trocado para realizar sucÃÃÃÂ§ÃÃÃÂ£o de pÃÃÃÂ³",
+            "defeito": "Equipamento trocado para realizar sucÃÃÃÃÂ§ÃÃÃÃÂ£o de pÃÃÃÃÂ³",
             "dataHoraInicio": "2025-10-13T20:50",
             "dataHoraFim": "2025-10-13T21:00"
           }
@@ -1524,7 +1884,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1570,9 +1930,9 @@
         "area": "Alto forno",
         "atividade": "Limpeza de peneira ,estruturas e pisos",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
-        "observacoes": "Foi solicitado para realizarmos limpeza do no moinho de pÃÃÃÃÂ³ do alto forno 03, porem a ÃÃÃÃÂ¡rea nÃÃÃÃÂ£o conseguiu imprimir nota de manutenÃÃÃÃÂ§ÃÃÃÃÂ£o para executarmos a atividade, cancelado a atividade por falta da mesma.",
+        "observacoes": "Foi solicitado para realizarmos limpeza do no moinho de pÃÃÃÃÃÂ³ do alto forno 03, porem a ÃÃÃÃÃÂ¡rea nÃÃÃÃÃÂ£o conseguiu imprimir nota de manutenÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o para executarmos a atividade, cancelado a atividade por falta da mesma.",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
         "equipamento": "DSY 6F81",
         "regimeTrabalho": {
@@ -1582,7 +1942,7 @@
         "motorista": "Gerlanio Silves",
         "operadores": "Paulo Bras e Carlos Eduardo",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1609,7 +1969,7 @@
         "area": "Cral 03 e OG 02",
         "atividade": "Limpeza de secador de lama e rede de retorno",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -1621,7 +1981,7 @@
         "motorista": "Maick Pereira",
         "operadores": "Fabricio Fabiano e Felipe Matias",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1637,7 +1997,7 @@
           "implemento_Lances_Mangueira": "3",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1648,7 +2008,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza de canaleta e rede",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -1660,7 +2020,7 @@
         "motorista": "Adelson Alves",
         "operadores": "Paulo Cesar e David Silveira Vasconcelos",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1685,9 +2045,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Coqueria 02",
-        "atividade": "Limpeza do pÃÃÃÃÂ¡tio da bateria",
+        "atividade": "Limpeza do pÃÃÃÃÃÂ¡tio da bateria",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Moto bomba 01",
@@ -1699,7 +2059,7 @@
         "motorista": "N/A",
         "operadores": "Joao Paulo e Charles Ferreira",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1715,7 +2075,7 @@
           "implemento_Lances_Mangueira": "11",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1724,9 +2084,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Aciaria 02 e BG",
-        "atividade": "SucÃÃÃÃÂ§ÃÃÃÃÂ£o de agua de canaleta",
+        "atividade": "SucÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o de agua de canaleta",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -1735,10 +2095,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Walace das GraÃÃÃÃÂ§as",
+        "motorista": "Walace das GraÃÃÃÃÃÂ§as",
         "operadores": "Romulo de Souza",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1751,7 +2111,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1760,11 +2120,11 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Area interna usiminas",
-        "atividade": "sucÃÃÃÃÂ§ÃÃÃÃÂ£o de condensado de COG",
+        "atividade": "sucÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o de condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
         "pendencia": "",
-        "observacoes": "Com solicitaÃÃÃÃÂ§ÃÃÃÃÂ£o da garagem o vÃÃÃÃÂ¡cuo foi deixado carregado de resÃÃÃÃÂ­duos de restaurante do turno anterior e descarregado nesse turno.",
+        "observacoes": "Com solicitaÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o da garagem o vÃÃÃÃÃÂ¡cuo foi deixado carregado de resÃÃÃÃÃÂ­duos de restaurante do turno anterior e descarregado nesse turno.",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
         "equipamento": "ALY 5322",
         "regimeTrabalho": {
@@ -1774,16 +2134,16 @@
         "motorista": "Leonardo de Souza",
         "operadores": "Fernando Maria",
         "atraso": {
-          "houve": "NÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
         },
         "trocas": [
           {
-            "motivo": "SolicitaÃÃÃÃÂ§ÃÃÃÃÂ£o Do Cliente",
+            "motivo": "SolicitaÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o Do Cliente",
             "placaNova": "EAM 3257",
-            "defeito": "solicitaÃÃÃÃÂ§ÃÃÃÃÂ£o do cliente",
+            "defeito": "solicitaÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o do cliente",
             "dataHoraInicio": "2025-10-13T01:15",
             "dataHoraFim": "2025-10-13T01:20"
           }
@@ -1795,7 +2155,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1805,12 +2165,12 @@
       "realizado": false,
       "horarioTeste": "07:00",
       "responsavel": "Ozias",
-      "observacoes": "NÃÃÃÃÂ£o foi realizado teste de etilÃÃÃÃÂ´metro devido nÃÃÃÃÂ£o ter canudos disponÃÃÃÃÂ­veis.",
+      "observacoes": "NÃÃÃÃÃÂ£o foi realizado teste de etilÃÃÃÃÃÂ´metro devido nÃÃÃÃÃÂ£o ter canudos disponÃÃÃÃÃÂ­veis.",
       "colaboradoresAusentes": [
         {
           "nome": "ozias gomes de oliveira",
           "motivo": "Outros",
-          "observacao": "NÃÃÃÃÂ£o foi realizado teste de etilÃÃÃÃÂ´metro devido nÃÃÃÃÂ£o ter canudos disponÃÃÃÃÂ­veis."
+          "observacao": "NÃÃÃÃÃÂ£o foi realizado teste de etilÃÃÃÃÃÂ´metro devido nÃÃÃÃÃÂ£o ter canudos disponÃÃÃÃÃÂ­veis."
         }
       ]
     },
@@ -1845,9 +2205,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza do tanque de expansÃÃÃÃÃÂ£o e caixas do IDF",
+        "atividade": "Limpeza do tanque de expansÃÃÃÃÃÃÂ£o e caixas do IDF",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -1859,7 +2219,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Marcos Vinicius",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1883,10 +2243,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "Alto forno e SinterizaÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o",
+        "area": "Alto forno e SinterizaÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂ£o",
         "atividade": "Limpeza das peneiras e Silos",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -1896,9 +2256,9 @@
           "turnos": []
         },
         "motorista": "Genilson",
-        "operadores": "AdÃÃÃÃÃÂ£o e Cadmiel",
+        "operadores": "AdÃÃÃÃÃÃÂ£o e Cadmiel",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1923,9 +2283,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Aguardando ÃÃÃÃÃÂ¡rea",
+        "atividade": "Aguardando ÃÃÃÃÃÃÂ¡rea",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -1937,7 +2297,7 @@
         "motorista": "Walisson Lucas",
         "operadores": "Gabriel e Lucas Martins",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1953,7 +2313,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -1962,9 +2322,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza do tanque de expansÃÃÃÃÃÂ£o e caixas e canaletas do IDF",
+        "atividade": "Limpeza do tanque de expansÃÃÃÃÃÃÂ£o e caixas e canaletas do IDF",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -1974,9 +2334,9 @@
           "turnos": []
         },
         "motorista": "Israel",
-        "operadores": "Jose EugÃÃÃÃÃÂªnio",
+        "operadores": "Jose EugÃÃÃÃÃÃÂªnio",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -1989,7 +2349,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2000,7 +2360,7 @@
         "area": "Coqueria 02",
         "atividade": "Limpeza de Portas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Moto Bomba",
@@ -2012,7 +2372,7 @@
         "motorista": "N/A",
         "operadores": "Cristiano e Kevin",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2028,7 +2388,7 @@
           "implemento_Lances_Mangueira": "N/A",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2037,9 +2397,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÃÃÃÂ§ÃÃÃÃÃÂ£o de Condensado de COG",
+        "atividade": "SucÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂ£o de Condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -2051,7 +2411,7 @@
         "motorista": "Diego",
         "operadores": "Gilson",
         "atraso": {
-          "houve": "NÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2064,7 +2424,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2079,12 +2439,12 @@
         {
           "nome": "Marcelo Leandro",
           "motivo": "Outros",
-          "observacao": "CrachÃÃÃÃÃÂ¡ bloqueado"
+          "observacao": "CrachÃÃÃÃÃÃÂ¡ bloqueado"
         },
         {
           "nome": "Bruno Matias",
           "motivo": "Outros",
-          "observacao": "CrachÃÃÃÃÃÂ¡ bloqueado"
+          "observacao": "CrachÃÃÃÃÃÃÂ¡ bloqueado"
         }
       ]
     },
@@ -2119,11 +2479,11 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza na grade do 4ÃÃÃÃÃÃÂ° andar",
+        "atividade": "Limpeza na grade do 4ÃÃÃÃÃÃÃÂ° andar",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
-        "observacoes": "Atividade concluÃÃÃÃÃÃÂ­da as 15:00 horas, apÃÃÃÃÃÃÂ³s ficou aguardando ate o final do turno",
+        "observacoes": "Atividade concluÃÃÃÃÃÃÃÂ­da as 15:00 horas, apÃÃÃÃÃÃÃÂ³s ficou aguardando ate o final do turno",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
         "equipamento": "EGC-2985",
         "regimeTrabalho": {
@@ -2133,7 +2493,7 @@
         "motorista": "Adelson Alves",
         "operadores": "Paulo Cesar e Joao Batista",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2160,7 +2520,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza no tanquinho e saturadora",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -2172,7 +2532,7 @@
         "motorista": "Edson",
         "operadores": "Joao Moreira de Barros e Railander",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2197,9 +2557,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciariaa 02",
-        "atividade": "Limpeza de tubulaÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂµes e Recuperador de GÃÃÃÃÃÃÂ¡s",
+        "atividade": "Limpeza de tubulaÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÂµes e Recuperador de GÃÃÃÃÃÃÃÂ¡s",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "Equipe ficou aguardando de 15:00 as 18:00",
         "vaga": "ALTA PRESSÃO - GPS - 06",
@@ -2211,7 +2571,7 @@
         "motorista": "Edimilson Meneses",
         "operadores": "Jose Aparecido e Matheus",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2238,7 +2598,7 @@
         "area": "Coqueria 02",
         "atividade": "limpeza do lavador de portas e pisos",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Moto bomba 01",
@@ -2250,7 +2610,7 @@
         "motorista": "N/A",
         "operadores": "Joao Paulo",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2266,7 +2626,7 @@
           "implemento_Lances_Mangueira": "11",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2274,12 +2634,12 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂ£o e patio de carvao",
-        "atividade": "limpeza de caÃÃÃÃÃÃÂ§amba de po e poco da c 08",
+        "area": "SinterizaÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÂ£o e patio de carvao",
+        "atividade": "limpeza de caÃÃÃÃÃÃÃÂ§amba de po e poco da c 08",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
-        "observacoes": "As 15:00 foi trocado o Hiper VÃÃÃÃÃÃÂ¡cuo DSY 6471 por vÃÃÃÃÃÃÂ¡cuo EGC 2993.",
+        "observacoes": "As 15:00 foi trocado o Hiper VÃÃÃÃÃÃÃÂ¡cuo DSY 6471 por vÃÃÃÃÃÃÃÂ¡cuo EGC 2993.",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
         "equipamento": "DSY 6F81",
         "regimeTrabalho": {
@@ -2289,16 +2649,16 @@
         "motorista": "Gerlanio Silves",
         "operadores": "Paulo Bras e Fabricio Fabiano",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
         },
         "trocas": [
           {
-            "motivo": "SolicitaÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂ£o Do Cliente",
+            "motivo": "SolicitaÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÂ£o Do Cliente",
             "placaNova": "DSY6471",
-            "defeito": "SolicitaÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÂ£o do cliete",
+            "defeito": "SolicitaÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÂ£o do cliete",
             "dataHoraInicio": "2025-10-11T10:15",
             "dataHoraFim": "2025-10-11T10:20"
           }
@@ -2312,8 +2672,8 @@
           "implemento_Rabicho": "N/A",
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
-          "justificativa_implementos": "Equipamento ficou aguardando de 08;00 as 10:00, devido os mangotes e a boca de 6ÃÃÃÃÃÃÂ¨ reduzida pra 4ÃÃÃÃÃÃÂ¨ esta na ÃÃÃÃÃÃÂ¡rea e nÃÃÃÃÃÃÂ£o foi passado pra nos onde fica esse material.",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
+          "justificativa_implementos": "Equipamento ficou aguardando de 08;00 as 10:00, devido os mangotes e a boca de 6ÃÃÃÃÃÃÃÂ¨ reduzida pra 4ÃÃÃÃÃÃÃÂ¨ esta na ÃÃÃÃÃÃÃÂ¡rea e nÃÃÃÃÃÃÃÂ£o foi passado pra nos onde fica esse material.",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2324,7 +2684,7 @@
         "area": "Aciaria 02",
         "atividade": "Equipe ficou aguardando",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -2333,10 +2693,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Walace das GraÃÃÃÃÃÃÂ§as",
+        "motorista": "Walace das GraÃÃÃÃÃÃÃÂ§as",
         "operadores": "Romulo de Souza",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2349,7 +2709,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2395,7 +2755,7 @@
         "area": "Etol e Alto forno 02",
         "atividade": "Limpeza de piso , peneiras e estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -2405,9 +2765,9 @@
           "turnos": []
         },
         "motorista": "Giliades",
-        "operadores": "AdÃÃÃÃÃÃÃÂ£o e Bruno Matias",
+        "operadores": "AdÃÃÃÃÃÃÃÃÂ£o e Bruno Matias",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2434,7 +2794,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza da saturadora e drenos do IDF",
         "tipoAtividade": "Programada",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -2446,7 +2806,7 @@
         "motorista": "David",
         "operadores": "Cadmiel",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2473,7 +2833,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza do IDF e drenos",
         "tipoAtividade": "Programada",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -2485,7 +2845,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Marcos Vinicius",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2512,7 +2872,7 @@
         "area": "Coqueria 02",
         "atividade": "Limpeza de portas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "Moto Bomba",
@@ -2524,7 +2884,7 @@
         "motorista": "N/A",
         "operadores": "Cristiano e Kevin",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2540,7 +2900,7 @@
           "implemento_Lances_Mangueira": "N/A",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2551,7 +2911,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza da saturadora",
         "tipoAtividade": "Programada",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -2561,9 +2921,9 @@
           "turnos": []
         },
         "motorista": "Walisson Lucas",
-        "operadores": "JosÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÂªnio",
+        "operadores": "JosÃÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÃÂªnio",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2576,7 +2936,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2585,9 +2945,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÂ£o de Condensado de COG",
+        "atividade": "SucÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÂ£o de Condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -2599,7 +2959,7 @@
         "motorista": "Diego",
         "operadores": "Gilson",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2612,7 +2972,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2662,11 +3022,11 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Aguardando abrir frente de serviÃÃÃÃÃÃÃÃÂ§o",
+        "atividade": "Aguardando abrir frente de serviÃÃÃÃÃÃÃÃÃÂ§o",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
-        "observacoes": "Equipe ficou aguardando abrir frente de servico no 4ÃÃÃÃÃÃÃÃÂ° andar",
+        "observacoes": "Equipe ficou aguardando abrir frente de servico no 4ÃÃÃÃÃÃÃÃÃÂ° andar",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
         "equipamento": "EGC-2985",
         "regimeTrabalho": {
@@ -2676,7 +3036,7 @@
         "motorista": "Adelson Alves",
         "operadores": "Joao Batista e Paulo Cesar",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2703,7 +3063,7 @@
         "area": "Aciaria 02",
         "atividade": "limpeza na parte superior do separador e damp",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -2715,7 +3075,7 @@
         "motorista": "Cristhian Marcelino",
         "operadores": "Adelson e Mateus Figueiredo",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2742,7 +3102,7 @@
         "area": "Aciaria 02",
         "atividade": "limpeza da grade do separador, tubos da bomba e tubos da saturadora",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 06",
@@ -2752,9 +3112,9 @@
           "turnos": []
         },
         "motorista": "Edmilson Meneses",
-        "operadores": "Jose Aparecido e Sandro AlcÃÃÃÃÃÃÃÃÂ¢ntara",
+        "operadores": "Jose Aparecido e Sandro AlcÃÃÃÃÃÃÃÃÃÂ¢ntara",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2770,7 +3130,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2779,9 +3139,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "SucÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÂ£o de agua  na linha do convertedor o4",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o de agua  na linha do convertedor o4",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -2790,10 +3150,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Walace das GraÃÃÃÃÃÃÃÃÂ§as",
+        "motorista": "Walace das GraÃÃÃÃÃÃÃÃÃÂ§as",
         "operadores": "Romulo de Souza",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2806,7 +3166,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2815,9 +3175,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Area interna usiminas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÂ£o de condensado de BFG",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o de condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -2829,7 +3189,7 @@
         "motorista": "Rogerio Augusto",
         "operadores": "Lucas Pereira",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2842,7 +3202,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2885,10 +3245,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o",
+        "area": "SinterizaÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÂ£o",
         "atividade": "Limpeza de estruturas",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -2900,7 +3260,7 @@
         "motorista": "Gilkyarlei",
         "operadores": "Bruno Matias e Cristiano",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2916,7 +3276,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -2925,9 +3285,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza da Grade 4ÃÃÃÃÃÃÃÃÃÂ° andar",
+        "atividade": "Limpeza da Grade 4ÃÃÃÃÃÃÃÃÃÃÂ° andar",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -2939,7 +3299,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Paulo Cesar",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -2964,9 +3324,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza no TubulÃÃÃÃÃÃÃÃÃÂ£o",
+        "atividade": "Limpeza no TubulÃÃÃÃÃÃÃÃÃÃÂ£o",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -2978,7 +3338,7 @@
         "motorista": "Crystian",
         "operadores": "Matheus e Adelson",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3005,7 +3365,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza no separador",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 04",
@@ -3015,9 +3375,9 @@
           "turnos": []
         },
         "motorista": "Edimilson",
-        "operadores": "Sandro e JosÃÃÃÃÃÃÃÃÃÂ© Aparecido",
+        "operadores": "Sandro e JosÃÃÃÃÃÃÃÃÃÃÂ© Aparecido",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3042,9 +3402,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Ficou a disposiÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o",
+        "atividade": "Ficou a disposiÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÂ£o",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -3054,9 +3414,9 @@
           "turnos": []
         },
         "motorista": "Walisson Lucas",
-        "operadores": "JosÃÃÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÃÃÂªnio",
+        "operadores": "JosÃÃÃÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÃÃÃÂªnio",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3069,7 +3429,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3078,9 +3438,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o de Condensado de BFG",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÂ£o de Condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -3092,7 +3452,7 @@
         "motorista": "Rogerio 7 as 15 / Maxuel  15 as 23",
         "operadores": "Lucas",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3105,7 +3465,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3114,9 +3474,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o de Condensado de COG",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÂ£o de Condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -3128,7 +3488,7 @@
         "motorista": "Leonardo",
         "operadores": "Fernando",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3141,7 +3501,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3150,9 +3510,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Oficinas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÂ£o de resÃÃÃÃÃÃÃÃÃÂ­duos",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÂ£o de resÃÃÃÃÃÃÃÃÃÃÂ­duos",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 07 - 16 HS",
@@ -3161,10 +3521,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "JoÃÃÃÃÃÃÃÃÃÂ£o Santana 7 as 15/15 as 23 Jeferson",
+        "motorista": "JoÃÃÃÃÃÃÃÃÃÃÂ£o Santana 7 as 15/15 as 23 Jeferson",
         "operadores": "Evaldo 7 as 15 / Renato",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3177,7 +3537,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3195,9 +3555,9 @@
           "observacao": ""
         },
         {
-          "nome": "AdÃÃÃÃÃÃÃÃÃÂ£o Godoi",
+          "nome": "AdÃÃÃÃÃÃÃÃÃÃÂ£o Godoi",
           "motivo": "Outros",
-          "observacao": "CrachÃÃÃÃÃÃÃÃÃÂ¡ Bloqueado"
+          "observacao": "CrachÃÃÃÃÃÃÃÃÃÃÂ¡ Bloqueado"
         }
       ]
     },
@@ -3231,10 +3591,10 @@
       {
         "tipo": "Alta Pressao",
         "numero": "",
-        "area": "SinterizaÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o e Carboquimico",
+        "area": "SinterizaÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o e Carboquimico",
         "atividade": "Limpeza de estruturas e piso",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 01 - 24 HS",
@@ -3246,7 +3606,7 @@
         "motorista": "Renan",
         "operadores": "Bruno Matias e Paulo Cesar",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3262,7 +3622,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3271,9 +3631,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza no 3ÃÃÃÃÃÃÃÃÃÃÃÃÂ° andar Pera",
+        "atividade": "Limpeza no 3ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ° andar Pera",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 08 - 24 HS",
@@ -3285,7 +3645,7 @@
         "motorista": "Sergio",
         "operadores": "Alderino e Marcos Vinicius",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3301,7 +3661,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3310,9 +3670,9 @@
         "tipo": "Alta Pressao",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Limpeza no 5ÃÃÃÃÃÃÃÃÃÃÃÃÂ° andar e no 4ÃÃÃÃÃÃÃÃÃÃÃÃÂ°",
+        "atividade": "Limpeza no 5ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ° andar e no 4ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ°",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 07 - 16 HS",
@@ -3324,7 +3684,7 @@
         "motorista": "Crystian",
         "operadores": "Adelson e David",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3340,7 +3700,7 @@
           "implemento_Lances_Mangueira": "4",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3351,7 +3711,7 @@
         "area": "Aciaria 02",
         "atividade": "Limpeza da canaleta",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "ALTA PRESSÃO - GPS - 06",
@@ -3361,9 +3721,9 @@
           "turnos": []
         },
         "motorista": "Edmilson",
-        "operadores": "Sandro e JosÃÃÃÃÃÃÃÃÃÃÃÃÂ© Aparecido",
+        "operadores": "Sandro e JosÃÃÃÃÃÃÃÃÃÃÃÃÃÂ© Aparecido",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3379,7 +3739,7 @@
           "implemento_Lances_Mangueira": "N/A",
           "implemento_Lances_Varetas": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3388,9 +3748,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o de Condensado de BFG",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o de Condensado de BFG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 02 - 16 HS",
@@ -3399,10 +3759,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÃÃÃÃÃÃÃÃÃÃÃÂ© Roberto",
+        "motorista": "Maxuel 7 as 15 / 15 as 23 JosÃÃÃÃÃÃÃÃÃÃÃÃÃÂ© Roberto",
         "operadores": "Lucas / Valdeci",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3415,7 +3775,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3424,9 +3784,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Área interna Usiminas",
-        "atividade": "SecÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o de condensado de COG",
+        "atividade": "SecÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o de condensado de COG",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 01 - 16 HS",
@@ -3438,7 +3798,7 @@
         "motorista": "Diego",
         "operadores": "Gilson",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3451,7 +3811,7 @@
           "implemento_Mangotes_4_": "N/A",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3460,9 +3820,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Aciaria 02",
-        "atividade": "Ficou a disposiÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+        "atividade": "Ficou a disposiÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 08 - 24 HS",
@@ -3472,9 +3832,9 @@
           "turnos": []
         },
         "motorista": "Genilson",
-        "operadores": "JosÃÃÃÃÃÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÃÃÃÃÃÂªnio",
+        "operadores": "JosÃÃÃÃÃÃÃÃÃÃÃÃÃÂ© EugÃÃÃÃÃÃÃÃÃÃÃÃÃÂªnio",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3487,7 +3847,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3496,9 +3856,9 @@
         "tipo": "Auto Vacuo / Hiper Vacuo",
         "numero": "",
         "area": "Fossa e Oficinas Diversas",
-        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o em  caixa de contenÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÂ£o e fossa",
+        "atividade": "SucÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o em  caixa de contenÃÃÃÃÃÃÃÃÃÃÃÃÃÂ§ÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o e fossa",
         "tipoAtividade": "Rotineira",
-        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
+        "statusAtividade": "ConcluÃÃÃÃÃÃÃÃÃÃÃÃÃÂ­do",
         "pendencia": "",
         "observacoes": "",
         "vaga": "AUTO VÁCUO - GPS - 07 - 16 HS",
@@ -3507,10 +3867,10 @@
           "tipo": "turno-unico",
           "turnos": []
         },
-        "motorista": "JoÃÃÃÃÃÃÃÃÃÃÃÃÂ£o Santana 7 as 15 / 15 as 23 Jeferson",
+        "motorista": "JoÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o Santana 7 as 15 / 15 as 23 Jeferson",
         "operadores": "Evaldo 7 as 15/ 15 as 23",
         "atraso": {
-          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "houve": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "horarioDirecionamento": "",
           "motivo": "",
           "justificativa": ""
@@ -3523,7 +3883,7 @@
           "implemento_Mangotes_4_": "10 metros",
           "implemento_Mangotes_6_": "N/A",
           "justificativa_implementos": "",
-          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
+          "caixa_bloqueio": "NÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o",
           "cadeados": "N/A",
           "plaquetas": "N/A"
         }
@@ -3541,9 +3901,9 @@
           "observacao": ""
         },
         {
-          "nome": "AdÃÃÃÃÃÃÃÃÃÃÃÃÂ£o Godoi",
+          "nome": "AdÃÃÃÃÃÃÃÃÃÃÃÃÃÂ£o Godoi",
           "motivo": "Outros",
-          "observacao": "CrachÃÃÃÃÃÃÃÃÃÃÃÃÂ¡ bloqueado"
+          "observacao": "CrachÃÃÃÃÃÃÃÃÃÃÃÃÃÂ¡ bloqueado"
         }
       ]
     },
