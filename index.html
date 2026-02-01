@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Relatório de Turno | GPS Mecanizada</title>
+    <meta name="theme-color" content="#1e40af">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { font-family: 'Inter', sans-serif; box-sizing: border-box; }
+        body { background: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        /* Sidebar */
+        .sidebar {
+            position: fixed; left: 0; top: 0; height: 100vh; width: 280px;
+            background: white; box-shadow: 4px 0 24px rgba(0,0,0,0.08);
+            transform: translateX(-100%); transition: transform 0.3s ease; z-index: 50;
+        }
+        .sidebar.open { transform: translateX(0); }
+        @media(min-width: 768px) { .sidebar { transform: translateX(0); } .main-content { margin-left: 280px; } }
+        
+        /* Timeline for Exchanges */
+        .timeline-item { position: relative; padding-left: 24px; border-left: 2px solid #e2e8f0; padding-bottom: 16px; }
+        .timeline-item::before {
+            content: ''; position: absolute; left: -5px; top: 0; width: 8px; height: 8px;
+            border-radius: 50%; background: #3b82f6;
+        }
+        .timeline-item:last-child { border-left: none; }
+
+        /* Screenshot Modal Specifics */
+        .screenshot-mode { background: white !important; color: black !important; padding: 20px; border-radius: 0; }
+        .screenshot-mode .bg-blue-600 { background: #1e3a8a !important; }
+        .screenshot-mode .text-white { color: white !important; }
+    </style>
+</head>
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loading" class="fixed inset-0 bg-black/50 z-[100] hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-xl shadow-2xl flex flex-col items-center">
+            <div class="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-3"></div>
+            <span class="font-semibold text-gray-700">Processando...</span>
+        </div>
+    </div>
+
+    <!-- App Container -->
+    <div id="app"></div>
+
+    <script>
+        // CONFIGURAÇÃO
+        const CONFIG = {
+            API_URL: 'SUA_URL_DO_WEB_APP_AQUI' // <--- COLE SUA URL AQUI
+        };
+
+        // ESTADO GLOBAL
+        let state = {
+            view: 'login',
+            user: null,
+            lists: { vagas: [], equipamentos: [], equipe: [] },
+            reportData: {
+                date: new Date().toISOString().split('T')[0],
+                items: [], // { id, vaga, currentEquip, crew: [], exchanges: [], area: '' }
+                generalObs: ''
+            },
+            dashboard: null
+        };
+
+        // ICONS
+        const ICONS = {
+            menu: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>',
+            plus: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>',
+            refresh: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>',
+            exchange: '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>',
+            whatsapp: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>'
+        };
+
+        // ==========================================
+        // API CALLS
+        // ==========================================
+        async function api(params, method = 'GET', body = null) {
+            document.getElementById('loading').classList.remove('hidden');
+            try {
+                const url = new URL(CONFIG.API_URL);
+                Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+                
+                const opts = { method };
+                if (body) opts.body = JSON.stringify(body);
+                
+                const res = await fetch(url, opts);
+                const json = await res.json();
+                return json;
+            } catch (e) {
+                alert('Erro de conexão: ' + e.message);
+                return { success: false };
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // LOGIC & VIEWS
+        // ==========================================
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'login') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-700 to-blue-900">
+                        <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 fade-in">
+                            <div class="text-center mb-8">
+                                <h1 class="text-2xl font-bold text-gray-800">Relatório de Turno</h1>
+                                <p class="text-blue-600 font-medium">GPS Mecanizada</p>
+                            </div>
+                            <form onsubmit="handleLogin(event)" class="space-y-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Usuário</label>
+                                    <input type="text" id="username" class="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Senha</label>
+                                    <input type="password" id="password" class="w-full border rounded-lg p-3 outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <button class="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold py-3 rounded-lg shadow-lg transition-transform active:scale-95">
+                                    Entrar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // MAIN LAYOUT
+            const isDashboard = state.view === 'dashboard';
+            const isReport = state.view === 'report';
+            
+            app.innerHTML = `
+                <!-- Sidebar Mobile Overlay -->
+                <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-black/50 z-40 hidden md:hidden"></div>
+                
+                <!-- Sidebar -->
+                <aside id="sidebar" class="sidebar flex flex-col">
+                    <div class="p-6 bg-blue-800 text-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
+                                ${state.user.nome.charAt(0)}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm truncate w-40">${state.user.nome}</h3>
+                                <p class="text-xs opacity-75 capitalize">${state.user.nivel}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+                        <button onclick="setView('report')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isReport ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Novo Relatório
+                        </button>
+                        ${state.user.nivel === 'gestao' ? `
+                        <button onclick="loadDashboard()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${isDashboard ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                            Gestão de Turno
+                        </button>` : ''}
+                        <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 mt-4">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Sair
+                        </button>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <div class="main-content min-h-screen bg-gray-50 transition-all duration-300">
+                    <header class="bg-white border-b sticky top-0 z-30 px-4 py-3 flex items-center justify-between shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleSidebar()" class="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                                ${ICONS.menu}
+                            </button>
+                            <h1 class="text-lg font-bold text-gray-800">${isReport ? 'Preenchimento de Turno' : 'Painel de Gestão'}</h1>
+                        </div>
+                        <div class="text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                            Turno: ${state.user.letra || '?'}
+                        </div>
+                    </header>
+
+                    <main class="p-4 max-w-5xl mx-auto">
+                        ${isReport ? renderReportForm() : renderDashboard()}
+                    </main>
+                </div>
+            `;
+        }
+
+        function renderReportForm() {
+            return `
+                <div class="space-y-6 fade-in">
+                    <!-- Header Data -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Data Referência</label>
+                                <input type="date" value="${state.reportData.date}" onchange="state.reportData.date = this.value" class="w-full mt-1 border rounded p-2 text-sm font-semibold bg-gray-50">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">ID do Relatório</label>
+                                <div class="mt-1 p-2 bg-gray-100 rounded text-sm text-gray-400 font-mono">Gerado ao salvar</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Items List -->
+                    <div id="items-container" class="space-y-4">
+                        ${state.reportData.items.map((item, idx) => renderItemCard(item, idx)).join('')}
+                    </div>
+
+                    <!-- Add Button -->
+                    <button onclick="addItem()" class="w-full py-4 border-2 border-dashed border-blue-300 rounded-xl text-blue-600 font-bold hover:bg-blue-50 transition-colors flex items-center justify-center gap-2">
+                        ${ICONS.plus} Adicionar Vaga/Equipamento
+                    </button>
+
+                    <!-- Obs -->
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Observações Gerais do Turno</label>
+                        <textarea oninput="state.reportData.generalObs = this.value" class="w-full border rounded-lg p-3 h-24 resize-none" placeholder="Ocorrências gerais, pendências...">${state.reportData.generalObs}</textarea>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="grid grid-cols-2 gap-4 pb-10">
+                        <button onclick="generatePreview()" class="bg-gray-800 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-gray-900 flex items-center justify-center gap-2">
+                            ${ICONS.whatsapp} Pré-visualizar
+                        </button>
+                        <button onclick="saveReport()" class="bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 flex items-center justify-center gap-2">
+                            Salvar Relatório
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderItemCard(item, idx) {
+            // Helpers for selects
+            const makeOptions = (list, selected) => list.map(opt => `<option value="${opt}" ${opt === selected ? 'selected' : ''}>${opt}</option>`).join('');
+            
+            const crewList = item.crew.map((c, cIdx) => `
+                <div class="flex items-center gap-2 text-sm bg-gray-50 p-2 rounded border">
+                    <span class="font-bold text-gray-600 w-20">${c.role}:</span>
+                    <span class="flex-1">${c.name}</span>
+                    <button onclick="removeCrew(${idx}, ${cIdx})" class="text-red-500 font-bold">✕</button>
+                </div>
+            `).join('');
+
+            const exchangeTimeline = item.exchanges.map(ex => `
+                <div class="timeline-item">
+                    <div class="text-xs text-gray-400 font-mono">${ex.date.split('-').reverse().slice(0,2).join('/')} ${ex.time}</div>
+                    <div class="font-bold text-gray-800">Troca: ${ex.oldEquip} ➝ ${ex.newEquip}</div>
+                    <div class="text-xs text-red-600 font-semibold bg-red-50 inline-block px-1 rounded">${ex.reason}</div>
+                </div>
+            `).join('');
+
+            return `
+                <div class="bg-white rounded-xl shadow-sm border-l-4 border-blue-600 p-4 relative fade-in">
+                    <button onclick="removeItem(${idx})" class="absolute top-2 right-2 text-gray-400 hover:text-red-500">✕</button>
+                    
+                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Item ${idx + 1}</span>
+                    </h3>
+
+                    <div class="grid md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="label">Vaga / Posto</label>
+                            <select onchange="updateItem(${idx}, 'vaga', this.value)" class="input">
+                                <option value="">Selecione...</option>
+                                ${makeOptions(state.lists.vagas, item.vaga)}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="label">Área</label>
+                            <input type="text" value="${item.area}" onchange="updateItem(${idx}, 'area', this.value)" class="input" placeholder="Ex: Área 51">
+                        </div>
+                    </div>
+
+                    <!-- Equipment Section -->
+                    <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="label mb-0">Equipamento Atual</label>
+                            <button onclick="openExchangeModal(${idx})" class="text-xs bg-white border border-blue-200 text-blue-600 px-2 py-1 rounded font-bold hover:bg-blue-50">
+                                ${ICONS.exchange} Registrar Troca
+                            </button>
+                        </div>
+                        <select onchange="updateItem(${idx}, 'currentEquip', this.value)" class="input bg-white font-bold text-blue-900">
+                             <option value="">Selecione...</option>
+                             ${makeOptions(state.lists.equipamentos, item.currentEquip)}
+                        </select>
+
+                        ${item.exchanges.length > 0 ? `
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <label class="label mb-2">Histórico de Trocas</label>
+                                <div class="pl-2">${exchangeTimeline}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Crew Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="label mb-0">Equipe Técnica</label>
+                            <button onclick="openCrewModal(${idx})" class="text-xs text-green-700 font-bold hover:underline">+ Adicionar Pessoa</button>
+                        </div>
+                        <div class="space-y-1">
+                            ${crewList.length ? crewList : '<div class="text-sm text-gray-400 italic">Ninguém vinculado.</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDashboard() {
+            if (!state.dashboard) return '<div class="text-center p-10">Carregando dados...</div>';
+            
+            const activeLetters = state.dashboard.activeLetters.join(', ');
+            
+            return `
+                <div class="space-y-6 fade-in">
+                    <!-- Info Card -->
+                    <div class="bg-gradient-to-r from-blue-900 to-blue-700 text-white p-6 rounded-xl shadow-lg">
+                        <div class="text-sm opacity-80 uppercase font-bold tracking-wider">Status da Operação</div>
+                        <div class="text-3xl font-bold mt-1">Turnos Ativos: ${activeLetters}</div>
+                        <div class="mt-2 text-sm flex items-center gap-2">
+                            <span>Data: ${state.dashboard.date.split('-').reverse().join('/')}</span>
+                            <button onclick="loadDashboard()" class="bg-white/20 p-1 rounded hover:bg-white/30">${ICONS.refresh}</button>
+                        </div>
+                        <input type="date" value="${state.dashboard.date}" onchange="loadDashboard(this.value)" class="mt-3 text-black text-sm rounded p-1">
+                    </div>
+
+                    <!-- Supervisors Grid -->
+                    <div class="grid gap-4">
+                        ${state.dashboard.statusList.map(sup => {
+                            let statusClass, statusText, icon;
+                            
+                            if (!sup.workingToday) {
+                                statusClass = "bg-gray-100 border-gray-200 opacity-60";
+                                statusText = "Folga";
+                                icon = "💤";
+                            } else if (sup.submitted) {
+                                statusClass = "bg-green-50 border-green-200";
+                                statusText = "Relatório Enviado";
+                                icon = "✅";
+                            } else {
+                                statusClass = "bg-red-50 border-red-200 ring-2 ring-red-100";
+                                statusText = "Pendente";
+                                icon = "⚠️";
+                            }
+
+                            return `
+                                <div class="bg-white p-4 rounded-xl shadow-sm border flex items-center justify-between ${statusClass}">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-full bg-white border flex items-center justify-center text-2xl shadow-sm">
+                                            ${sup.letra}
+                                        </div>
+                                        <div>
+                                            <div class="font-bold text-gray-900">${sup.nome}</div>
+                                            <div class="text-xs font-semibold uppercase tracking-wide opacity-75">${statusText}</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-2xl">${icon}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // ACTIONS
+        // ==========================================
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            
+            const res = await api({ action: 'login', username: u, password: p });
+            if (res.success) {
+                state.user = res.user;
+                state.view = 'report'; // Default view
+                await loadLists();
+                render();
+            } else {
+                alert(res.error);
+            }
+        }
+
+        async function loadLists() {
+            const res = await api({ action: 'getData', supervisor: state.user.nome });
+            if (res.success) {
+                state.lists = res;
+            }
+        }
+
+        async function loadDashboard(date = null) {
+            state.view = 'dashboard';
+            render(); // Show loading state inside dashboard
+            const params = { action: 'getDashboard' };
+            if (date) params.date = date;
+            
+            const res = await api(params);
+            if (res.success) {
+                state.dashboard = res;
+                render();
+            }
+        }
+
+        // --- FORM MANIPULATION ---
+
+        function addItem() {
+            state.reportData.items.push({
+                vaga: '',
+                currentEquip: '',
+                area: '',
+                crew: [],
+                exchanges: []
+            });
+            render();
+        }
+
+        function removeItem(idx) {
+            if(confirm('Remover este item?')) {
+                state.reportData.items.splice(idx, 1);
+                render();
+            }
+        }
+
+        function updateItem(idx, field, value) {
+            state.reportData.items[idx][field] = value;
+            // No re-render needed for inputs to keep focus, but strictly we sync state
+        }
+
+        // --- CREW MODAL ---
+        function openCrewModal(itemIdx) {
+            const person = prompt("Selecione o número correspondente:\n" + 
+                state.lists.equipe.map((p, i) => `${i+1}. ${p.nome} (${p.funcao})`).join('\n')
+            );
+            
+            if (person) {
+                const selected = state.lists.equipe[parseInt(person)-1];
+                if (selected) {
+                    // Logic: Auto-assign role based on function or ask
+                    let role = selected.funcao.includes('Mot') ? 'Motorista' : 'Operador';
+                    if (!role) role = prompt("Função (Motorista/Operador):", "Operador");
+                    
+                    state.reportData.items[itemIdx].crew.push({
+                        name: selected.nome,
+                        role: role
+                    });
+                    render();
+                }
+            }
+        }
+
+        function removeCrew(itemIdx, crewIdx) {
+            state.reportData.items[itemIdx].crew.splice(crewIdx, 1);
+            render();
+        }
+
+        // --- EXCHANGE MODAL ---
+        function openExchangeModal(itemIdx) {
+            const item = state.reportData.items[itemIdx];
+            if (!item.currentEquip) return alert('Selecione um equipamento inicial primeiro.');
+
+            const newEquip = prompt("Novo Equipamento (Digite o nome ou placa):");
+            if (!newEquip) return;
+
+            const reason = prompt("Motivo da Troca (Manutenção, Solicitação, Avaria):", "Manutenção");
+            const time = prompt("Hora da Troca (HH:MM):", new Date().toTimeString().slice(0,5));
+            
+            if (newEquip && reason && time) {
+                // Save exchange record
+                item.exchanges.push({
+                    oldEquip: item.currentEquip,
+                    newEquip: newEquip,
+                    reason: reason,
+                    time: time,
+                    date: state.reportData.date
+                });
+                
+                // Update current equipment
+                item.currentEquip = newEquip;
+                render();
+            }
+        }
+
+        // --- FINALIZATION ---
+
+        async function saveReport() {
+            if (state.reportData.items.length === 0) return alert('Adicione pelo menos um item.');
+            
+            const payload = {
+                action: 'saveReport',
+                supervisor: state.user.nome,
+                shiftLetter: state.user.letra,
+                date: state.reportData.date,
+                generalObs: state.reportData.generalObs,
+                items: state.reportData.items
+            };
+
+            const res = await api({}, 'POST', payload);
+            if (res.success) {
+                alert(`Relatório ${res.reportId} salvo com sucesso!`);
+                // Reset form
+                state.reportData.items = [];
+                state.reportData.generalObs = '';
+                render();
+            } else {
+                alert('Erro ao salvar: ' + res.error);
+            }
+        }
+
+        function generatePreview() {
+            // Create a modal overlay with the report formatted for screenshot
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-50 bg-black/90 overflow-y-auto flex items-center justify-center p-4';
+            modal.onclick = (e) => { if(e.target === modal) modal.remove(); };
+
+            const dateFmt = state.reportData.date.split('-').reverse().join('/');
+            
+            let contentHtml = `
+                <div class="bg-white w-full max-w-md mx-auto rounded-none screenshot-mode shadow-2xl overflow-hidden">
+                    <div class="bg-blue-800 text-white p-4 text-center">
+                        <h2 class="font-bold text-xl">RELATÓRIO DE TURNO</h2>
+                        <p class="text-sm opacity-90">GPS Mecanizada</p>
+                    </div>
+                    <div class="p-4 bg-gray-100 border-b border-gray-300 text-sm">
+                        <div class="flex justify-between"><span>Supervisor:</span> <strong>${state.user.nome}</strong></div>
+                        <div class="flex justify-between"><span>Data:</span> <strong>${dateFmt}</strong></div>
+                        <div class="flex justify-between"><span>Turno:</span> <strong>Letra ${state.user.letra}</strong></div>
+                    </div>
+                    
+                    <div class="p-4 space-y-4">
+            `;
+
+            state.reportData.items.forEach((item, i) => {
+                const motorista = item.crew.find(c => c.role === 'Motorista')?.name || '-';
+                const ops = item.crew.filter(c => c.role !== 'Motorista').map(c => c.name).join(', ') || '-';
+                
+                contentHtml += `
+                    <div class="border border-gray-300 bg-white p-3 rounded shadow-sm">
+                        <div class="flex justify-between border-b border-gray-100 pb-2 mb-2">
+                            <span class="font-bold text-blue-800">${item.vaga || 'Vaga N/A'}</span>
+                            <span class="text-xs bg-gray-200 px-2 rounded py-0.5">${item.area}</span>
+                        </div>
+                        <div class="text-sm space-y-1">
+                            <div><span class="font-semibold text-gray-600">Equip:</span> <span class="font-bold">${item.currentEquip}</span></div>
+                            <div><span class="font-semibold text-gray-600">Mot:</span> ${motorista}</div>
+                            <div><span class="font-semibold text-gray-600">Ops:</span> ${ops}</div>
+                        </div>
+                        
+                        ${item.exchanges.length ? `
+                            <div class="mt-2 bg-yellow-50 p-2 text-xs rounded border border-yellow-200">
+                                <strong class="text-yellow-800 block mb-1">⚠️ Trocas Realizadas:</strong>
+                                ${item.exchanges.map(ex => `
+                                    <div class="mb-1 pb-1 border-b border-yellow-100 last:border-0 last:mb-0">
+                                        <span class="font-mono">${ex.time}</span>: ${ex.oldEquip} ➝ ${ex.newEquip}<br>
+                                        <span class="italic text-yellow-700">(${ex.reason})</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            if (state.reportData.generalObs) {
+                contentHtml += `
+                    <div class="border-t-2 border-dashed border-gray-300 pt-3">
+                        <h4 class="font-bold text-gray-700 text-sm mb-1">Observações Gerais:</h4>
+                        <p class="text-sm text-gray-600 italic bg-gray-50 p-2 rounded">${state.reportData.generalObs}</p>
+                    </div>
+                `;
+            }
+
+            contentHtml += `
+                    </div>
+                    <div class="bg-gray-800 text-white text-xs p-2 text-center">
+                        ID: ${'RPT-' + Math.floor(Math.random()*10000)} | Gerado via Sistema
+                    </div>
+                </div>
+                <div class="text-white text-center mt-4 text-sm font-bold animate-pulse">
+                    Tire um Print desta tela para enviar no WhatsApp
+                </div>
+            `;
+
+            modal.innerHTML = contentHtml;
+            document.body.appendChild(modal);
+        }
+
+        // --- UTILS ---
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            const ov = document.getElementById('overlay');
+            sb.classList.toggle('open');
+            ov.classList.toggle('hidden');
+        }
+
+        function setView(v) {
+            state.view = v;
+            // Mobile: close sidebar on selection
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay').classList.add('hidden');
+            render();
+        }
+
+        function logout() {
+            state.user = null;
+            state.view = 'login';
+            state.reportData.items = [];
+            render();
+        }
+
+        // CSS Helper
+        const style = document.createElement('style');
+        style.textContent = `
+            .input { width: 100%; border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 0.5rem; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+            .input:focus { border-color: #2563eb; ring: 2px solid #bfdbfe; }
+            .label { display: block; font-size: 0.75rem; font-weight: 700; color: #4b5563; text-transform: uppercase; margin-bottom: 0.25rem; }
+        `;
+        document.head.appendChild(style);
+
+        // Init
+        render();
+
+    </script>
+</body>
+</html>
