@@ -9,6 +9,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -216,7 +219,7 @@
         // CONFIGURAÇÃO
         // ============================================
         const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbw77qnOw5NoQ_BUy1Y6igbXXMemsi_C1RwQTM8gDbwB14hZHykRZw9iGAavOK7hvgGvrg/exec',
+            API_URL: 'https://script.google.com/macros/s/AKfycbxYVRjYONuG-hiZC3_hg8IUWYwj0ZXPctFX8qnoR7IfJWIH6dMR_7ugtDF4dv_0UpcG9w/exec',
             CACHE_DURATION: 5 * 60 * 1000,
             TOAST_DURATION: 4000
         };
@@ -255,7 +258,8 @@
             currentRelatorio: null,
             selectedDate: getCurrentDate(),
             isLoading: false,
-            sidebarOpen: window.innerWidth >= 768
+            sidebarOpen: window.innerWidth >= 768,
+            dashboardData: null
         };
         
         // ============================================
@@ -379,6 +383,19 @@
             const c = Cache.get(k); if(c) return c;
             const r = await apiCall(`${CONFIG.API_URL}?action=getRelatorios&supervisor=${encodeURIComponent(sup)}&date=${date}`);
             if(r.success) Cache.set(k, r);
+            return r;
+        }
+        
+        async function getDashboardData(date) {
+            const k = `dashboard_${date}`;
+            const c = Cache.get(k); if(c) return c;
+            const r = await apiCall(`${CONFIG.API_URL}?action=getDashboard&date=${date}`);
+            if(r.success) Cache.set(k, r);
+            return r;
+        }
+        
+        async function getRelatoriosNaoFeitos(date) {
+            const r = await apiCall(`${CONFIG.API_URL}?action=getRelatoriosNaoFeitos&date=${date}`);
             return r;
         }
         
@@ -517,6 +534,32 @@
             render();
         }
         
+        async function loadDashboard() {
+            if (!hasGestaoAccess()) {
+                Toast.error('Acesso negado');
+                return;
+            }
+            
+            showLoading(true);
+            const [dashboardRes, naoFeitosRes] = await Promise.all([
+                getDashboardData(state.selectedDate),
+                getRelatoriosNaoFeitos(state.selectedDate)
+            ]);
+            showLoading(false);
+            
+            if (dashboardRes.success) {
+                state.dashboardData = dashboardRes.data;
+            }
+            
+            if (naoFeitosRes.success) {
+                state.dashboardData.naoFizeram = naoFeitosRes.naoFizeram;
+                state.dashboardData.totalSupervisores = naoFeitosRes.totalSupervisores;
+                state.dashboardData.totalComRelatorio = naoFeitosRes.totalComRelatorio;
+            }
+            
+            render();
+        }
+        
         function handleLogout() {
             localStorage.removeItem('user');
             Cache.clear();
@@ -546,6 +589,8 @@
             
             if (view === 'historico') {
                 await loadHistorico();
+            } else if (view === 'dashboard') {
+                await loadDashboard();
             }
             
             render();
@@ -611,10 +656,15 @@
                 case 'login': 
                     app.innerHTML = renderLogin(); 
                     break;
+                case 'dashboard':
                 case 'relatorio':
                 case 'novo-relatorio':
                 case 'historico':
                     app.innerHTML = renderMain();
+                    // Inicializar gráficos do dashboard após render
+                    if (state.view === 'dashboard' && state.dashboardData) {
+                        setTimeout(() => initCharts(), 100);
+                    }
                     break;
             }
         }
@@ -648,7 +698,13 @@
         }
         
         function renderSidebar() {
-            const menuItems = [
+            const isGestao = hasGestaoAccess();
+            
+            const menuItems = isGestao ? [
+                { label: 'Dashboard', view: 'dashboard', icon: ICONS.dashboard },
+                { label: 'Novo Relatório', view: 'relatorio', icon: ICONS.clipboard },
+                { label: 'Histórico', view: 'historico', icon: ICONS.history }
+            ] : [
                 { label: 'Novo Relatório', view: 'relatorio', icon: ICONS.clipboard },
                 { label: 'Histórico', view: 'historico', icon: ICONS.history }
             ];
@@ -664,7 +720,7 @@
                                 </div>
                                 <div class="flex-1 min-w-0">
                                     <h3 class="font-bold text-sm truncate">${state.user.nome}</h3>
-                                    <p class="text-xs opacity-70">${state.user.letraTurno ? `Turno ${state.user.letraTurno}` : 'Supervisor'}</p>
+                                    <p class="text-xs opacity-70">${isGestao ? 'Gestão' : (state.user.letraTurno ? `Turno ${state.user.letraTurno}` : 'Supervisor')}</p>
                                 </div>
                             </div>
                             <button onclick="toggleSidebar()" class="p-2 hover:bg-white/20 rounded-lg md:hidden">✕</button>
@@ -686,10 +742,19 @@
         }
         
         function renderMain() {
+            let content;
+            if (state.view === 'dashboard') {
+                content = renderDashboard();
+            } else if (state.view === 'relatorio' || state.view === 'novo-relatorio') {
+                content = renderNovoRelatorio();
+            } else {
+                content = renderHistorico();
+            }
+            
             return `
                 ${renderSidebar()}
                 <div class="main-content min-h-screen bg-gray-50 pb-24">
-                    ${state.view === 'relatorio' || state.view === 'novo-relatorio' ? renderNovoRelatorio() : renderHistorico()}
+                    ${content}
                 </div>
             `;
         }
@@ -961,6 +1026,319 @@
                     ` : ''}
                 </div>
             `;
+        }
+        
+        function renderDashboard() {
+            if (!hasGestaoAccess()) {
+                return `<div class="p-4"><div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">Acesso negado</div></div>`;
+            }
+            
+            const data = state.dashboardData;
+            
+            if (!data) {
+                return `
+                    <div class="p-4">
+                        <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
+                                    <div>
+                                        <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+                                        <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
+                                    </div>
+                                </div>
+                                <input type="date" value="${state.selectedDate}" 
+                                    onchange="state.selectedDate=this.value; loadDashboard();"
+                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                            </div>
+                        </header>
+                        <div class="flex items-center justify-center h-64">
+                            <div class="text-gray-500">Carregando dashboard...</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const totalRelatorios = data.totalRelatorios || 0;
+            const totalEquipamentos = data.totalEquipamentos || 0;
+            const totalTrocas = data.totalTrocas || 0;
+            const totalSupervisores = data.totalSupervisores || 0;
+            const totalComRelatorio = data.totalComRelatorio || 0;
+            const naoFizeram = data.naoFizeram || [];
+            const percentualCompleto = totalSupervisores > 0 ? Math.round((totalComRelatorio / totalSupervisores) * 100) : 0;
+            
+            // Relatórios por turno
+            const relatoriosPorTurno = {A: 0, B: 0, C: 0, D: 0};
+            if (data.relatoriosPorTurno) {
+                Object.assign(relatoriosPorTurno, data.relatoriosPorTurno);
+            }
+            
+            // Equipamentos mais usados
+            const equipamentosMaisUsados = data.equipamentosMaisUsados || [];
+            
+            // Motivos de trocas
+            const motivosTrocas = data.motivosTrocas || {};
+            
+            return `
+                <div class="p-4">
+                    <!-- Header -->
+                    <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
+                        <div class="flex items-center justify-between flex-wrap gap-4">
+                            <div class="flex items-center gap-3">
+                                <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
+                                <div>
+                                    <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
+                                    <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
+                                </div>
+                            </div>
+                            <input type="date" value="${state.selectedDate}" 
+                                onchange="state.selectedDate=this.value; loadDashboard();"
+                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </header>
+                    
+                    <!-- Cards de estatísticas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <!-- Total de Relatórios -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm text-gray-600 font-medium">Relatórios Criados</p>
+                                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900">${totalRelatorios}</p>
+                            <p class="text-xs text-gray-500 mt-1">Total no dia</p>
+                        </div>
+                        
+                        <!-- Total de Equipamentos -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm text-gray-600 font-medium">Equipamentos Operando</p>
+                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900">${totalEquipamentos}</p>
+                            <p class="text-xs text-gray-500 mt-1">Em campo hoje</p>
+                        </div>
+                        
+                        <!-- Total de Trocas -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm text-gray-600 font-medium">Trocas Realizadas</p>
+                                <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900">${totalTrocas}</p>
+                            <p class="text-xs text-gray-500 mt-1">Substituições no dia</p>
+                        </div>
+                        
+                        <!-- Supervisores com Relatório -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 ${naoFizeram.length === 0 ? 'border-green-500' : 'border-yellow-500'}">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-sm text-gray-600 font-medium">Supervisores</p>
+                                <svg class="w-8 h-8 ${naoFizeram.length === 0 ? 'text-green-500' : 'text-yellow-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-3xl font-bold text-gray-900">${totalComRelatorio}/${totalSupervisores}</p>
+                            <div class="mt-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                                        <div class="bg-${naoFizeram.length === 0 ? 'green' : 'yellow'}-500 h-2 rounded-full transition-all" style="width: ${percentualCompleto}%"></div>
+                                    </div>
+                                    <span class="text-xs text-gray-600 font-medium">${percentualCompleto}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alertas: Supervisores que não fizeram relatório -->
+                    ${naoFizeram.length > 0 ? `
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <h3 class="font-bold text-yellow-800 mb-2">⚠️ Supervisores sem relatório hoje</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                                        ${naoFizeram.map(sup => `
+                                            <div class="bg-white rounded-lg px-4 py-2 border border-yellow-300">
+                                                <p class="font-medium text-gray-900">${sup.nome}</p>
+                                                <p class="text-xs text-gray-600">Turno ${sup.letraTurno || '?'}</p>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : `
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <div>
+                                    <h3 class="font-bold text-green-800">✅ Todos os supervisores fizeram o relatório!</h3>
+                                    <p class="text-sm text-green-700">100% de conformidade no dia</p>
+                                </div>
+                            </div>
+                        </div>
+                    `}
+                    
+                    <!-- Gráficos -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Relatórios por Turno -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Relatórios por Turno</h3>
+                            <canvas id="chartTurnos"></canvas>
+                        </div>
+                        
+                        <!-- Motivos de Trocas -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Motivos de Trocas</h3>
+                            ${Object.keys(motivosTrocas).length > 0 ? `
+                                <canvas id="chartMotivos"></canvas>
+                            ` : `
+                                <div class="flex items-center justify-center h-48 text-gray-400">
+                                    <p>Nenhuma troca registrada hoje</p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                    
+                    <!-- Equipamentos mais usados -->
+                    ${equipamentosMaisUsados.length > 0 ? `
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Equipamentos Mais Utilizados</h3>
+                            <div class="space-y-3">
+                                ${equipamentosMaisUsados.map((eq, idx) => {
+                                    const maxUso = equipamentosMaisUsados[0].quantidade;
+                                    const percentage = (eq.quantidade / maxUso) * 100;
+                                    return `
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
+                                                ${idx + 1}
+                                            </div>
+                                            <div class="flex-1">
+                                                <div class="flex items-center justify-between mb-1">
+                                                    <span class="font-medium text-gray-900">${eq.equipamento}</span>
+                                                    <span class="text-sm text-gray-600">${eq.quantidade}x</span>
+                                                </div>
+                                                <div class="bg-gray-200 rounded-full h-2">
+                                                    <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+        
+        function initCharts() {
+            if (!state.dashboardData) return;
+            
+            const data = state.dashboardData;
+            
+            // Gráfico de Relatórios por Turno
+            const ctxTurnos = document.getElementById('chartTurnos');
+            if (ctxTurnos) {
+                const relatoriosPorTurno = data.relatoriosPorTurno || {A: 0, B: 0, C: 0, D: 0};
+                new Chart(ctxTurnos, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Turno A', 'Turno B', 'Turno C', 'Turno D'],
+                        datasets: [{
+                            label: 'Relatórios',
+                            data: [
+                                relatoriosPorTurno.A || 0,
+                                relatoriosPorTurno.B || 0,
+                                relatoriosPorTurno.C || 0,
+                                relatoriosPorTurno.D || 0
+                            ],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(16, 185, 129, 0.7)',
+                                'rgba(251, 146, 60, 0.7)',
+                                'rgba(168, 85, 247, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(59, 130, 246)',
+                                'rgb(16, 185, 129)',
+                                'rgb(251, 146, 60)',
+                                'rgb(168, 85, 247)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Gráfico de Motivos de Trocas
+            const ctxMotivos = document.getElementById('chartMotivos');
+            if (ctxMotivos && data.motivosTrocas && Object.keys(data.motivosTrocas).length > 0) {
+                const motivosTrocas = data.motivosTrocas;
+                const labels = Object.keys(motivosTrocas);
+                const valores = Object.values(motivosTrocas);
+                
+                new Chart(ctxMotivos, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: valores,
+                            backgroundColor: [
+                                'rgba(239, 68, 68, 0.7)',
+                                'rgba(59, 130, 246, 0.7)',
+                                'rgba(251, 146, 60, 0.7)',
+                                'rgba(168, 85, 247, 0.7)',
+                                'rgba(16, 185, 129, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgb(239, 68, 68)',
+                                'rgb(59, 130, 246)',
+                                'rgb(251, 146, 60)',
+                                'rgb(168, 85, 247)',
+                                'rgb(16, 185, 129)'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
         }
         
         // ============================================
