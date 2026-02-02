@@ -3,462 +3,274 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema de Relatório de Turno | GPS Mecanizada</title>
+    <title>Relatório de Turno Inteligente</title>
     <meta name="theme-color" content="#1e40af">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
-    <!-- Google Fonts: Inter -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
-        * { 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            box-sizing: border-box;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; -webkit-tap-highlight-color: transparent; }
         
-        body { 
-            -webkit-tap-highlight-color: transparent; 
-            overscroll-behavior-y: none;
-            background: #f8fafc;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(20px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        @keyframes spin { 
-            from { transform: rotate(0deg); } 
-            to { transform: rotate(360deg); } 
-        }
-        
+        /* Animações */
         .fade-in { animation: fadeIn 0.3s ease-out; }
-        .slide-in-right { animation: slideInRight 0.3s ease-out; }
-        .animate-spin { animation: spin 1s linear infinite; }
+        .slide-up { animation: slideUp 0.3s ease-out; }
         
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        .toast {
-            background: white;
-            border-radius: 12px;
-            padding: 16px 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease-out;
-            border-left: 4px solid;
-        }
-        
-        .toast.success { border-color: #10b981; }
-        .toast.error { border-color: #ef4444; }
-        .toast.info { border-color: #3b82f6; }
-        .toast.warning { border-color: #f59e0b; }
-        
-        .toast-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-        }
-        
-        .toast.success .toast-icon { background: #dcfce7; color: #16a34a; }
-        .toast.error .toast-icon { background: #fee2e2; color: #dc2626; }
-        .toast.info .toast-icon { background: #dbeafe; color: #2563eb; }
-        .toast.warning .toast-icon { background: #fef3c7; color: #d97706; }
-        
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
+        /* Autocomplete Customizado */
+        .autocomplete-wrapper { position: relative; }
+        .autocomplete-dropdown {
+            position: absolute;
+            top: 100%;
             left: 0;
-            top: 0;
-            height: 100vh;
-            width: 280px;
+            right: 0;
             background: white;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease;
-            z-index: 1000;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            margin-top: 4px;
+            max-height: 250px;
+            overflow-y: auto;
+            z-index: 50;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
-        
-        .sidebar.closed { transform: translateX(-100%); }
-        
-        @media (min-width: 768px) {
-            .sidebar { transform: translateX(0) !important; }
-            .main-content { margin-left: 280px; }
+        .autocomplete-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
         }
+        .autocomplete-item:hover, .autocomplete-item.selected { background-color: #eff6ff; }
+        .autocomplete-item:last-child { border-bottom: none; }
         
-        /* Loading Overlay */
-        .loading-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9998;
-        }
-        
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        /* Scrollbar suave */
+        ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* Cards */
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .card:hover {
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        /* Badge */
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        
-        /* Troca Item */
-        .troca-item {
-            border: 2px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            background: #f9fafb;
-            position: relative;
-        }
-        
-        .troca-item::before {
-            content: '🔄';
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 1.5rem;
-            opacity: 0.2;
-        }
-        
-        /* Print Styles */
-        @media print {
-            .no-print { display: none !important; }
-            .sidebar { display: none !important; }
-            .main-content { margin-left: 0 !important; }
-            body { background: white; }
-        }
-        
-        .hidden { display: none !important; }
-        .show { display: block !important; }
+
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-    
+
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="bg-white rounded-xl p-8 text-center shadow-2xl">
-            <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p class="text-gray-700 font-semibold">Carregando...</p>
+    <div id="loading" class="fixed inset-0 bg-black/50 z-[9999] hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl text-center">
+            <i class="ph ph-spinner ph-spin text-4xl text-blue-600 mb-2"></i>
+            <p class="text-gray-700 font-semibold" id="loading-text">Carregando...</p>
         </div>
     </div>
-    
+
     <!-- App Container -->
     <div id="app"></div>
 
     <script>
         // ============================================
-        // ÍCONES SVG
+        // CONFIGURAÇÃO & ESTADO
         // ============================================
-        const ICONS = {
-            login: '<svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-            dashboard: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>',
-            clipboard: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>',
-            logout: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>',
-            truck: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/><path d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 001 1h2m-6 0h6m0 0h2a1 1 0 001-1V9h-3l-2-3h-2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>',
-            history: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-            whatsapp: '<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>'
-        };
-
-        // ============================================
-        // CONFIGURAÇÃO
-        // ============================================
-        const CONFIG = {
-            API_URL: 'https://script.google.com/macros/s/AKfycbxYVRjYONuG-hiZC3_hg8IUWYwj0ZXPctFX8qnoR7IfJWIH6dMR_7ugtDF4dv_0UpcG9w/exec',
-            CACHE_DURATION: 5 * 60 * 1000,
-            TOAST_DURATION: 4000
-        };
+        // IMPORTANTE: Substitua pela URL do seu Script Google
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwxGAQlf6699osRjUSenW7E9Ca-GXbU1-s67UVWVmfpKy6cPQnTJeSh14Z6uapFp8P0Cg/exec';
         
-        // ============================================
-        // NÍVEIS DE ACESSO
-        // ============================================
-        const ACCESS_LEVELS = {
-            SUPERVISOR: 'supervisor',
-            GESTAO: 'gestao'
-        };
-
-        // ============================================
-        // LETRAS DE TURNO E REGIMES
-        // ============================================
-        const LETRAS_TURNO = ['A', 'B', 'C', 'D'];
-        const REGIMES = {
-            'ADM': { tipo: 'ADM', descricao: 'Administrativo' },
-            '16HS': { tipo: '16HS - 5X2', descricao: '16 Horas - 5x2' },
-            '24HS-A': { tipo: '24HS - A', letra: 'A', dataBase: '2026-01-26' },
-            '24HS-B': { tipo: '24HS - B', letra: 'B', dataBase: '2026-01-30' },
-            '24HS-C': { tipo: '24HS - C', letra: 'C', dataBase: '2026-02-01' },
-            '24HS-D': { tipo: '24HS - D', letra: 'D', dataBase: '2026-01-28' }
-        };
+        const CACHE_KEY = 'turno_app_cache_v2';
         
-        // ============================================
-        // ESTADO GLOBAL
-        // ============================================
         let state = {
             view: 'login',
             user: null,
             equipamentos: [],
-            colaboradores: [],
+            colaboradores: [], // Cache local para busca rápida
             vagas: [],
-            relatorios: [],
             currentRelatorio: null,
-            selectedDate: getCurrentDate(),
-            isLoading: false,
-            sidebarOpen: window.innerWidth >= 768,
-            dashboardData: null
+            relatoriosHistorico: [],
+            dashboardData: null,
+            sidebarOpen: false
         };
-        
+
         // ============================================
-        // CACHE SYSTEM
+        // CORE FUNCTIONS
         // ============================================
-        const Cache = {
-            set(key, data) {
-                try {
-                    const item = { data: data, timestamp: Date.now() };
-                    localStorage.setItem(`cache_${key}`, JSON.stringify(item));
-                } catch (e) { console.warn('Cache set failed:', e); }
-            },
-            get(key) {
-                try {
-                    const item = localStorage.getItem(`cache_${key}`);
-                    if (!item) return null;
-                    const parsed = JSON.parse(item);
-                    if (Date.now() - parsed.timestamp > CONFIG.CACHE_DURATION) {
-                        localStorage.removeItem(`cache_${key}`);
-                        return null;
-                    }
-                    return parsed.data;
-                } catch (e) { return null; }
-            },
-            clear(pattern) {
-                try {
-                    Object.keys(localStorage).forEach(key => {
-                        if (key.startsWith(pattern ? `cache_${pattern}` : 'cache_')) {
-                            localStorage.removeItem(key);
-                        }
-                    });
-                } catch (e) {}
-            }
-        };
-        
-        // ============================================
-        // TOAST SYSTEM
-        // ============================================
-        const Toast = {
-            show(message, type = 'info') {
-                const container = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                const icons = { success: '✓', error: '✕', info: 'i', warning: '!' };
-                toast.innerHTML = `<div class="toast-icon">${icons[type]}</div><div class="flex-1"><p class="text-sm font-semibold text-gray-900">${message}</p></div>`;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(20px)';
-                    setTimeout(() => toast.remove(), 300);
-                }, CONFIG.TOAST_DURATION);
-            },
-            success(m) { this.show(m, 'success'); },
-            error(m) { this.show(m, 'error'); },
-            info(m) { this.show(m, 'info'); },
-            warning(m) { this.show(m, 'warning'); }
-        };
-        
-        // ============================================
-        // UTILITY FUNCTIONS
-        // ============================================
-        function getCurrentDate() { return new Date().toISOString().split('T')[0]; }
-        function formatDate(d) { return new Date(d+'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' }); }
-        function formatDateTime(dt) { return new Date(dt).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); }
-        function hasGestaoAccess() { return state.user && state.user.accessLevel === ACCESS_LEVELS.GESTAO; }
-        function showLoading(show = true) { document.getElementById('loadingOverlay').classList.toggle('hidden', !show); }
-        function generateId() { return `REL-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`; }
-        
-        // ============================================
-        // API CALLS
-        // ============================================
-        async function apiCall(endpoint, options = {}) {
-            try {
-                const response = await fetch(endpoint, options);
-                return await response.json();
-            } catch (error) {
-                Toast.error('Erro de conexão');
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function login(u, p) { 
-            return await apiCall(`${CONFIG.API_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`); 
-        }
-        
-        async function getEquipamentos(sup) {
-            const k = `equipamentos_${sup}`;
-            const c = Cache.get(k); if(c) return c;
-            const r = await apiCall(`${CONFIG.API_URL}?action=getEquipamentos&supervisor=${encodeURIComponent(sup)}`);
-            if(r.success) Cache.set(k, r);
-            return r;
-        }
-        
-        async function getColaboradores(sup) {
-            const k = `colaboradores_${sup}`;
-            const c = Cache.get(k); if(c) return c;
-            const r = await apiCall(`${CONFIG.API_URL}?action=getColaboradores&supervisor=${encodeURIComponent(sup)}`);
-            if(r.success) Cache.set(k, r);
-            return r;
-        }
-        
-        async function getVagas() {
-            const k = 'vagas';
-            const c = Cache.get(k); if(c) return c;
-            const r = await apiCall(`${CONFIG.API_URL}?action=getVagas`);
-            if(r.success) Cache.set(k, r);
-            return r;
-        }
-        
-        async function saveRelatorio(relatorio) {
-            const r = await apiCall(CONFIG.API_URL, { 
-                method: 'POST', 
-                body: JSON.stringify({ action: 'saveRelatorio', relatorio }) 
-            });
-            Cache.clear('relatorios_');
-            return r;
-        }
-        
-        async function getRelatorios(sup, date) {
-            const k = `relatorios_${sup}_${date}`;
-            const c = Cache.get(k); if(c) return c;
-            const r = await apiCall(`${CONFIG.API_URL}?action=getRelatorios&supervisor=${encodeURIComponent(sup)}&date=${date}`);
-            if(r.success) Cache.set(k, r);
-            return r;
-        }
-        
-        async function getDashboardData(date) {
-            const k = `dashboard_${date}`;
-            const c = Cache.get(k); if(c) return c;
-            const r = await apiCall(`${CONFIG.API_URL}?action=getDashboard&date=${date}`);
-            if(r.success) Cache.set(k, r);
-            return r;
-        }
-        
-        async function getRelatoriosNaoFeitos(date) {
-            const r = await apiCall(`${CONFIG.API_URL}?action=getRelatoriosNaoFeitos&date=${date}`);
-            return r;
-        }
-        
-        // ============================================
-        // BUSINESS LOGIC
-        // ============================================
-        async function handleLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('username').value.trim();
-            const p = document.getElementById('password').value.trim();
-            if (!u || !p) { Toast.warning('Preencha todos os campos'); return; }
-            
-            showLoading(true);
-            const r = await login(u, p);
-            showLoading(false);
-            
-            if (r.success) {
-                state.user = r.supervisor;
-                localStorage.setItem('user', JSON.stringify(r.supervisor));
-                Toast.success(`Bem-vindo, ${r.supervisor.nome}!`);
-                await loadInitialData();
-                navigateTo('relatorio');
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('user_session');
+            if (savedUser) {
+                state.user = JSON.parse(savedUser);
+                initApp();
             } else {
-                Toast.error(r.error || 'Credenciais inválidas');
+                renderLogin();
+            }
+        });
+
+        async function initApp() {
+            showLoading(true, 'Sincronizando dados...');
+            try {
+                // Carregamento paralelo para velocidade
+                const [eqRes, colRes, vagRes] = await Promise.all([
+                    fetchAPI('getEquipamentos', { supervisor: state.user.nome }),
+                    fetchAPI('getColaboradores', { supervisor: state.user.nome }),
+                    fetchAPI('getVagas')
+                ]);
+
+                if (eqRes.success) state.equipamentos = eqRes.equipamentos;
+                if (colRes.success) state.colaboradores = colRes.colaboradores;
+                if (vagRes.success) state.vagas = vagRes.vagas;
+
+                navigateTo('novo-relatorio');
+            } catch (e) {
+                showToast('Erro ao carregar dados iniciais', 'error');
+                console.error(e);
+            } finally {
+                showLoading(false);
             }
         }
-        
-        async function loadInitialData() {
-            showLoading(true);
-            const [equipamentosRes, colaboradoresRes, vagasRes] = await Promise.all([
-                getEquipamentos(state.user.nome),
-                getColaboradores(state.user.nome),
-                getVagas()
-            ]);
+
+        // Navegação
+        function navigateTo(view) {
+            state.view = view;
+            state.sidebarOpen = false; // Fecha sidebar no mobile
             
-            if (equipamentosRes.success) state.equipamentos = equipamentosRes.equipamentos;
-            if (colaboradoresRes.success) state.colaboradores = colaboradoresRes.colaboradores;
-            if (vagasRes.success) state.vagas = vagasRes.vagas;
-            
-            showLoading(false);
+            if (view === 'novo-relatorio') renderNovoRelatorio();
+            else if (view === 'historico') renderHistorico();
+            else if (view === 'dashboard') renderDashboard();
         }
+
+        // ============================================
+        // AUTOCOMPLETE LOGIC (MOTOR DE BUSCA)
+        // ============================================
+        function setupAutocomplete(inputId, dataList, onSelect) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+
+            let currentFocus = -1;
+
+            // Criar wrapper se não existir
+            if (!input.parentNode.classList.contains('autocomplete-wrapper')) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'autocomplete-wrapper';
+                input.parentNode.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+            }
+
+            input.addEventListener('input', function(e) {
+                const val = this.value;
+                closeAllLists();
+                if (!val) return false;
+                
+                currentFocus = -1;
+                const list = document.createElement('div');
+                list.setAttribute('id', this.id + 'autocomplete-list');
+                list.setAttribute('class', 'autocomplete-dropdown');
+                this.parentNode.appendChild(list);
+
+                // Filtragem Inteligente (Nome ou Função)
+                const matches = dataList.filter(item => 
+                    item.nome.toUpperCase().includes(val.toUpperCase()) || 
+                    (item.funcao && item.funcao.toUpperCase().includes(val.toUpperCase()))
+                ).slice(0, 8); // Limita a 8 resultados para performance
+
+                if(matches.length === 0) {
+                    const noResult = document.createElement('div');
+                    noResult.className = 'autocomplete-item text-gray-400 cursor-default';
+                    noResult.innerHTML = 'Nenhum resultado encontrado';
+                    list.appendChild(noResult);
+                }
+
+                matches.forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'autocomplete-item';
+                    itemDiv.innerHTML = `
+                        <div class="font-semibold text-gray-800">${item.nome}</div>
+                        <div class="text-xs text-gray-500">${item.funcao || 'N/A'} • ${item.regime || 'N/A'}</div>
+                    `;
+                    itemDiv.addEventListener('click', function() {
+                        input.value = item.nome;
+                        if (onSelect) onSelect(item);
+                        closeAllLists();
+                    });
+                    list.appendChild(itemDiv);
+                });
+            });
+
+            input.addEventListener('keydown', function(e) {
+                let x = document.getElementById(this.id + 'autocomplete-list');
+                if (x) x = x.getElementsByTagName('div');
+                if (e.keyCode == 40) { // Down
+                    currentFocus++;
+                    addActive(x);
+                } else if (e.keyCode == 38) { // Up
+                    currentFocus--;
+                    addActive(x);
+                } else if (e.keyCode == 13) { // Enter
+                    e.preventDefault();
+                    if (currentFocus > -1) {
+                        if (x) x[currentFocus].click();
+                    }
+                }
+            });
+
+            function addActive(x) {
+                if (!x) return false;
+                removeActive(x);
+                if (currentFocus >= x.length) currentFocus = 0;
+                if (currentFocus < 0) currentFocus = (x.length - 1);
+                x[currentFocus].classList.add('selected');
+                x[currentFocus].scrollIntoView({ block: 'nearest' });
+            }
+
+            function removeActive(x) {
+                for (let i = 0; i < x.length; i++) {
+                    x[i].classList.remove('selected');
+                }
+            }
+
+            function closeAllLists(elmnt) {
+                const x = document.getElementsByClassName('autocomplete-dropdown');
+                for (let i = 0; i < x.length; i++) {
+                    if (elmnt != x[i] && elmnt != input) {
+                        x[i].parentNode.removeChild(x[i]);
+                    }
+                }
+            }
+
+            document.addEventListener('click', function (e) {
+                closeAllLists(e.target);
+            });
+        }
+
+        // ============================================
+        // LÓGICA DE NEGÓCIO - RELATÓRIO
+        // ============================================
         
         function iniciarNovoRelatorio() {
             state.currentRelatorio = {
-                id: generateId(),
+                id: `REL-${Date.now()}`,
                 supervisor: state.user.nome,
                 letraTurno: state.user.letraTurno || '',
-                data: state.selectedDate,
+                data: new Date().toISOString().split('T')[0],
                 equipamentosOperando: [],
                 observacoes: '',
                 criadoEm: new Date().toISOString()
             };
-            state.view = 'novo-relatorio';
-            render();
+            // Adiciona um equipamento padrão
+            adicionarEquipamento(); 
+            renderNovoRelatorio();
         }
-        
+
         function adicionarEquipamento() {
-            if (!state.currentRelatorio.equipamentosOperando) {
-                state.currentRelatorio.equipamentosOperando = [];
-            }
+            if (!state.currentRelatorio) iniciarNovoRelatorio();
             
             state.currentRelatorio.equipamentosOperando.push({
-                id: `EQ-${Date.now()}`,
+                _tempId: Date.now(), // ID para controle de DOM
                 equipamento: '',
                 vaga: '',
                 area: '',
@@ -466,895 +278,570 @@
                 operadores: '',
                 trocas: []
             });
-            
-            render();
+            renderNovoRelatorio();
         }
-        
+
         function removerEquipamento(index) {
-            if (confirm('Remover este equipamento do relatório?')) {
+            if(confirm("Remover este equipamento?")) {
                 state.currentRelatorio.equipamentosOperando.splice(index, 1);
-                render();
+                renderNovoRelatorio();
             }
         }
-        
+
         function adicionarTroca(equipIndex) {
             const equip = state.currentRelatorio.equipamentosOperando[equipIndex];
             equip.trocas.push({
-                id: `TR-${Date.now()}`,
                 motivo: '',
                 equipamentoNovo: '',
                 dataHora: new Date().toISOString().slice(0, 16),
                 observacao: ''
             });
-            render();
+            renderNovoRelatorio();
         }
-        
+
         function removerTroca(equipIndex, trocaIndex) {
-            const equip = state.currentRelatorio.equipamentosOperando[equipIndex];
-            equip.trocas.splice(trocaIndex, 1);
-            render();
+            state.currentRelatorio.equipamentosOperando[equipIndex].trocas.splice(trocaIndex, 1);
+            renderNovoRelatorio();
         }
-        
+
         async function salvarRelatorio() {
             // Validações
-            if (!state.currentRelatorio.equipamentosOperando || state.currentRelatorio.equipamentosOperando.length === 0) {
-                Toast.error('Adicione pelo menos um equipamento');
-                return;
+            const rel = state.currentRelatorio;
+            if(!rel.equipamentosOperando.length) return showToast("Adicione ao menos um equipamento", "warning");
+            
+            for(let eq of rel.equipamentosOperando) {
+                if(!eq.equipamento || !eq.vaga || !eq.area) return showToast("Preencha os campos obrigatórios (*)", "warning");
             }
-            
-            for (let i = 0; i < state.currentRelatorio.equipamentosOperando.length; i++) {
-                const eq = state.currentRelatorio.equipamentosOperando[i];
-                if (!eq.equipamento || !eq.vaga || !eq.area) {
-                    Toast.error(`Equipamento ${i+1}: preencha todos os campos obrigatórios`);
-                    return;
-                }
-            }
-            
-            showLoading(true);
-            const result = await saveRelatorio(state.currentRelatorio);
-            showLoading(false);
-            
-            if (result.success) {
-                Toast.success('Relatório salvo com sucesso!');
-                state.currentRelatorio = null;
-                navigateTo('historico');
-            } else {
-                Toast.error('Erro ao salvar: ' + result.error);
-            }
-        }
-        
-        async function loadHistorico() {
-            showLoading(true);
-            const result = await getRelatorios(state.user.nome, state.selectedDate);
-            showLoading(false);
-            
-            if (result.success) {
-                state.relatorios = result.relatorios;
-            }
-            render();
-        }
-        
-        async function loadDashboard() {
-            if (!hasGestaoAccess()) {
-                Toast.error('Acesso negado');
-                return;
-            }
-            
-            showLoading(true);
-            const [dashboardRes, naoFeitosRes] = await Promise.all([
-                getDashboardData(state.selectedDate),
-                getRelatoriosNaoFeitos(state.selectedDate)
-            ]);
-            showLoading(false);
-            
-            if (dashboardRes.success) {
-                state.dashboardData = dashboardRes.data;
-            }
-            
-            if (naoFeitosRes.success) {
-                state.dashboardData.naoFizeram = naoFeitosRes.naoFizeram;
-                state.dashboardData.totalSupervisores = naoFeitosRes.totalSupervisores;
-                state.dashboardData.totalComRelatorio = naoFeitosRes.totalComRelatorio;
-            }
-            
-            render();
-        }
-        
-        function handleLogout() {
-            localStorage.removeItem('user');
-            Cache.clear();
-            state = {
-                view: 'login',
-                user: null,
-                equipamentos: [],
-                colaboradores: [],
-                vagas: [],
-                relatorios: [],
-                currentRelatorio: null,
-                selectedDate: getCurrentDate(),
-                isLoading: false,
-                sidebarOpen: false
-            };
-            render();
-        }
-        
-        function toggleSidebar() { 
-            state.sidebarOpen = !state.sidebarOpen; 
-            render(); 
-        }
-        
-        async function navigateTo(view) {
-            state.view = view;
-            state.sidebarOpen = window.innerWidth >= 768;
-            
-            if (view === 'historico') {
-                await loadHistorico();
-            } else if (view === 'dashboard') {
-                await loadDashboard();
-            }
-            
-            render();
-        }
-        
-        function gerarMensagemWhatsApp(relatorio) {
-            let msg = `📋 *RELATÓRIO DE TURNO*\n`;
-            msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-            msg += `📅 *Data:* ${formatDate(relatorio.data)}\n`;
-            msg += `👤 *Supervisor:* ${relatorio.supervisor}\n`;
-            msg += `🔤 *Turno:* ${relatorio.letraTurno}\n`;
-            msg += `🆔 *ID:* ${relatorio.id}\n\n`;
-            
-            msg += `🚛 *EQUIPAMENTOS EM OPERAÇÃO*\n`;
-            msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-            
-            relatorio.equipamentosOperando.forEach((eq, i) => {
-                msg += `*${i+1}. ${eq.equipamento}*\n`;
-                msg += `├ Vaga: ${eq.vaga}\n`;
-                msg += `├ Área: ${eq.area}\n`;
-                msg += `├ Motorista: ${eq.motorista || 'N/A'}\n`;
-                msg += `└ Operadores: ${eq.operadores || 'N/A'}\n`;
+
+            if(!confirm("Confirmar o envio do relatório?")) return;
+
+            showLoading(true, "Salvando relatório...");
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'saveRelatorio', relatorio: rel })
+                });
+                const json = await res.json();
                 
-                if (eq.trocas && eq.trocas.length > 0) {
-                    msg += `\n  🔄 *Trocas:*\n`;
-                    eq.trocas.forEach((tr, ti) => {
-                        msg += `  ${ti+1}. ${tr.motivo}\n`;
-                        msg += `     ├ Novo equip: ${tr.equipamentoNovo}\n`;
-                        msg += `     └ Horário: ${formatDateTime(tr.dataHora)}\n`;
-                    });
+                if(json.success) {
+                    showToast("Relatório salvo com sucesso!", "success");
+                    state.currentRelatorio = null;
+                    navigateTo('historico');
+                } else {
+                    throw new Error(json.error);
                 }
-                msg += `\n`;
-            });
-            
-            if (relatorio.observacoes) {
-                msg += `📝 *Observações:*\n${relatorio.observacoes}\n\n`;
-            }
-            
-            msg += `━━━━━━━━━━━━━━━━━━━━\n`;
-            msg += `⏰ ${new Date().toLocaleString('pt-BR')}`;
-            
-            return msg;
-        }
-        
-        function copiarParaWhatsApp(relatorioId) {
-            const relatorio = state.relatorios.find(r => r.id === relatorioId);
-            if (!relatorio) return;
-            
-            const mensagem = gerarMensagemWhatsApp(relatorio);
-            navigator.clipboard.writeText(mensagem).then(() => {
-                Toast.success('Mensagem copiada! Cole no WhatsApp');
-            }).catch(() => {
-                Toast.error('Erro ao copiar');
-            });
-        }
-        
-        // ============================================
-        // RENDER FUNCTIONS
-        // ============================================
-        function render() {
-            const app = document.getElementById('app');
-            switch(state.view) {
-                case 'login': 
-                    app.innerHTML = renderLogin(); 
-                    break;
-                case 'dashboard':
-                case 'relatorio':
-                case 'novo-relatorio':
-                case 'historico':
-                    app.innerHTML = renderMain();
-                    // Inicializar gráficos do dashboard após render
-                    if (state.view === 'dashboard' && state.dashboardData) {
-                        setTimeout(() => initCharts(), 100);
-                    }
-                    break;
+            } catch(e) {
+                showToast("Erro ao salvar: " + e.message, "error");
+            } finally {
+                showLoading(false);
             }
         }
-        
+
+        // ============================================
+        // RENDERIZAÇÃO
+        // ============================================
+
         function renderLogin() {
-            return `
-                <div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-600 to-blue-800">
-                    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden fade-in">
-                        <div class="bg-blue-600 p-8 text-center">
-                            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                                ${ICONS.login}
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-900 to-blue-700">
+                    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 fade-in">
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="ph-fill ph-clipboard-text text-4xl text-blue-600"></i>
                             </div>
-                            <h1 class="text-3xl font-bold text-white mb-2">Relatório de Turno</h1>
-                            <p class="text-blue-100 text-sm font-medium">GPS Mecanizada</p>
+                            <h1 class="text-2xl font-bold text-gray-800">Relatório de Turno</h1>
+                            <p class="text-gray-500 text-sm">Acesso do Supervisor</p>
                         </div>
-                        <form onsubmit="handleLogin(event)" class="p-8 space-y-6">
+                        <form onsubmit="handleLogin(event)" class="space-y-5">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Usuário</label>
-                                <input type="text" id="username" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" required>
+                                <div class="relative">
+                                    <i class="ph ph-user absolute left-3 top-3.5 text-gray-400 text-lg"></i>
+                                    <input type="text" id="username" class="w-full pl-10 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Seu usuário" required>
+                                </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Senha</label>
-                                <input type="password" id="password" class="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" required>
-                            </div>
-                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow transition-all">Entrar</button>
-                        </form>
-                        <div class="px-8 pb-8 text-center text-xs text-gray-400"><p>© 2026 GPS Mecanizada</p></div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderSidebar() {
-            const isGestao = hasGestaoAccess();
-            
-            const menuItems = isGestao ? [
-                { label: 'Dashboard', view: 'dashboard', icon: ICONS.dashboard },
-                { label: 'Novo Relatório', view: 'relatorio', icon: ICONS.clipboard },
-                { label: 'Histórico', view: 'historico', icon: ICONS.history }
-            ] : [
-                { label: 'Novo Relatório', view: 'relatorio', icon: ICONS.clipboard },
-                { label: 'Histórico', view: 'historico', icon: ICONS.history }
-            ];
-            
-            return `
-                ${state.sidebarOpen && window.innerWidth < 768 ? '<div class="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden" onclick="toggleSidebar()"></div>' : ''}
-                <aside class="sidebar ${state.sidebarOpen ? '' : 'closed'}">
-                    <div class="bg-blue-800 text-white p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center font-bold text-lg">
-                                    ${state.user.nome.charAt(0)}
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <h3 class="font-bold text-sm truncate">${state.user.nome}</h3>
-                                    <p class="text-xs opacity-70">${isGestao ? 'Gestão' : (state.user.letraTurno ? `Turno ${state.user.letraTurno}` : 'Supervisor')}</p>
+                                <div class="relative">
+                                    <i class="ph ph-lock absolute left-3 top-3.5 text-gray-400 text-lg"></i>
+                                    <input type="password" id="password" class="w-full pl-10 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Sua senha" required>
                                 </div>
                             </div>
-                            <button onclick="toggleSidebar()" class="p-2 hover:bg-white/20 rounded-lg md:hidden">✕</button>
-                        </div>
-                    </div>
-                    <nav class="p-4 flex-1 overflow-y-auto space-y-1">
-                        ${menuItems.map(item => `
-                            <button onclick="navigateTo('${item.view}')" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium ${state.view === item.view ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
-                                ${item.icon}<span>${item.label}</span>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all flex justify-center items-center gap-2">
+                                <span>Entrar</span>
+                                <i class="ph-bold ph-arrow-right"></i>
                             </button>
-                        `).join('')}
-                        <div class="border-t border-gray-200 my-4"></div>
-                        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all font-medium text-red-600 hover:bg-red-50">
-                            ${ICONS.logout}<span>Sair</span>
-                        </button>
-                    </nav>
-                </aside>
-            `;
-        }
-        
-        function renderMain() {
-            let content;
-            if (state.view === 'dashboard') {
-                content = renderDashboard();
-            } else if (state.view === 'relatorio' || state.view === 'novo-relatorio') {
-                content = renderNovoRelatorio();
-            } else {
-                content = renderHistorico();
-            }
-            
-            return `
-                ${renderSidebar()}
-                <div class="main-content min-h-screen bg-gray-50 pb-24">
-                    ${content}
+                        </form>
+                    </div>
                 </div>
             `;
         }
-        
-        function renderNovoRelatorio() {
-            if (!state.currentRelatorio) {
-                return `
-                    <div class="p-4">
-                        <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
-                                    <div>
-                                        <h1 class="text-xl font-bold text-gray-900">Relatório de Turno</h1>
-                                        <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
-                                    </div>
-                                </div>
+
+        function getLayout(content) {
+            const isGestao = state.user.accessLevel === 'gestao';
+            
+            return `
+                <div class="flex min-h-screen bg-gray-50">
+                    <!-- Sidebar Mobile Overlay -->
+                    ${state.sidebarOpen ? `<div class="fixed inset-0 bg-black/50 z-30 md:hidden" onclick="state.sidebarOpen=false; render()"></div>` : ''}
+                    
+                    <!-- Sidebar -->
+                    <aside class="fixed md:sticky top-0 left-0 h-screen w-72 bg-white border-r border-gray-200 z-40 transform transition-transform duration-300 ${state.sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}">
+                        <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-lg">
+                                ${state.user.nome.charAt(0)}
                             </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-gray-900 truncate">${state.user.nome}</h3>
+                                <p class="text-xs text-gray-500">${isGestao ? 'Gestor' : `Turno ${state.user.letraTurno || '-'}`}</p>
+                            </div>
+                        </div>
+
+                        <nav class="p-4 space-y-2">
+                            <button onclick="navigateTo('novo-relatorio')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${state.view === 'novo-relatorio' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
+                                <i class="ph ph-plus-circle text-xl"></i>
+                                <span>Novo Relatório</span>
+                            </button>
+                            
+                            <button onclick="navigateTo('historico')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${state.view === 'historico' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
+                                <i class="ph ph-clock-counter-clockwise text-xl"></i>
+                                <span>Histórico</span>
+                            </button>
+                            
+                            ${isGestao ? `
+                            <button onclick="navigateTo('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium ${state.view === 'dashboard' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:bg-gray-50'}">
+                                <i class="ph ph-chart-pie-slice text-xl"></i>
+                                <span>Dashboard</span>
+                            </button>
+                            ` : ''}
+
+                            <div class="pt-8 mt-8 border-t border-gray-100">
+                                <button onclick="logout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-red-600 hover:bg-red-50">
+                                    <i class="ph ph-sign-out text-xl"></i>
+                                    <span>Sair</span>
+                                </button>
+                            </div>
+                        </nav>
+                    </aside>
+
+                    <!-- Main Content -->
+                    <main class="flex-1 overflow-x-hidden">
+                        <header class="bg-white border-b border-gray-200 p-4 sticky top-0 z-20 flex items-center gap-4 md:hidden">
+                            <button onclick="state.sidebarOpen=true; render()" class="p-2 text-gray-600">
+                                <i class="ph ph-list text-2xl"></i>
+                            </button>
+                            <h1 class="font-bold text-lg text-gray-800">GPS Mecanizada</h1>
                         </header>
                         
-                        <div class="max-w-4xl mx-auto">
-                            <div class="bg-white rounded-xl shadow-sm p-8 text-center">
-                                ${ICONS.clipboard}
-                                <h2 class="text-2xl font-bold text-gray-900 mt-4 mb-2">Pronto para começar?</h2>
-                                <p class="text-gray-600 mb-6">Crie um novo relatório de turno</p>
-                                <button onclick="iniciarNovoRelatorio()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow transition-all">
-                                    Iniciar Novo Relatório
-                                </button>
-                            </div>
+                        <div class="p-4 md:p-8 max-w-5xl mx-auto">
+                            ${content}
                         </div>
-                    </div>
-                `;
-            }
-            
-            return `
-                <div class="p-4">
-                    <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
-                                <div>
-                                    <h1 class="text-xl font-bold text-gray-900">Novo Relatório</h1>
-                                    <p class="text-sm text-gray-500">ID: ${state.currentRelatorio.id}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </header>
-                    
-                    <div class="max-w-4xl mx-auto space-y-4">
-                        <!-- Info Card -->
-                        <div class="card">
-                            <div class="grid grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Supervisor</label>
-                                    <input type="text" value="${state.currentRelatorio.supervisor}" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Turno</label>
-                                    <input type="text" value="${state.currentRelatorio.letraTurno}" readonly class="w-full border border-gray-300 rounded-lg px-4 py-2 bg-gray-50">
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Data</label>
-                                <input type="date" value="${state.currentRelatorio.data}" onchange="state.currentRelatorio.data = this.value; render();" class="w-full border border-gray-300 rounded-lg px-4 py-2">
-                            </div>
-                        </div>
-                        
-                        <!-- Equipamentos -->
-                        <div class="card">
-                            <div class="flex items-center justify-between mb-4">
-                                <h2 class="text-lg font-bold text-gray-900">Equipamentos em Operação</h2>
-                                <button onclick="adicionarEquipamento()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg text-sm">
-                                    + Adicionar Equipamento
-                                </button>
-                            </div>
-                            
-                            ${state.currentRelatorio.equipamentosOperando.length === 0 ? 
-                                '<p class="text-center text-gray-500 py-8">Nenhum equipamento adicionado</p>' :
-                                state.currentRelatorio.equipamentosOperando.map((eq, i) => renderEquipamentoForm(eq, i)).join('')
-                            }
-                        </div>
-                        
-                        <!-- Observações -->
-                        <div class="card">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Observações Gerais</label>
-                            <textarea 
-                                onchange="state.currentRelatorio.observacoes = this.value"
-                                class="w-full border border-gray-300 rounded-lg px-4 py-2 h-24"
-                                placeholder="Observações sobre o turno..."
-                            >${state.currentRelatorio.observacoes}</textarea>
-                        </div>
-                        
-                        <!-- Botões -->
-                        <div class="flex gap-4">
-                            <button onclick="state.currentRelatorio = null; render();" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 rounded-lg">
-                                Cancelar
-                            </button>
-                            <button onclick="salvarRelatorio()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg">
-                                Salvar Relatório
-                            </button>
-                        </div>
-                    </div>
+                    </main>
                 </div>
             `;
         }
-        
-        function renderEquipamentoForm(eq, index) {
-            return `
-                <div class="border-2 border-gray-200 rounded-lg p-4 mb-4 bg-gray-50">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="font-bold text-gray-900">Equipamento ${index + 1}</h3>
-                        <button onclick="removerEquipamento(${index})" class="text-red-600 hover:text-red-700 font-bold">✕</button>
+
+        function renderNovoRelatorio() {
+            const app = document.getElementById('app');
+            
+            if(!state.currentRelatorio) {
+                // Estado vazio
+                app.innerHTML = getLayout(`
+                    <div class="bg-white rounded-2xl shadow-sm p-12 text-center fade-in">
+                        <div class="w-24 h-24 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i class="ph-duotone ph-file-plus text-5xl text-blue-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Começar Turno</h2>
+                        <p class="text-gray-500 mb-8 max-w-md mx-auto">Inicie um novo relatório para registrar as atividades, equipamentos e ocorrências do seu turno.</p>
+                        <button onclick="iniciarNovoRelatorio()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1">
+                            Iniciar Relatório
+                        </button>
                     </div>
-                    
+                `);
+                return;
+            }
+
+            const r = state.currentRelatorio;
+            
+            // Gerar HTML dos equipamentos
+            const equipamentosHTML = r.equipamentosOperando.map((eq, idx) => `
+                <div class="bg-white border border-gray-200 rounded-xl p-5 mb-4 shadow-sm slide-up relative group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded-md">EQ ${idx + 1}</span>
+                            <h3 class="font-bold text-gray-800">Detalhes da Operação</h3>
+                        </div>
+                        <button onclick="removerEquipamento(${idx})" class="text-gray-400 hover:text-red-500 transition-colors p-1">
+                            <i class="ph-bold ph-trash text-lg"></i>
+                        </button>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Equipamento *</label>
-                            <select onchange="state.currentRelatorio.equipamentosOperando[${index}].equipamento = this.value; render();" class="w-full border border-gray-300 rounded-lg px-4 py-2">
-                                <option value="">Selecione...</option>
-                                ${state.equipamentos.map(e => `<option value="${e.placa}" ${eq.equipamento === e.placa ? 'selected' : ''}>${e.placa} - ${e.tipo}</option>`).join('')}
-                            </select>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Equipamento *</label>
+                            <div class="relative">
+                                <i class="ph ph-truck absolute left-3 top-3 text-gray-400"></i>
+                                <select onchange="state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value" class="w-full pl-9 border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white appearance-none">
+                                    <option value="">Selecione...</option>
+                                    ${state.equipamentos.map(e => `<option value="${e.placa}" ${eq.equipamento === e.placa ? 'selected' : ''}>${e.placa} - ${e.tipo}</option>`).join('')}
+                                </select>
+                            </div>
                         </div>
-                        
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Vaga *</label>
-                            <select onchange="state.currentRelatorio.equipamentosOperando[${index}].vaga = this.value; render();" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Vaga *</label>
+                            <select onchange="state.currentRelatorio.equipamentosOperando[${idx}].vaga = this.value" class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none bg-white">
                                 <option value="">Selecione...</option>
                                 ${state.vagas.map(v => `<option value="${v.nome}" ${eq.vaga === v.nome ? 'selected' : ''}>${v.nome}</option>`).join('')}
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Área de Atuação *</label>
-                        <input type="text" value="${eq.area}" onchange="state.currentRelatorio.equipamentosOperando[${index}].area = this.value" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Ex: Galpão 1, Linha A...">
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Motorista</label>
-                            <select onchange="state.currentRelatorio.equipamentosOperando[${index}].motorista = this.value; render();" class="w-full border border-gray-300 rounded-lg px-4 py-2">
-                                <option value="">Selecione...</option>
-                                ${state.colaboradores.filter(c => c.funcao === 'Motorista').map(c => `<option value="${c.nome}" ${eq.motorista === c.nome ? 'selected' : ''}>${c.nome}</option>`).join('')}
-                            </select>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Área de Atuação *</label>
+                            <input type="text" value="${eq.area}" onchange="state.currentRelatorio.equipamentosOperando[${idx}].area = this.value" class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none" placeholder="Ex: Galpão A, Linha 3...">
                         </div>
                         
+                        <!-- Autocomplete Motorista -->
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Operadores</label>
-                            <input type="text" value="${eq.operadores}" onchange="state.currentRelatorio.equipamentosOperando[${index}].operadores = this.value" class="w-full border border-gray-300 rounded-lg px-4 py-2" placeholder="Nomes dos operadores...">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Motorista</label>
+                            <input type="text" 
+                                id="motorista_input_${eq._tempId}" 
+                                value="${eq.motorista}" 
+                                class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none" 
+                                placeholder="Digite para buscar...">
+                        </div>
+
+                         <!-- Autocomplete Operadores -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Operadores</label>
+                            <input type="text" value="${eq.operadores}" onchange="state.currentRelatorio.equipamentosOperando[${idx}].operadores = this.value" class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none" placeholder="Nomes separados por vírgula">
                         </div>
                     </div>
-                    
+
                     <!-- Trocas -->
-                    <div class="border-t border-gray-300 pt-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-semibold text-gray-900">Trocas de Equipamento</h4>
-                            <button onclick="adicionarTroca(${index})" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-1 px-3 rounded text-sm">
-                                + Adicionar Troca
+                    <div class="border-t border-gray-100 pt-3 mt-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-orange-600 flex items-center gap-1">
+                                <i class="ph-bold ph-arrows-left-right"></i> Trocas/Ocorrências
+                            </span>
+                            <button onclick="adicionarTroca(${idx})" class="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded hover:bg-orange-100 font-semibold transition-colors">
+                                + Adicionar
                             </button>
                         </div>
                         
-                        ${eq.trocas.length === 0 ? '<p class="text-sm text-gray-500 text-center py-2">Nenhuma troca registrada</p>' : 
-                            eq.trocas.map((tr, ti) => renderTrocaForm(index, ti, tr)).join('')
-                        }
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderTrocaForm(equipIndex, trocaIndex, troca) {
-            return `
-                <div class="troca-item">
-                    <div class="flex justify-between items-start mb-3">
-                        <h5 class="font-semibold text-sm">Troca ${trocaIndex + 1}</h5>
-                        <button onclick="removerTroca(${equipIndex}, ${trocaIndex})" class="text-red-600 hover:text-red-700 text-sm font-bold">✕</button>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Motivo</label>
-                            <select onchange="state.currentRelatorio.equipamentosOperando[${equipIndex}].trocas[${trocaIndex}].motivo = this.value" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-                                <option value="">Selecione...</option>
-                                <option value="Manutenção Preventiva" ${troca.motivo === 'Manutenção Preventiva' ? 'selected' : ''}>Manutenção Preventiva</option>
-                                <option value="Manutenção Corretiva" ${troca.motivo === 'Manutenção Corretiva' ? 'selected' : ''}>Manutenção Corretiva</option>
-                                <option value="Solicitação Cliente" ${troca.motivo === 'Solicitação Cliente' ? 'selected' : ''}>Solicitação Cliente</option>
-                                <option value="Avaria" ${troca.motivo === 'Avaria' ? 'selected' : ''}>Avaria</option>
-                            </select>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-700 mb-1">Novo Equipamento</label>
-                            <select onchange="state.currentRelatorio.equipamentosOperando[${equipIndex}].trocas[${trocaIndex}].equipamentoNovo = this.value" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-                                <option value="">Selecione...</option>
-                                ${state.equipamentos.map(e => `<option value="${e.placa}" ${troca.equipamentoNovo === e.placa ? 'selected' : ''}>${e.placa}</option>`).join('')}
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-3">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Data e Hora da Troca</label>
-                        <input type="datetime-local" value="${troca.dataHora}" onchange="state.currentRelatorio.equipamentosOperando[${equipIndex}].trocas[${trocaIndex}].dataHora = this.value" class="w-full border border-gray-300 rounded px-3 py-2 text-sm">
-                    </div>
-                    
-                    <div class="mt-3">
-                        <label class="block text-xs font-semibold text-gray-700 mb-1">Observação</label>
-                        <textarea onchange="state.currentRelatorio.equipamentosOperando[${equipIndex}].trocas[${trocaIndex}].observacao = this.value" class="w-full border border-gray-300 rounded px-3 py-2 text-sm h-16" placeholder="Detalhes sobre a troca...">${troca.observacao}</textarea>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderHistorico() {
-            return `
-                <div class="p-4">
-                    <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-3">
-                                <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
-                                <div>
-                                    <h1 class="text-xl font-bold text-gray-900">Histórico de Relatórios</h1>
-                                    <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
+                        ${eq.trocas.map((tr, tIdx) => `
+                            <div class="bg-orange-50/50 rounded-lg p-3 mb-2 border border-orange-100 text-sm">
+                                <div class="flex justify-between mb-2">
+                                    <strong class="text-orange-800">Ocorrência ${tIdx + 1}</strong>
+                                    <button onclick="removerTroca(${idx}, ${tIdx})" class="text-red-500 hover:text-red-700">✕</button>
                                 </div>
-                            </div>
-                            <input type="date" value="${state.selectedDate}" onchange="state.selectedDate = this.value; loadHistorico();" class="border border-gray-300 rounded-lg px-4 py-2">
-                        </div>
-                    </header>
-                    
-                    <div class="max-w-6xl mx-auto">
-                        ${state.relatorios.length === 0 ? 
-                            '<div class="bg-white rounded-xl shadow-sm p-12 text-center"><p class="text-gray-500">Nenhum relatório encontrado para esta data</p></div>' :
-                            state.relatorios.map(r => renderRelatorioCard(r)).join('')
-                        }
-                    </div>
-                </div>
-            `;
-        }
-        
-        function renderRelatorioCard(relatorio) {
-            return `
-                <div class="card mb-4">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-lg text-gray-900">Relatório ${relatorio.id}</h3>
-                            <p class="text-sm text-gray-500">Supervisor: ${relatorio.supervisor} | Turno: ${relatorio.letraTurno}</p>
-                        </div>
-                        <button onclick="copiarParaWhatsApp('${relatorio.id}')" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
-                            ${ICONS.whatsapp}
-                            <span>WhatsApp</span>
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-3">
-                        ${relatorio.equipamentosOperando.map((eq, i) => `
-                            <div class="border-l-4 border-blue-500 pl-4 py-2">
-                                <h4 class="font-semibold text-gray-900">${i+1}. ${eq.equipamento}</h4>
-                                <p class="text-sm text-gray-600">Vaga: ${eq.vaga} | Área: ${eq.area}</p>
-                                ${eq.motorista ? `<p class="text-sm text-gray-600">Motorista: ${eq.motorista}</p>` : ''}
-                                ${eq.operadores ? `<p class="text-sm text-gray-600">Operadores: ${eq.operadores}</p>` : ''}
-                                ${eq.trocas.length > 0 ? `<p class="text-sm text-yellow-600 font-semibold mt-1">🔄 ${eq.trocas.length} troca(s) registrada(s)</p>` : ''}
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2">
+                                    <select onchange="state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].motivo = this.value" class="border border-orange-200 rounded p-1.5 w-full bg-white">
+                                        <option value="">Motivo...</option>
+                                        <option value="Manutenção Preventiva" ${tr.motivo === 'Manutenção Preventiva' ? 'selected' : ''}>Preventiva</option>
+                                        <option value="Manutenção Corretiva" ${tr.motivo === 'Manutenção Corretiva' ? 'selected' : ''}>Corretiva</option>
+                                        <option value="Avaria" ${tr.motivo === 'Avaria' ? 'selected' : ''}>Avaria</option>
+                                    </select>
+                                    <select onchange="state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].equipamentoNovo = this.value" class="border border-orange-200 rounded p-1.5 w-full bg-white">
+                                        <option value="">Novo Equip...</option>
+                                        ${state.equipamentos.map(e => `<option value="${e.placa}" ${tr.equipamentoNovo === e.placa ? 'selected' : ''}>${e.placa}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <input type="time" value="${tr.dataHora.slice(11, 16)}" onchange="state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].dataHora = state.currentRelatorio.data + 'T' + this.value" class="border border-orange-200 rounded p-1.5 w-full mb-2">
+                                <input type="text" placeholder="Obs..." value="${tr.observacao}" onchange="state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].observacao = this.value" class="border border-orange-200 rounded p-1.5 w-full">
                             </div>
                         `).join('')}
                     </div>
-                    
-                    ${relatorio.observacoes ? `
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <p class="text-sm font-semibold text-gray-700">Observações:</p>
-                            <p class="text-sm text-gray-600">${relatorio.observacoes}</p>
-                        </div>
-                    ` : ''}
                 </div>
-            `;
-        }
-        
-        function renderDashboard() {
-            if (!hasGestaoAccess()) {
-                return `<div class="p-4"><div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-800">Acesso negado</div></div>`;
-            }
-            
-            const data = state.dashboardData;
-            
-            if (!data) {
-                return `
-                    <div class="p-4">
-                        <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
-                                    <div>
-                                        <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
-                                        <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
-                                    </div>
-                                </div>
-                                <input type="date" value="${state.selectedDate}" 
-                                    onchange="state.selectedDate=this.value; loadDashboard();"
-                                    class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </header>
-                        <div class="flex items-center justify-center h-64">
-                            <div class="text-gray-500">Carregando dashboard...</div>
-                        </div>
+            `).join('');
+
+            app.innerHTML = getLayout(`
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900">Novo Relatório</h2>
+                        <p class="text-sm text-gray-500">Preencha os dados do turno atual</p>
                     </div>
-                `;
-            }
-            
-            const totalRelatorios = data.totalRelatorios || 0;
-            const totalEquipamentos = data.totalEquipamentos || 0;
-            const totalTrocas = data.totalTrocas || 0;
-            const totalSupervisores = data.totalSupervisores || 0;
-            const totalComRelatorio = data.totalComRelatorio || 0;
-            const naoFizeram = data.naoFizeram || [];
-            const percentualCompleto = totalSupervisores > 0 ? Math.round((totalComRelatorio / totalSupervisores) * 100) : 0;
-            
-            // Relatórios por turno
-            const relatoriosPorTurno = {A: 0, B: 0, C: 0, D: 0};
-            if (data.relatoriosPorTurno) {
-                Object.assign(relatoriosPorTurno, data.relatoriosPorTurno);
-            }
-            
-            // Equipamentos mais usados
-            const equipamentosMaisUsados = data.equipamentosMaisUsados || [];
-            
-            // Motivos de trocas
-            const motivosTrocas = data.motivosTrocas || {};
-            
-            return `
-                <div class="p-4">
-                    <!-- Header -->
-                    <header class="bg-white border-b border-gray-200 rounded-lg mb-4 p-6">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
-                            <div class="flex items-center gap-3">
-                                <button onclick="toggleSidebar()" class="p-2 md:hidden">☰</button>
-                                <div>
-                                    <h1 class="text-xl font-bold text-gray-900">Dashboard</h1>
-                                    <p class="text-sm text-gray-500">${formatDate(state.selectedDate)}</p>
-                                </div>
-                            </div>
-                            <input type="date" value="${state.selectedDate}" 
-                                onchange="state.selectedDate=this.value; loadDashboard();"
-                                class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
-                        </div>
-                    </header>
-                    
-                    <!-- Cards de estatísticas -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <!-- Total de Relatórios -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-blue-500">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-sm text-gray-600 font-medium">Relatórios Criados</p>
-                                <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
-                            <p class="text-3xl font-bold text-gray-900">${totalRelatorios}</p>
-                            <p class="text-xs text-gray-500 mt-1">Total no dia</p>
-                        </div>
-                        
-                        <!-- Total de Equipamentos -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-green-500">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-sm text-gray-600 font-medium">Equipamentos Operando</p>
-                                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                            </div>
-                            <p class="text-3xl font-bold text-gray-900">${totalEquipamentos}</p>
-                            <p class="text-xs text-gray-500 mt-1">Em campo hoje</p>
-                        </div>
-                        
-                        <!-- Total de Trocas -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 border-orange-500">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-sm text-gray-600 font-medium">Trocas Realizadas</p>
-                                <svg class="w-8 h-8 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                </svg>
-                            </div>
-                            <p class="text-3xl font-bold text-gray-900">${totalTrocas}</p>
-                            <p class="text-xs text-gray-500 mt-1">Substituições no dia</p>
-                        </div>
-                        
-                        <!-- Supervisores com Relatório -->
-                        <div class="bg-white rounded-xl shadow-sm p-6 border-l-4 ${naoFizeram.length === 0 ? 'border-green-500' : 'border-yellow-500'}">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-sm text-gray-600 font-medium">Supervisores</p>
-                                <svg class="w-8 h-8 ${naoFizeram.length === 0 ? 'text-green-500' : 'text-yellow-500'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                            <p class="text-3xl font-bold text-gray-900">${totalComRelatorio}/${totalSupervisores}</p>
-                            <div class="mt-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="flex-1 bg-gray-200 rounded-full h-2">
-                                        <div class="bg-${naoFizeram.length === 0 ? 'green' : 'yellow'}-500 h-2 rounded-full transition-all" style="width: ${percentualCompleto}%"></div>
-                                    </div>
-                                    <span class="text-xs text-gray-600 font-medium">${percentualCompleto}%</span>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="text-right hidden md:block">
+                        <div class="text-sm font-bold text-gray-900">${new Date().toLocaleDateString('pt-BR')}</div>
+                        <div class="text-xs text-gray-500">ID: ${r.id}</div>
                     </div>
-                    
-                    <!-- Alertas: Supervisores que não fizeram relatório -->
-                    ${naoFizeram.length > 0 ? `
-                        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-6">
-                            <div class="flex items-start gap-3">
-                                <svg class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                </svg>
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-yellow-800 mb-2">⚠️ Supervisores sem relatório hoje</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                                        ${naoFizeram.map(sup => `
-                                            <div class="bg-white rounded-lg px-4 py-2 border border-yellow-300">
-                                                <p class="font-medium text-gray-900">${sup.nome}</p>
-                                                <p class="text-xs text-gray-600">Turno ${sup.letraTurno || '?'}</p>
-                                            </div>
-                                        `).join('')}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ` : `
-                        <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div>
-                                    <h3 class="font-bold text-green-800">✅ Todos os supervisores fizeram o relatório!</h3>
-                                    <p class="text-sm text-green-700">100% de conformidade no dia</p>
-                                </div>
-                            </div>
-                        </div>
-                    `}
-                    
-                    <!-- Gráficos -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                        <!-- Relatórios por Turno -->
-                        <div class="bg-white rounded-xl shadow-sm p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Relatórios por Turno</h3>
-                            <canvas id="chartTurnos"></canvas>
-                        </div>
-                        
-                        <!-- Motivos de Trocas -->
-                        <div class="bg-white rounded-xl shadow-sm p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Motivos de Trocas</h3>
-                            ${Object.keys(motivosTrocas).length > 0 ? `
-                                <canvas id="chartMotivos"></canvas>
-                            ` : `
-                                <div class="flex items-center justify-center h-48 text-gray-400">
-                                    <p>Nenhuma troca registrada hoje</p>
-                                </div>
-                            `}
-                        </div>
-                    </div>
-                    
-                    <!-- Equipamentos mais usados -->
-                    ${equipamentosMaisUsados.length > 0 ? `
-                        <div class="bg-white rounded-xl shadow-sm p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Equipamentos Mais Utilizados</h3>
-                            <div class="space-y-3">
-                                ${equipamentosMaisUsados.map((eq, idx) => {
-                                    const maxUso = equipamentosMaisUsados[0].quantidade;
-                                    const percentage = (eq.quantidade / maxUso) * 100;
-                                    return `
-                                        <div class="flex items-center gap-3">
-                                            <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
-                                                ${idx + 1}
-                                            </div>
-                                            <div class="flex-1">
-                                                <div class="flex items-center justify-between mb-1">
-                                                    <span class="font-medium text-gray-900">${eq.equipamento}</span>
-                                                    <span class="text-sm text-gray-600">${eq.quantidade}x</span>
-                                                </div>
-                                                <div class="bg-gray-200 rounded-full h-2">
-                                                    <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: ${percentage}%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
                 </div>
-            `;
+
+                <div class="grid gap-6 max-w-4xl">
+                    <!-- Configurações Gerais -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                         <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Data do Turno</label>
+                                <input type="date" value="${r.data}" onchange="state.currentRelatorio.data = this.value" class="w-full border border-gray-300 rounded-lg p-2.5 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Letra Turno</label>
+                                <input type="text" value="${r.letraTurno}" readonly class="w-full bg-gray-100 border border-gray-300 rounded-lg p-2.5 text-gray-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lista Equipamentos -->
+                    <div>
+                        ${equipamentosHTML}
+                        
+                        <button onclick="adicionarEquipamento()" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 font-semibold hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-plus"></i> Adicionar Outro Equipamento
+                        </button>
+                    </div>
+
+                    <!-- Obs -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-2">Observações Gerais</label>
+                        <textarea rows="3" onchange="state.currentRelatorio.observacoes = this.value" class="w-full border border-gray-300 rounded-lg p-3 focus:border-blue-500 outline-none resize-none" placeholder="Alguma ocorrência geral importante?">${r.observacoes}</textarea>
+                    </div>
+
+                    <!-- Ações -->
+                    <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 md:static md:bg-transparent md:border-0 md:p-0 z-20">
+                        <div class="flex gap-3 max-w-4xl mx-auto">
+                            <button onclick="if(confirm('Cancelar e perder dados?')) { state.currentRelatorio=null; renderNovoRelatorio(); }" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 rounded-xl hover:bg-gray-300 transition-colors">
+                                Cancelar
+                            </button>
+                            <button onclick="salvarRelatorio()" class="flex-[2] bg-blue-600 text-white font-bold py-3 rounded-xl shadow-lg hover:bg-blue-700 transition-transform active:scale-95 flex justify-center items-center gap-2">
+                                <i class="ph-bold ph-paper-plane-right"></i> Salvar Relatório
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            // Inicializar Autocompletes após renderizar
+            r.equipamentosOperando.forEach((eq, idx) => {
+                setupAutocomplete(`motorista_input_${eq._tempId}`, state.colaboradores, (item) => {
+                    state.currentRelatorio.equipamentosOperando[idx].motorista = item.nome;
+                });
+            });
         }
-        
-        function initCharts() {
-            if (!state.dashboardData) return;
+
+        // ============================================
+        // AUXILIARES
+        // ============================================
+
+        async function fetchAPI(action, params = {}) {
+            const url = new URL(API_URL);
+            url.searchParams.append('action', action);
+            Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
             
-            const data = state.dashboardData;
+            const response = await fetch(url);
+            return await response.json();
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
             
-            // Gráfico de Relatórios por Turno
-            const ctxTurnos = document.getElementById('chartTurnos');
-            if (ctxTurnos) {
-                const relatoriosPorTurno = data.relatoriosPorTurno || {A: 0, B: 0, C: 0, D: 0};
-                new Chart(ctxTurnos, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Turno A', 'Turno B', 'Turno C', 'Turno D'],
-                        datasets: [{
-                            label: 'Relatórios',
-                            data: [
-                                relatoriosPorTurno.A || 0,
-                                relatoriosPorTurno.B || 0,
-                                relatoriosPorTurno.C || 0,
-                                relatoriosPorTurno.D || 0
-                            ],
-                            backgroundColor: [
-                                'rgba(59, 130, 246, 0.7)',
-                                'rgba(16, 185, 129, 0.7)',
-                                'rgba(251, 146, 60, 0.7)',
-                                'rgba(168, 85, 247, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgb(59, 130, 246)',
-                                'rgb(16, 185, 129)',
-                                'rgb(251, 146, 60)',
-                                'rgb(168, 85, 247)'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
-                        }
-                    }
-                });
-            }
-            
-            // Gráfico de Motivos de Trocas
-            const ctxMotivos = document.getElementById('chartMotivos');
-            if (ctxMotivos && data.motivosTrocas && Object.keys(data.motivosTrocas).length > 0) {
-                const motivosTrocas = data.motivosTrocas;
-                const labels = Object.keys(motivosTrocas);
-                const valores = Object.values(motivosTrocas);
-                
-                new Chart(ctxMotivos, {
-                    type: 'doughnut',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: valores,
-                            backgroundColor: [
-                                'rgba(239, 68, 68, 0.7)',
-                                'rgba(59, 130, 246, 0.7)',
-                                'rgba(251, 146, 60, 0.7)',
-                                'rgba(168, 85, 247, 0.7)',
-                                'rgba(16, 185, 129, 0.7)'
-                            ],
-                            borderColor: [
-                                'rgb(239, 68, 68)',
-                                'rgb(59, 130, 246)',
-                                'rgb(251, 146, 60)',
-                                'rgb(168, 85, 247)',
-                                'rgb(16, 185, 129)'
-                            ],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
-                            }
-                        }
-                    }
-                });
+            showLoading(true, "Autenticando...");
+            try {
+                const res = await fetchAPI('login', { username: u, password: p });
+                if (res.success) {
+                    localStorage.setItem('user_session', JSON.stringify(res.supervisor));
+                    state.user = res.supervisor;
+                    initApp();
+                } else {
+                    showToast(res.error, 'error');
+                }
+            } catch(err) {
+                showToast("Erro de conexão", 'error');
+            } finally {
+                showLoading(false);
             }
         }
-        
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedUser = localStorage.getItem('user');
-            if (savedUser) {
-                state.user = JSON.parse(savedUser);
-                loadInitialData().then(() => {
-                    navigateTo('relatorio');
-                });
+
+        function logout() {
+            localStorage.removeItem('user_session');
+            location.reload();
+        }
+
+        function showLoading(show, text) {
+            const el = document.getElementById('loading');
+            const txt = document.getElementById('loading-text');
+            if (show) {
+                el.classList.remove('hidden');
+                txt.textContent = text || 'Carregando...';
             } else {
-                render();
+                el.classList.add('hidden');
             }
-        });
+        }
+
+        function showToast(message, type = 'info') {
+            const div = document.createElement('div');
+            const colors = { success: 'bg-green-500', error: 'bg-red-500', warning: 'bg-orange-500', info: 'bg-blue-600' };
+            div.className = `fixed top-5 right-5 ${colors[type]} text-white px-6 py-4 rounded-xl shadow-2xl z-50 flex items-center gap-3 slide-up`;
+            div.innerHTML = `
+                <i class="ph-bold ${type === 'success' ? 'ph-check-circle' : type === 'error' ? 'ph-warning-circle' : 'ph-info'} text-xl"></i>
+                <span class="font-medium">${message}</span>
+            `;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 4000);
+        }
+
+        // Exibe o histórico de relatórios
+        async function renderHistorico() {
+            const app = document.getElementById('app');
+            app.innerHTML = getLayout(`
+                <div class="flex items-center justify-center h-64">
+                    <i class="ph ph-spinner ph-spin text-4xl text-blue-600"></i>
+                </div>
+            `);
+
+            const date = new Date().toISOString().split('T')[0];
+            const res = await fetchAPI('getRelatorios', { supervisor: state.user.nome, date: date });
+
+            let html = '';
+            if(res.success && res.relatorios.length > 0) {
+                html = res.relatorios.map(r => `
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mb-4">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-gray-900">Relatório de Turno ${r.letraTurno}</h3>
+                                <p class="text-sm text-gray-500">${new Date(r.data + 'T12:00:00').toLocaleDateString()}</p>
+                            </div>
+                            <button onclick="copiarWhatsApp('${btoa(JSON.stringify(r))}')" class="text-green-600 bg-green-50 hover:bg-green-100 px-3 py-2 rounded-lg text-sm font-bold flex items-center gap-2">
+                                <i class="ph-bold ph-whatsapp-logo"></i> Copiar
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                            ${r.equipamentosOperando.map(e => `
+                                <div class="text-sm border-l-4 border-blue-500 pl-3 py-1">
+                                    <span class="font-bold text-gray-800">${e.equipamento}</span>
+                                    <span class="text-gray-500"> - ${e.area}</span>
+                                    ${e.trocas && e.trocas.length ? `<span class="bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded-full ml-2">${e.trocas.length} Ocorrências</span>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                html = `<div class="text-center text-gray-500 py-12">Nenhum relatório encontrado hoje.</div>`;
+            }
+
+            const appContent = document.getElementById('app');
+            appContent.innerHTML = getLayout(`
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Histórico (Hoje)</h2>
+                <div class="max-w-3xl">${html}</div>
+            `);
+        }
+
+        // Função para formatar mensagem do WhatsApp
+        function copiarWhatsApp(encodedData) {
+            const r = JSON.parse(atob(encodedData));
+            let text = `*RELATÓRIO DE TURNO - ${r.letraTurno}*\n`;
+            text += `📅 ${new Date(r.data + 'T12:00:00').toLocaleDateString()}\n`;
+            text += `👤 Sup: ${r.supervisor}\n\n`;
+            
+            r.equipamentosOperando.forEach(eq => {
+                text += `🚛 *${eq.equipamento}*\n`;
+                text += `📍 ${eq.area} | ${eq.vaga}\n`;
+                if(eq.motorista) text += `👨‍✈️ ${eq.motorista}\n`;
+                
+                if(eq.trocas && eq.trocas.length) {
+                    eq.trocas.forEach(tr => {
+                        text += `⚠️ *${tr.motivo}* -> ${tr.equipamentoNovo || 'S/EQ'}\n`;
+                    });
+                }
+                text += `\n`;
+            });
+            
+            if(r.observacoes) text += `📝 *Obs:* ${r.observacoes}\n`;
+
+            navigator.clipboard.writeText(text);
+            showToast('Copiado para a área de transferência', 'success');
+        }
+
+        // Renderiza o Dashboard (Apenas Gestão)
+        async function renderDashboard() {
+            const app = document.getElementById('app');
+            app.innerHTML = getLayout(`<div class="text-center p-12"><i class="ph ph-spinner ph-spin text-4xl"></i></div>`);
+            
+            // Simples chamada ao backend para pegar dados crus
+            // A inteligência do gráfico fica aqui no frontend
+            const date = new Date().toISOString().split('T')[0];
+            const res = await fetchAPI('getDashboard', { date });
+            
+            if(!res.success) return showToast('Erro ao carregar dashboard', 'error');
+            const data = res.data;
+
+            // Preparar dados para o Chart.js
+            const appContent = document.getElementById('app');
+            
+            // Aqui eu crio uma estrutura de dashboard moderna
+            appContent.innerHTML = getLayout(`
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Dashboard Operacional</h2>
+                
+                <!-- KPIs -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-blue-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Total Equipamentos</p>
+                        <p class="text-3xl font-bold text-gray-800">${data.totalEquipamentos}</p>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-orange-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Trocas Realizadas</p>
+                        <p class="text-3xl font-bold text-gray-800">${data.totalTrocas}</p>
+                    </div>
+                     <div class="bg-white p-5 rounded-xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-xs text-gray-500 font-bold uppercase">Relatórios Entregues</p>
+                        <p class="text-3xl font-bold text-gray-800">${data.totalRelatorios}</p>
+                    </div>
+                </div>
+
+                <!-- Gráficos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm h-80">
+                        <h3 class="font-bold text-gray-700 mb-4">Motivos de Troca</h3>
+                        <canvas id="chartMotivos"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm h-80">
+                        <h3 class="font-bold text-gray-700 mb-4">Top Equipamentos</h3>
+                        <canvas id="chartEquipamentos"></canvas>
+                    </div>
+                </div>
+            `);
+
+            // Inicializar Gráficos
+            setTimeout(() => {
+                // Gráfico de Pizza (Motivos)
+                const ctxMotivos = document.getElementById('chartMotivos');
+                if(ctxMotivos && data.motivosTrocas) {
+                    new Chart(ctxMotivos, {
+                        type: 'doughnut',
+                        data: {
+                            labels: Object.keys(data.motivosTrocas),
+                            datasets: [{
+                                data: Object.values(data.motivosTrocas),
+                                backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                    });
+                }
+
+                // Gráfico de Barras (Top Equipamentos)
+                const ctxEq = document.getElementById('chartEquipamentos');
+                if(ctxEq && data.equipamentosMaisUsados) {
+                    new Chart(ctxEq, {
+                        type: 'bar',
+                        data: {
+                            labels: data.equipamentosMaisUsados.map(i => i.equipamento),
+                            datasets: [{
+                                label: 'Utilizações',
+                                data: data.equipamentosMaisUsados.map(i => i.quantidade),
+                                backgroundColor: '#3b82f6',
+                                borderRadius: 4
+                            }]
+                        },
+                        options: { maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+                    });
+                }
+            }, 100);
+        }
+
     </script>
 </body>
 </html>
