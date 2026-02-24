@@ -316,7 +316,13 @@ SGE_RT.relatorio = {
         const app = this.els.historicoView;
         if (!app) return;
 
-        app.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--primary);"><svg class="loading-spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg></div>`;
+        app.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:16px;">
+                <div class="skeleton" style="height: 120px; border-radius: var(--radius-md);"></div>
+                <div class="skeleton" style="height: 120px; border-radius: var(--radius-md);"></div>
+                <div class="skeleton" style="height: 120px; border-radius: var(--radius-md);"></div>
+            </div>
+        `;
 
         const date = new Date().toISOString().split('T')[0];
         const res = await SGE_RT.api.getRelatorios(SGE_RT.state.user.nome, date);
@@ -345,9 +351,17 @@ SGE_RT.relatorio = {
                 </div>
             `).join('');
         } else {
-            app.innerHTML = `<div class="empty-state">
-                <p>Nenhum relatório encontrado para hoje.</p>
-            </div>`;
+            app.innerHTML = `
+                <div class="no-data-message">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                    </svg>
+                    <h3>Nenhum Relatório</h3>
+                    <p>Não há dados registrados para a data selecionada.</p>
+                </div>
+            `;
         }
     },
 
@@ -394,7 +408,19 @@ SGE_RT.relatorio = {
         const app = this.els.dashboardView;
         if (!app) return;
 
-        app.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--primary);"><svg class="loading-spinner" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path></svg></div>`;
+        app.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:24px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div class="skeleton" style="height: 90px; border-radius: var(--radius-md);"></div>
+                    <div class="skeleton" style="height: 90px; border-radius: var(--radius-md);"></div>
+                    <div class="skeleton" style="height: 90px; border-radius: var(--radius-md);"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                    <div class="skeleton" style="height: 300px; border-radius: var(--radius-md);"></div>
+                    <div class="skeleton" style="height: 300px; border-radius: var(--radius-md);"></div>
+                </div>
+            </div>
+        `;
 
         const date = new Date().toISOString().split('T')[0];
         const res = await SGE_RT.api.getDashboard(date);

@@ -1,0 +1,237 @@
+/* Estilos específicos para o Relatório de Turno */
+.relatorio-container {
+    padding: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.equipamento-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.equipamento-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.equipamento-card-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-1);
+}
+
+.remove-btn {
+    color: var(--status-red);
+    background: rgba(220, 53, 69, 0.1);
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.remove-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-2);
+    text-transform: uppercase;
+}
+
+.input-group input,
+.input-group select,
+.input-group textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+.input-group textarea:focus {
+    border-color: var(--primary);
+}
+
+.trocas-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed var(--border);
+}
+
+.troca-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.troca-header h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--status-orange);
+}
+
+.add-troca-btn {
+    background: rgba(253, 126, 20, 0.1);
+    color: var(--status-orange);
+    border: none;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.2s;
+}
+
+.add-troca-btn:hover {
+    background: rgba(253, 126, 20, 0.15);
+}
+
+.troca-item {
+    background: #fff8f1;
+    border: 1px solid #ffe8cc;
+    padding: 12px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 12px;
+    align-items: start;
+}
+
+.autocomplete-wrapper {
+    position: relative;
+}
+
+.autocomplete-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 0 0 var(--radius-md) var(--radius-md);
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 50;
+    box-shadow: var(--shadow-md);
+}
+
+.autocomplete-item {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bg-body);
+    font-size: 14px;
+}
+
+.autocomplete-item:hover,
+.autocomplete-item.selected {
+    background-color: var(--bg-table-hover);
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+}
+
+.empty-state h2 {
+    margin: 16px 0 8px;
+    color: var(--text-1);
+}
+
+.empty-state p {
+    color: var(--text-2);
+    margin-bottom: 24px;
+}
+
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.primary-btn:hover {
+    opacity: 0.9;
+}
+
+.secondary-btn {
+    background: var(--bg-body);
+    color: var(--text-1);
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.secondary-btn:hover {
+    background: var(--bg-table-hover);
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+    margin-bottom: 40px;
+}
+
+.add-equip-btn {
+    width: 100%;
+    padding: 16px;
+    background: transparent;
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
+    color: var(--text-2);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.add-equip-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    background: var(--bg-table-hover);
+}

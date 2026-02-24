@@ -29,7 +29,7 @@
   --primary: var(--accent);
   --radius-sm: 4px;
   --radius-md: 8px;
-  --radius-lg: 16px;
-  --bg-body: var(--bg-0);
-  --bg-table-hover: var(--bg-2);
+  --bg-body: #f8f9fa;
+  --bg-table-hover: #f1f3f5;
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
