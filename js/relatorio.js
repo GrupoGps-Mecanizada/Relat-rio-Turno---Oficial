@@ -42,7 +42,7 @@ SGE_RT.relatorio = {
             vaga: '',
             area: '',
             motorista: '',
-            operadores: '',
+            operadores: [],
             trocas: []
         });
         this.renderNovoRelatorio();
@@ -77,41 +77,56 @@ SGE_RT.relatorio = {
 
         // Limpa os campos antes de buscar
         eq.motorista = '';
-        eq.operadores = '';
+        eq.operadores = [];
 
         if (!vagaValue || !SGE_RT.state.colaboradores) {
             this.renderNovoRelatorio();
             return;
         }
 
+        // Função para ignorar espaços e hífens na hora de comparar "AP 01" com "AP-01"
+        const normalize = s => (s || '').toString().toUpperCase().replace(/[\s\-]/g, '');
+        const targetVaga = normalize(vagaValue);
+
         // Busca colaboradores que estão atribuídos a essa vaga
-        // A propriedade no JSON do backend pode ser Equipamento, equipamento, ou equipamento_atual
-        const cols = SGE_RT.state.colaboradores.filter(c => {
-            const cEq = c.Equipamento || c.equipamento || '';
-            return cEq.toUpperCase() === vagaValue.toUpperCase();
-        });
+        let cols = SGE_RT.state.colaboradores.filter(c => normalize(c.equipamento) === targetVaga);
+
+        // Se o usuário logado tiver uma Letra de Turno específica (ex: A, B, C, D), filtrar só os daquele turno
+        const myLetra = SGE_RT.state.user.letraTurno;
+        if (myLetra && myLetra !== '-' && myLetra.trim() !== '') {
+            const shiftCols = cols.filter(c => c.regime && c.regime.toUpperCase().endsWith(myLetra.toUpperCase()));
+            // Para não quebrar testes de quem é ADMIN, só aplica o filtro se de fato encontrou gente naquele turno
+            if (shiftCols.length > 0) {
+                cols = shiftCols;
+            }
+        }
 
         // Separar Motorista (MOT) e Operadores (OP)
         const motoristas = cols.filter(c => {
-            const func = c.Função || c.funcao || '';
+            const func = c.funcao || '';
             return func.toUpperCase() === 'MOT';
         });
 
         const operadores = cols.filter(c => {
-            const func = c.Função || c.funcao || '';
+            const func = c.funcao || '';
             return func.toUpperCase() === 'OP';
         });
 
         if (motoristas.length > 0) {
-            eq.motorista = motoristas[0].Nome || motoristas[0].nome || '';
+            eq.motorista = motoristas[0].nome || '';
         }
 
         if (operadores.length > 0) {
-            eq.operadores = operadores.map(op => op.Nome || op.nome || '').join(', ');
+            eq.operadores = operadores.map(op => op.nome || '');
         }
 
         this.renderNovoRelatorio();
-        SGE_RT.helpers.toast(`Dados preenchidos automaticamente para a vaga ${vagaValue}`, 'success');
+
+        if (cols.length === 0) {
+            SGE_RT.helpers.toast(`Nenhum colaborador encontrado para a vaga ${vagaValue}`, 'warning');
+        } else {
+            SGE_RT.helpers.toast(`Dados preenchidos para a vaga ${vagaValue}`, 'success');
+        }
     },
 
     async salvarRelatorio() {
@@ -203,7 +218,13 @@ SGE_RT.relatorio = {
                     </div>
                     <div class="input-group">
                         <label>Operadores</label>
-                        <input type="text" value="${eq.operadores}" onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores = this.value" placeholder="Nomes separados por vírgula">
+                        ${(Array.isArray(eq.operadores) ? eq.operadores : []).map((opName, opIdx) => `
+                            <div style="display:flex; gap:8px; margin-bottom:8px;">
+                                <input type="text" value="${opName}" onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores[${opIdx}] = this.value" placeholder="Operador ${opIdx + 1}" style="flex:1;">
+                                <button class="remove-btn" style="padding: 0 12px;" onclick="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores.splice(${opIdx}, 1); SGE_RT.relatorio.renderNovoRelatorio();">✕</button>
+                            </div>
+                        `).join('')}
+                        <button class="secondary-btn" style="padding: 6px 12px; font-size: 11px; width: fit-content;" onclick="if(!Array.isArray(SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores)) SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores = []; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].operadores.push(''); SGE_RT.relatorio.renderNovoRelatorio();">+ Adicionar Operador</button>
                     </div>
                 </div>
 
@@ -341,6 +362,14 @@ SGE_RT.relatorio = {
                 text += `🚛 *${eq.equipamento}*\n`;
                 text += `📍 ${eq.area} | ${eq.vaga}\n`;
                 if (eq.motorista) text += `👨‍✈️ ${eq.motorista}\n`;
+
+                if (Array.isArray(eq.operadores) && eq.operadores.length) {
+                    eq.operadores.forEach(op => {
+                        if (op) text += `👷 ${op}\n`;
+                    });
+                } else if (typeof eq.operadores === 'string' && eq.operadores) {
+                    text += `👷 ${eq.operadores}\n`;
+                }
 
                 if (eq.trocas && eq.trocas.length) {
                     eq.trocas.forEach(tr => {

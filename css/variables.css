@@ -24,4 +24,12 @@
   --radius: 12px;
   --shadow: 0 2px 12px #0000000a;
   --shadow-lg: 0 6px 28px #00000010;
+
+  /* Missing variables used by Relatório View */
+  --primary: var(--accent);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --bg-body: var(--bg-0);
+  --bg-table-hover: var(--bg-2);
 }

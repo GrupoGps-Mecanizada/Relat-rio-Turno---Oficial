@@ -34,13 +34,7 @@ SGE_RT.api = {
 
     async login(username, password) {
         const url = SGE_RT.CONFIG.gasUrl;
-        // Uses the current script logic
-        try {
-            const res = await fetch(`${url}?action=login&username=${username}&password=${password}`);
-            return await res.json();
-        } catch (e) {
-            return { success: false, error: e.message };
-        }
+        return await this.doReq(url, 'GET', { action: 'login', username, password });
     },
 
     async fetchColaboradores() {

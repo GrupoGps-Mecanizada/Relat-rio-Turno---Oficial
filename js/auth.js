@@ -59,21 +59,6 @@ SGE_RT.auth = {
 
         this.setLoading(true);
 
-        // Bypass para facilitar testes locales
-        if (user.toLowerCase() === 'admin' && pass === 'admin') {
-            const mockUser = {
-                id: 'ADM',
-                nome: 'ADMIN TESTE',
-                accessLevel: 'gestao',
-                letraTurno: '-'
-            };
-            localStorage.setItem('user_session_rt', JSON.stringify(mockUser));
-            SGE_RT.state.user = mockUser;
-            this.showApp();
-            this.setLoading(false);
-            return;
-        }
-
         const res = await SGE_RT.api.login(user, pass);
 
         if (res && res.success) {
@@ -95,7 +80,7 @@ SGE_RT.auth = {
     },
 
     showLogin() {
-        if (this.els.loginScreen) this.els.loginScreen.classList.add('active');
+        if (this.els.loginScreen) this.els.loginScreen.classList.remove('hidden');
         if (this.els.appScreen) this.els.appScreen.style.display = 'none';
         if (this.els.userInput) this.els.userInput.value = '';
         if (this.els.passInput) this.els.passInput.value = '';
@@ -103,7 +88,7 @@ SGE_RT.auth = {
     },
 
     async showApp() {
-        if (this.els.loginScreen) this.els.loginScreen.classList.remove('active');
+        if (this.els.loginScreen) this.els.loginScreen.classList.add('hidden');
         if (this.els.appScreen) this.els.appScreen.style.display = 'block';
 
         const isGestao = SGE_RT.state.user.accessLevel === 'gestao';

@@ -111,11 +111,19 @@
 }
 
 .login-error {
-    color: var(--danger);
+    color: var(--danger, #dc3545);
     font-size: 13px;
     margin-top: 16px;
     text-align: center;
     min-height: 20px;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+.login-error.active {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .login-footer {
