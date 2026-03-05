@@ -8,24 +8,21 @@ SGE_RT.app = {
         const statusEl = document.getElementById('loading-status');
         const topbar = document.getElementById('topbar');
         const main = document.getElementById('main');
+        const tabs = document.getElementById('relatorio-tabs');
 
-        // Prepare fade in
         if (topbar) topbar.style.opacity = '0';
         if (main) main.style.opacity = '0';
+        if (tabs) tabs.style.opacity = '0';
+        if (loadingScreen) loadingScreen.classList.remove('hide');
 
         const setStatus = (msg) => {
             if (statusEl) statusEl.innerHTML = msg + '<span class="loading-dots"></span>';
         };
 
-        if (loadingScreen) {
-            loadingScreen.classList.remove('hide');
-        }
-
         SGE_RT.navigation.init();
-        setStatus('Sincronizando banco de dados...');
+        setStatus('Sincronizando banco de dados');
 
         try {
-            // Load base data from Supabase Gestão de Efetivo schemas
             const [colsOk, eqOk] = await Promise.all([
                 SGE_RT.api.loadColaboradores(),
                 SGE_RT.api.loadEquipamentos()
@@ -35,16 +32,16 @@ SGE_RT.app = {
                 console.warn('SGE_RT: Algum erro ocorreu ao carregar dados operacionais.');
             }
 
-            // Setup Realtime connections for Relatorios
+            // Update nav stats after data is loaded
+            const equipsCount = (SGE_RT.state.equipamentos || []).length;
+            const turno = SGE_RT.auth.currentUser?.letraTurno || '—';
+            SGE_RT.navigation.updateStats(equipsCount, turno);
+
             SGE_RT.api.setupRealtime();
 
-            if (SGE_RT.relatorio) {
-                SGE_RT.relatorio.init();
-            }
+            if (SGE_RT.relatorio) SGE_RT.relatorio.init();
 
-            setStatus('Montando interface...');
-
-            // Start default view
+            setStatus('Montando interface');
             SGE_RT.state.dataLoaded = true;
             SGE_RT.relatorio.renderNovoRelatorio();
 
@@ -52,16 +49,19 @@ SGE_RT.app = {
             SGE_RT.helpers.toast('Erro ao inicializar o app', 'error');
             console.error(e);
         } finally {
-            // Smooth transition
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 350));
 
-            if (topbar) topbar.style.transition = 'opacity .4s ease';
-            if (main) main.style.transition = 'opacity .4s ease';
+            const fadeIn = (el) => {
+                if (!el) return;
+                el.style.transition = 'opacity .4s ease';
+                el.style.opacity = '1';
+            };
 
-            if (topbar) topbar.style.opacity = '1';
-            if (main) main.style.opacity = '1';
+            fadeIn(topbar);
+            fadeIn(main);
+            fadeIn(tabs);
 
-            if (loadingScreen && loadingScreen.parentNode) {
+            if (loadingScreen?.parentNode) {
                 loadingScreen.classList.add('hide');
                 setTimeout(() => loadingScreen.remove(), 700);
             }
@@ -69,11 +69,7 @@ SGE_RT.app = {
     }
 };
 
-// Bootstrap check - Initialize Auth. App will be started if Auth passes.
 document.addEventListener('DOMContentLoaded', () => {
-    if (SGE_RT.auth) {
-        SGE_RT.auth.init();
-    } else {
-        SGE_RT.app.start();
-    }
+    if (SGE_RT.auth) SGE_RT.auth.init();
+    else SGE_RT.app.start();
 });
