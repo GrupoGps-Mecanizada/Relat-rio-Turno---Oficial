@@ -13,7 +13,7 @@ window.SGE_RT = window.SGE_RT || {};
 
 // ─── Configuração ────────────────────────────────────────────────────────────
 const SSO_APP_SLUG = 'relatorio_turno';
-const SSO_LOGIN_URL = 'https://grupogps-mecanizada.github.io/SGE_GRUPOGPS/sso_login.html';
+const SSO_LOGIN_URL = 'https://grupogps-mecanizada.github.io/SGE-CENTRAL/sso_login.html';
 // URL de redirect de volta para este app (usa location atual sem querystring)
 const SSO_REDIRECT_URL = () => window.location.origin + window.location.pathname;
 
