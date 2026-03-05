@@ -177,6 +177,10 @@ SGE_RT.auth = {
             escalaJornada
         };
 
+        if (!SGE_RT.state) {
+            SGE_RT.state = {};
+        }
+
         SGE_RT.state.user = this.currentUser;
 
         console.info(
@@ -202,8 +206,10 @@ SGE_RT.auth = {
         }
 
         this.currentUser = null;
-        SGE_RT.state.user = null;
-        SGE_RT.state.dataLoaded = false;
+        if (SGE_RT.state) {
+            SGE_RT.state.user = null;
+            SGE_RT.state.dataLoaded = false;
+        }
 
         // Redireciona para a Central para novo login
         this._redirectToSSO();
