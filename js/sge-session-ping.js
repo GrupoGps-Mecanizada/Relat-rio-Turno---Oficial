@@ -1,12 +1,12 @@
 /**
- * SGE SESSION PING — Mantém sessões ativas no Radar Central
+ * SGE_RT SESSION PING — Mantém sessões ativas no Radar Central
  * 
- * Inclua este script em qualquer sistema satélite do ecossistema SGE.
+ * Inclua este script em qualquer sistema satélite do ecossistema SGE_RT.
  * Ele lê os dados de sessão gravados no localStorage pelo sso_login.html
  * e envia pings periódicos (a cada 30s) para manter o status "Online"
  * no Radar de Sessões do Painel Central.
  * 
- * Uso: <script src="https://SEU_DOMINIO/SGE-CENTRAL/js/sge-session-ping.js"></script>
+ * Uso: <script src="https://SEU_DOMINIO/SGE_RT-CENTRAL/js/SGE_RT-session-ping.js"></script>
  *       (incluir APÓS o supabase-js CDN)
  */
 (function () {
@@ -18,9 +18,9 @@
 
     function getSessionData() {
         try {
-            const sessionId = localStorage.getItem('sge_session_id');
-            const userId = localStorage.getItem('sge_session_user_id');
-            const token = localStorage.getItem('sge_session_token');
+            const sessionId = localStorage.getItem('SGE_RT_session_id');
+            const userId = localStorage.getItem('SGE_RT_session_user_id');
+            const token = localStorage.getItem('SGE_RT_session_token');
             if (!sessionId || !userId || !token) return null;
             return { sessionId, userId, token };
         } catch (e) {
@@ -40,13 +40,13 @@
                 const { data: authData } = await window.supabase.auth.getSession();
                 if (authData?.session?.access_token) {
                     token = authData.session.access_token;
-                    localStorage.setItem('sge_session_token', token);
+                    localStorage.setItem('SGE_RT_session_token', token);
                 }
             }
         } catch (e) { }
 
         try {
-            const response = await fetch(`${SUPABASE_URL}/rest/v1/sge_central_sessoes?id=eq.${data.sessionId}&usuario_id=eq.${data.userId}`, {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/SGE_RT_central_sessoes?id=eq.${data.sessionId}&usuario_id=eq.${data.userId}`, {
                 method: 'PATCH',
                 headers: {
                     'apikey': ANON_KEY,
@@ -61,10 +61,10 @@
 
             if (!response.ok) {
                 const errText = await response.text().catch(() => '');
-                console.warn('[SGE Ping] Erro no ping:', response.status, errText);
+                console.warn('[SGE_RT Ping] Erro no ping:', response.status, errText);
             }
         } catch (err) {
-            console.warn('[SGE Ping] Falha no ping:', err.message);
+            console.warn('[SGE_RT Ping] Falha no ping:', err.message);
         }
     }
 
@@ -72,11 +72,11 @@
         if (_pingInterval) return;
         const data = getSessionData();
         if (!data) {
-            console.log('[SGE Ping] Nenhuma sessão SGE encontrada no localStorage.');
+            console.log('[SGE_RT Ping] Nenhuma sessão SGE_RT encontrada no localStorage.');
             return;
         }
 
-        console.log(`[SGE Ping] Iniciando ping a cada ${PING_INTERVAL_MS / 1000}s para sessão ${data.sessionId}`);
+        console.log(`[SGE_RT Ping] Iniciando ping a cada ${PING_INTERVAL_MS / 1000}s para sessão ${data.sessionId}`);
         pingSession(); // First ping immediately
         _pingInterval = setInterval(pingSession, PING_INTERVAL_MS);
     }
@@ -99,5 +99,5 @@
     window.addEventListener('beforeunload', stop);
 
     // Export for manual control
-    window.SGE_SESSION_PING = { start, stop, ping: pingSession };
+    window.SGE_RT_SESSION_PING = { start, stop, ping: pingSession };
 })();

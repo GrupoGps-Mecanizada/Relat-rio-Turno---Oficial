@@ -4,9 +4,9 @@
  * SGE — Configuration
  * Central configuration for the application
  */
-window.SGE = window.SGE || {};
+window.SGE_RT = window.SGE || {};
 
-SGE.CONFIG = {
+SGE_RT.CONFIG = {
   // Supabase is now used instead of Google Apps Script
   // gasUrl: 'https://script.google.com/macros/s/.../exec',
 
@@ -131,22 +131,22 @@ SGE.CONFIG = {
 /**
  * Manage custom dynamic configurations
  */
-SGE.configManager = {
+SGE_RT.configManager = {
   /**
-   * Load any saved configurations from localStorage and merge into SGE.CONFIG
+   * Load any saved configurations from localStorage and merge into SGE_RT.CONFIG
    */
   load() {
     try {
       const saved = localStorage.getItem('SGE_CUSTOM_CONFIG');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.regimes) SGE.CONFIG.regimes = parsed.regimes;
-        if (parsed.funcoes) SGE.CONFIG.funcoes = parsed.funcoes;
-        if (parsed.equipTipos) SGE.CONFIG.equipTipos = parsed.equipTipos;
-        if (parsed.turnoMap) SGE.CONFIG.turnoMap = parsed.turnoMap;
-        if (parsed.ordemKanban) SGE.CONFIG.ordemKanban = parsed.ordemKanban;
-        if (parsed.statuses) SGE.CONFIG.statuses = parsed.statuses;
-        if (parsed.motivos) SGE.CONFIG.motivos = parsed.motivos;
+        if (parsed.regimes) SGE_RT.CONFIG.regimes = parsed.regimes;
+        if (parsed.funcoes) SGE_RT.CONFIG.funcoes = parsed.funcoes;
+        if (parsed.equipTipos) SGE_RT.CONFIG.equipTipos = parsed.equipTipos;
+        if (parsed.turnoMap) SGE_RT.CONFIG.turnoMap = parsed.turnoMap;
+        if (parsed.ordemKanban) SGE_RT.CONFIG.ordemKanban = parsed.ordemKanban;
+        if (parsed.statuses) SGE_RT.CONFIG.statuses = parsed.statuses;
+        if (parsed.motivos) SGE_RT.CONFIG.motivos = parsed.motivos;
       }
     } catch (e) {
       console.warn('Failed to load custom configs', e);
@@ -154,25 +154,25 @@ SGE.configManager = {
   },
 
   /**
-   * Save current SGE.CONFIG to localStorage
+   * Save current SGE_RT.CONFIG to localStorage
    */
   save() {
     try {
       const dataToSave = {
-        regimes: SGE.CONFIG.regimes,
-        funcoes: SGE.CONFIG.funcoes,
-        equipTipos: SGE.CONFIG.equipTipos,
-        turnoMap: SGE.CONFIG.turnoMap,
-        ordemKanban: SGE.CONFIG.ordemKanban,
-        statuses: SGE.CONFIG.statuses,
-        motivos: SGE.CONFIG.motivos
+        regimes: SGE_RT.CONFIG.regimes,
+        funcoes: SGE_RT.CONFIG.funcoes,
+        equipTipos: SGE_RT.CONFIG.equipTipos,
+        turnoMap: SGE_RT.CONFIG.turnoMap,
+        ordemKanban: SGE_RT.CONFIG.ordemKanban,
+        statuses: SGE_RT.CONFIG.statuses,
+        motivos: SGE_RT.CONFIG.motivos
       };
       localStorage.setItem('SGE_CUSTOM_CONFIG', JSON.stringify(dataToSave));
 
       // Async sync each config key to Supabase app_config table
-      if (window.SGE && SGE.api && typeof SGE.api.syncConfigArray === 'function') {
+      if (window.SGE && SGE_RT.api && typeof SGE_RT.api.syncConfigArray === 'function') {
         Object.entries(dataToSave).forEach(([key, value]) => {
-          SGE.api.syncConfigArray(key, value).catch(e => console.warn('Failed to sync config to Supabase', e));
+          SGE_RT.api.syncConfigArray(key, value).catch(e => console.warn('Failed to sync config to Supabase', e));
         });
       }
     } catch (e) {
@@ -182,4 +182,4 @@ SGE.configManager = {
 };
 
 // Auto-load config immediately on script execution
-SGE.configManager.load();
+SGE_RT.configManager.load();

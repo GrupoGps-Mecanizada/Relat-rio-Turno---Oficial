@@ -4,9 +4,9 @@
  * SGE — Helper Functions
  * Utility functions used across the application
  */
-window.SGE = window.SGE || {};
+window.SGE_RT = window.SGE || {};
 
-SGE.helpers = {
+SGE_RT.helpers = {
     /**
      * Get CSS class for regime badge
      */
@@ -48,8 +48,8 @@ SGE.helpers = {
      * Filter collaborators based on active filters
      */
     filtrarColaboradores() {
-        const f = SGE.state.filtros;
-        return SGE.state.colaboradores.filter(c => {
+        const f = SGE_RT.state.filtros;
+        return SGE_RT.state.colaboradores.filter(c => {
             // Regime filter (multi-select)
             if (f.regime && f.regime.length > 0 && !f.regime.includes(c.regime)) return false;
             // Funcao filter (multi-select)
@@ -57,9 +57,9 @@ SGE.helpers = {
             // Status filter (multi-select, with special cases)
             if (f.status && f.status.length > 0) {
                 const matchesStatus = f.status.some(s => {
-                    if (s === 'FÉRIAS') return SGE.helpers.isFerias(c);
-                    if (s === 'SEM EQUIP') return SGE.helpers.isSemEquipamento(c);
-                    if (s === 'SEM_ID') return SGE.helpers.isSemId(c);
+                    if (s === 'FÉRIAS') return SGE_RT.helpers.isFerias(c);
+                    if (s === 'SEM EQUIP') return SGE_RT.helpers.isSemEquipamento(c);
+                    if (s === 'SEM_ID') return SGE_RT.helpers.isSemId(c);
                     return c.status === s;
                 });
                 if (!matchesStatus) return false;
@@ -74,8 +74,8 @@ SGE.helpers = {
                 if (c.setor_id && c.setor && c.setor !== 'SEM SETOR') {
                     colAloc = c.setor;
                 } else if (c.equipamento && c.equipamento !== 'SEM EQUIPAMENTO') {
-                    const parsed = SGE.equip ? SGE.equip.parseEquip(c.equipamento) : null;
-                    const tipos = SGE.CONFIG.equipTipos || {};
+                    const parsed = SGE_RT.equip ? SGE_RT.equip.parseEquip(c.equipamento) : null;
+                    const tipos = SGE_RT.CONFIG.equipTipos || {};
                     colAloc = parsed ? (parsed.sigla + ' — ' + (tipos[parsed.sigla]?.nome || '')) : null;
                 }
 
@@ -83,7 +83,7 @@ SGE.helpers = {
             }
             // EquipTurno filter
             if (f.equipTurno && f.equipTurno.length > 0) {
-                const turno = SGE.equip ? SGE.equip.getTurno(c.regime) : null;
+                const turno = SGE_RT.equip ? SGE_RT.equip.getTurno(c.regime) : null;
                 if (!turno || !f.equipTurno.includes(turno)) return false;
             }
             return true;
@@ -103,7 +103,7 @@ SGE.helpers = {
         el.className = `toast ${type}`;
         el.innerHTML = (icons[type] || '') + msg;
         document.getElementById('toast-container').appendChild(el);
-        setTimeout(() => el.remove(), SGE.CONFIG.toastDuration);
+        setTimeout(() => el.remove(), SGE_RT.CONFIG.toastDuration);
     },
 
     /**
@@ -118,9 +118,9 @@ SGE.helpers = {
      * Update statistics in the topbar
      */
     updateStats() {
-        const total = SGE.state.colaboradores.length;
-        const ativos = SGE.state.colaboradores.filter(c => c.status === 'ATIVO').length;
-        const semId = SGE.state.colaboradores.filter(c => SGE.helpers.isSemId(c)).length;
+        const total = SGE_RT.state.colaboradores.length;
+        const ativos = SGE_RT.state.colaboradores.filter(c => c.status === 'ATIVO').length;
+        const semId = SGE_RT.state.colaboradores.filter(c => SGE_RT.helpers.isSemId(c)).length;
 
         // Menu stats (primary)
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };

@@ -4,9 +4,9 @@
  * SGE — State Management
  * Centralized application state
  */
-window.SGE = window.SGE || {};
+window.SGE_RT = window.SGE || {};
 
-SGE.state = {
+SGE_RT.state = {
     colaboradores: [],
     supervisores: [],
     setores: [],
