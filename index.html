@@ -3,9 +3,10 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <title>SGE — Relatório de Turno</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    <meta name="theme-color" content="#0f3868" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
 
     <!-- CSS Modules -->
@@ -14,9 +15,7 @@
     <link rel="stylesheet" href="css/auth.css" />
     <link rel="stylesheet" href="css/topbar.css" />
     <link rel="stylesheet" href="css/filterbar.css" />
-    <link rel="stylesheet" href="css/search.css" />
     <link rel="stylesheet" href="css/history.css" />
-    <link rel="stylesheet" href="css/settings.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="stylesheet" href="css/drawer.css" />
     <link rel="stylesheet" href="css/modal.css" />
@@ -26,72 +25,69 @@
 
 <body>
     <!-- ==================== LOGIN SCREEN ==================== -->
-    <div id="login-screen">
+    <div id="login-screen" class="hidden">
         <div class="login-box">
-            <img src="img/logo.png" alt="Grupo GPS" class="login-logo" onerror="this.style.display='none';" />
-            <h2 class="login-title">Relatório de Turno</h2>
+            <!-- Title Block matching HUB and Controle de Presença -->
+            <div
+                style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 30px; text-align: center;">
+                <span
+                    style="font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #94a3b8;">GRUPO
+                    GPS</span>
+                <span
+                    style="font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: #0f3868; line-height: 1.2;">MECANIZADA</span>
+                <div
+                    style="width: 32px; height: 2px; background: #0f3868; border-radius: 2px; opacity: 0.25; margin-top: 6px; margin-bottom: 12px;">
+                </div>
+                <span
+                    style="font-size: 13px; font-weight: 600; color: #475569; letter-spacing: 0.05em; text-transform: uppercase;">Relatório
+                    de Turno</span>
+            </div>
+
             <form id="login-form">
                 <div class="login-input-group">
-                    <label>Usuário</label>
-                    <input type="text" id="login-user" required autocomplete="username" />
+                    <label>E-mail</label>
+                    <input type="email" id="login-user" required autocomplete="username"
+                        placeholder="Seu e-mail do Supabase" />
                 </div>
                 <div class="login-input-group">
                     <label>Senha</label>
-                    <input type="password" id="login-pass" required autocomplete="current-password" />
+                    <input type="password" id="login-pass" required autocomplete="current-password"
+                        placeholder="Sua senha" />
                 </div>
                 <button type="submit" class="login-btn" id="login-submit">Entrar</button>
             </form>
             <div class="login-error" id="login-error"></div>
         </div>
         <div class="login-footer">
-            Desenvolvido por Warlison Abreu
+            Desenvolvido por Warlison Abreu | Icaro Bernardo - Grupo GPS
         </div>
     </div>
 
-    <div id="app">
+    <!-- ==================== MAIN APP ==================== -->
+    <div id="app" style="display: none;">
 
         <!-- ==================== LOADING SCREEN ==================== -->
-        <div id="loading-screen">
+        <div id="loading-screen" style="background:var(--bg-0)">
             <div class="loading-content">
-                <div class="loading-logo-ring">
-                    <!-- Outer animated ring -->
-                    <svg class="loading-ring" viewBox="0 0 80 80">
-                        <defs>
-                            <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#4a7fd7" />
-                                <stop offset="50%" stop-color="#6ba3f2" />
-                                <stop offset="100%" stop-color="#3a6abf" />
-                            </linearGradient>
-                        </defs>
-                        <circle cx="40" cy="40" r="36" />
-                    </svg>
-                    <!-- Inner logo SVG -->
-                    <svg class="loading-logo" viewBox="0 0 24 24" fill="none" stroke="#4a7fd7" stroke-width="2"
-                        width="32" height="32">
-                        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <path d="M16 13H8" />
-                        <path d="M16 17H8" />
-                        <path d="M10 9H8" />
-                    </svg>
+                <div class="loading-bar-container">
+                    <div class="loading-bar"></div>
                 </div>
-                <div style="text-align: center;">
-                    <h1 class="loading-title">SGE</h1>
-                    <div class="loading-subtitle">RELATÓRIO DE TURNO</div>
-                </div>
-                <div class="loading-progress">
-                    <div class="loading-bar">
-                        <div class="loading-bar-fill"></div>
-                    </div>
-                    <div id="loading-status" class="loading-status">Inicializando</div>
-                </div>
+                <div id="loading-status"
+                    style="color:var(--text-3); font-size:12px; font-weight:500; margin-top:14px; text-align:center; letter-spacing:0.02em;">
+                    Conectando...</div>
             </div>
         </div>
+
+        <!-- ==================== SYNC BAR ==================== -->
+        <div id="global-sync-bar"></div>
 
         <!-- ==================== TOPBAR ==================== -->
         <div id="topbar">
             <div class="logo">
-                SGE <span>Relatório de Turno</span>
+                <span>GRUPO GPS</span>
+                <span>Mecanizada</span>
+                <div style="height:1px; background:var(--border); width:100%; margin:2px 0;"></div>
+                <span>Relatório de Turno</span>
             </div>
 
             <!-- Hamburger Button (Mobile Only) -->
@@ -122,9 +118,8 @@
             </div>
 
             <div id="topbar-right">
-                <div id="topbar-user" style="display:flex; align-items:center; padding-right:12px; margin-right:4px;">
+                <div id="topbar-user">
                 </div>
-                <button id="logout-btn" class="secondary-btn" style="padding: 6px 12px; font-size:12px;">Sair</button>
             </div>
         </div>
 
@@ -157,13 +152,18 @@
         <div id="toast-container"></div>
     </div>
 
+    <!-- JS Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://grupogps-mecanizada.github.io/SGE_GRUPOGPS/js/auth/sso_client.js?v=5"></script>
+
     <!-- JS Modules -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="js/config.js"></script>
+    <script src="js/supabase-config.js"></script>
     <script src="js/state.js"></script>
+    <script src="js/helpers.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
-    <script src="js/helpers.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/relatorio.js"></script>
     <script src="js/app.js"></script>

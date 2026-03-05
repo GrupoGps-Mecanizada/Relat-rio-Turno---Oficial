@@ -16,19 +16,17 @@ SGE_RT.relatorio = {
         };
     },
 
-    bindEvents() {
-        // Global events if necessary
-    },
+    bindEvents() { },
 
     iniciarNovoRelatorio() {
+        if (!SGE_RT.auth.currentUser) return;
+
         SGE_RT.state.currentRelatorio = {
-            id: `REL-${Date.now()}`,
-            supervisor: SGE_RT.state.user.nome,
-            letraTurno: SGE_RT.state.user.letraTurno || '',
+            supervisor: SGE_RT.auth.currentUser.nome,
+            letraTurno: SGE_RT.auth.currentUser.letraTurno || '',
             data: new Date().toISOString().split('T')[0],
             equipamentosOperando: [],
-            observacoes: '',
-            criadoEm: new Date().toISOString()
+            observacoes: ''
         };
         this.adicionarEquipamento();
     },
@@ -38,8 +36,9 @@ SGE_RT.relatorio = {
 
         SGE_RT.state.currentRelatorio.equipamentosOperando.push({
             _tempId: Date.now(),
-            equipamento: '',
-            vaga: '',
+            equipamento: '', // Placa
+            tipo: '',        // Tipo (sigla)
+            vaga: '',        // Usually placa, but we keep it separated for compatibility
             area: '',
             motorista: '',
             operadores: [],
@@ -71,46 +70,40 @@ SGE_RT.relatorio = {
         this.renderNovoRelatorio();
     },
 
-    handleVagaChange(equipIndex, vagaValue) {
+    // Handles the selection of the primary equipment (Vaga)
+    handleVagaChange(equipIndex, equipamentoId) {
         const eq = SGE_RT.state.currentRelatorio.equipamentosOperando[equipIndex];
-        eq.vaga = vagaValue;
 
-        // Limpa os campos antes de buscar
+        // Define Vaga / Placa info based on selected DB equipment
+        const eqDb = SGE_RT.state.equipamentos.find(e => e.id === equipamentoId);
+        if (eqDb) {
+            eq.equipamento = eqDb.placa;
+            eq.vaga = eqDb.placa;
+            eq.tipo = eqDb.tipo;
+        } else {
+            eq.equipamento = '';
+            eq.vaga = '';
+            eq.tipo = '';
+        }
+
+        // Limpa os campos de pessoal antes de buscar
         eq.motorista = '';
         eq.operadores = [];
 
-        if (!vagaValue || !SGE_RT.state.colaboradores) {
+        if (!equipamentoId || !SGE_RT.state.colaboradores) {
             this.renderNovoRelatorio();
             return;
         }
 
-        // Função para ignorar espaços e hífens na hora de comparar "AP 01" com "AP-01"
-        const normalize = s => (s || '').toString().toUpperCase().replace(/[\s\-]/g, '');
-        const targetVaga = normalize(vagaValue);
+        // Busca colaboradores que estão atribuídos a esse equipamento específico
+        let cols = SGE_RT.state.colaboradores.filter(c => c.equipment_id === equipamentoId);
 
-        // Busca colaboradores que estão atribuídos a essa vaga
-        let cols = SGE_RT.state.colaboradores.filter(c => normalize(c.equipamento) === targetVaga);
+        // Separar Função Motorista e Operador
+        // Dependendo de como a nomenclatura é (MOTORISTA, OPERADOR, MOTORISTA PIPA, etc)
+        const normalizeFunc = f => (f || '').toUpperCase();
 
-        // Se o usuário logado tiver uma Letra de Turno específica (ex: A, B, C, D), filtrar só os daquele turno
-        const myLetra = SGE_RT.state.user.letraTurno;
-        if (myLetra && myLetra !== '-' && myLetra.trim() !== '') {
-            const shiftCols = cols.filter(c => c.regime && c.regime.toUpperCase().endsWith(myLetra.toUpperCase()));
-            // Para não quebrar testes de quem é ADMIN, só aplica o filtro se de fato encontrou gente naquele turno
-            if (shiftCols.length > 0) {
-                cols = shiftCols;
-            }
-        }
-
-        // Separar Motorista (MOT) e Operadores (OP)
-        const motoristas = cols.filter(c => {
-            const func = c.funcao || '';
-            return func.toUpperCase() === 'MOT';
-        });
-
-        const operadores = cols.filter(c => {
-            const func = c.funcao || '';
-            return func.toUpperCase() === 'OP';
-        });
+        const motoristas = cols.filter(c => normalizeFunc(c.funcao).includes('MOT'));
+        const operadores = cols.filter(c => normalizeFunc(c.funcao).includes('OP'));
 
         if (motoristas.length > 0) {
             eq.motorista = motoristas[0].nome || '';
@@ -123,9 +116,9 @@ SGE_RT.relatorio = {
         this.renderNovoRelatorio();
 
         if (cols.length === 0) {
-            SGE_RT.helpers.toast(`Nenhum colaborador encontrado para a vaga ${vagaValue}`, 'warning');
+            SGE_RT.helpers.toast(`Nenhum colaborador alocado neste equipamento`, 'warning');
         } else {
-            SGE_RT.helpers.toast(`Dados preenchidos para a vaga ${vagaValue}`, 'success');
+            SGE_RT.helpers.toast(`Dados preenchidos (Alocação Supabase)`, 'success');
         }
     },
 
@@ -133,27 +126,27 @@ SGE_RT.relatorio = {
         const rel = SGE_RT.state.currentRelatorio;
         if (!rel.equipamentosOperando.length) return SGE_RT.helpers.toast("Adicione ao menos um equipamento", "warning");
 
+        // Validate
         for (let eq of rel.equipamentosOperando) {
-            if (!eq.equipamento || !eq.vaga || !eq.area) return SGE_RT.helpers.toast("Preencha os campos obrigatórios (*)", "warning");
+            if (!eq.equipamento || !eq.area) return SGE_RT.helpers.toast("Preencha os campos obrigatórios (*)", "warning");
         }
 
         if (!confirm("Confirmar o envio do relatório?")) return;
 
         SGE_RT.helpers.showLoadingScreen(true, "Salvando relatório...");
-        try {
-            const res = await SGE_RT.api.salvarRelatorio(rel);
-            if (res.success) {
-                SGE_RT.helpers.toast("Relatório salvo com sucesso!", "success");
-                SGE_RT.state.currentRelatorio = null;
-                // Move to Historico
-                document.querySelector('[data-view="historico"]').click();
-            } else {
-                throw new Error(res.error || 'Erro desconhecido');
-            }
-        } catch (e) {
-            SGE_RT.helpers.toast(`Erro ao salvar: ${e.message}`, "error");
-        } finally {
-            SGE_RT.helpers.showLoadingScreen(false);
+
+        const res = await SGE_RT.api.salvarRelatorio(rel);
+
+        SGE_RT.helpers.showLoadingScreen(false);
+
+        if (res && res.success) {
+            SGE_RT.helpers.toast("Relatório salvo com sucesso!", "success");
+            SGE_RT.state.currentRelatorio = null;
+            // Move to Historico
+            const histBtn = document.querySelector('[data-view="historico"]');
+            if (histBtn) histBtn.click();
+        } else {
+            SGE_RT.helpers.toast(`Erro ao salvar. Verifique sua conexão.`, "error");
         }
     },
 
@@ -181,8 +174,46 @@ SGE_RT.relatorio = {
         }
 
         const r = SGE_RT.state.currentRelatorio;
+        const equipamentos = SGE_RT.state.equipamentos || [];
+        const motivosTroca = SGE_RT.CONFIG.motivosTroca || [];
 
-        const equipamentosHTML = r.equipamentosOperando.map((eq, idx) => `
+        // ── Agrupa equipamentos por sigla (tipo) para o <optgroup> ──────────
+        const equipByTipo = equipamentos.reduce((acc, e) => {
+            const t = e.sigla || 'OUTROS';
+            if (!acc[t]) acc[t] = [];
+            acc[t].push(e);
+            return acc;
+        }, {});
+
+        const buildEquipOptions = (selectedId) => {
+            const groups = Object.keys(equipByTipo).sort().map(tipo => {
+                const opts = equipByTipo[tipo]
+                    .sort((a, b) => (a.numero || '').localeCompare(b.numero || '', undefined, { numeric: true }))
+                    .map(e => `<option value="${e.id}" ${selectedId === e.id ? 'selected' : ''}>${e.placa}${e.escala ? ' · ' + e.escala : ''}</option>`)
+                    .join('');
+                return `<optgroup label="${tipo}">${opts}</optgroup>`;
+            });
+            return `<option value="">Selecione...</option>` + groups.join('');
+        };
+
+        // Versão para trocas: value = placa (string), pois trocas.equipamentoNovo armazena a placa
+        const buildEquipOptionsPlaca = (selectedPlaca) => {
+            const groups = Object.keys(equipByTipo).sort().map(tipo => {
+                const opts = equipByTipo[tipo]
+                    .sort((a, b) => (a.numero || '').localeCompare(b.numero || '', undefined, { numeric: true }))
+                    .map(e => `<option value="${e.placa}" ${selectedPlaca === e.placa ? 'selected' : ''}>${e.placa}${e.escala ? ' · ' + e.escala : ''}</option>`)
+                    .join('');
+                return `<optgroup label="${tipo}">${opts}</optgroup>`;
+            });
+            return `<option value="">Selecione...</option>` + groups.join('');
+        };
+
+
+        const equipamentosHTML = r.equipamentosOperando.map((eq, idx) => {
+            // Check if this equipment has a selected ID based on its placa
+            const eqSelectedId = equipamentos.find(e => e.placa === eq.equipamento)?.id || '';
+
+            return `
             <div class="equipamento-card">
                 <div class="equipamento-card-header">
                     <h3>Equipamento ${idx + 1} - Detalhes da Operação</h3>
@@ -191,24 +222,15 @@ SGE_RT.relatorio = {
 
                 <div class="grid-2">
                     <div class="input-group">
-                        <label>Equipamento *</label>
-                        <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value">
-                            <option value="">Selecione...</option>
-                            ${SGE_RT.state.equipamentos.map(e => `<option value="${e.placa}" ${eq.equipamento === e.placa ? 'selected' : ''}>${e.placa} - ${e.tipo}</option>`).join('')}
+                        <label>Equipamento / Alocação *</label>
+                        <select onchange="SGE_RT.relatorio.handleVagaChange(${idx}, this.value)">
+                            ${buildEquipOptions(eqSelectedId)}
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Vaga *</label>
-                        <select onchange="SGE_RT.relatorio.handleVagaChange(${idx}, this.value)">
-                            <option value="">Selecione...</option>
-                            ${SGE_RT.state.vagas.map(v => `<option value="${v}" ${eq.vaga === v ? 'selected' : ''}>${v}</option>`).join('')}
-                        </select>
+                        <label>Área de Atuação *</label>
+                        <input type="text" value="${eq.area}" onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].area = this.value" placeholder="Ex: Galpão A, Linha 3...">
                     </div>
-                </div>
-                
-                <div class="input-group" style="margin-bottom: 16px;">
-                    <label>Área de Atuação *</label>
-                    <input type="text" value="${eq.area}" onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].area = this.value" placeholder="Ex: Galpão A, Linha 3...">
                 </div>
 
                 <div class="grid-2">
@@ -240,16 +262,13 @@ SGE_RT.relatorio = {
                                 <label>Motivo</label>
                                 <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].motivo = this.value">
                                     <option value="">Selecione...</option>
-                                    <option value="Manutenção Preventiva" ${tr.motivo === 'Manutenção Preventiva' ? 'selected' : ''}>Preventiva</option>
-                                    <option value="Manutenção Corretiva" ${tr.motivo === 'Manutenção Corretiva' ? 'selected' : ''}>Corretiva</option>
-                                    <option value="Avaria" ${tr.motivo === 'Avaria' ? 'selected' : ''}>Avaria</option>
+                                    ${motivosTroca.map(m => `<option value="${m}" ${tr.motivo === m ? 'selected' : ''}>${m}</option>`).join('')}
                                 </select>
                             </div>
                             <div class="input-group">
                                 <label>Novo Equip.</label>
                                 <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].trocas[${tIdx}].equipamentoNovo = this.value">
-                                    <option value="">Selecione...</option>
-                                    ${SGE_RT.state.equipamentos.map(e => `<option value="${e.placa}" ${tr.equipamentoNovo === e.placa ? 'selected' : ''}>${e.placa}</option>`).join('')}
+                                    ${buildEquipOptionsPlaca(tr.equipamentoNovo || '')}
                                 </select>
                             </div>
                             <div class="input-group">
@@ -263,14 +282,19 @@ SGE_RT.relatorio = {
                     `).join('')}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
+
+        const user = SGE_RT.auth.currentUser;
+        const turnoInfo = user
+            ? (user.accessLevel === 'gestao' ? 'Gestão · Todos os Equipamentos' : `Turno ${user.letraTurno || '—'} · ${user.escalaJornada || 'Misto'} · ${equipamentos.length} equipamentos`)
+            : '';
 
         app.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 24px;">
                 <h2 style="font-size: 24px; color: var(--text-1);">Novo Relatório</h2>
-                <div style="text-align: right; color: var(--text-2); font-size: 14px;">
-                    <div>${new Date().toLocaleDateString('pt-BR')}</div>
-                    <div style="font-size: 12px; margin-top: 4px;">ID: ${r.id}</div>
+                <div style="text-align: right; font-size: 13px;">
+                    <div style="color: var(--text-2);">${new Date().toLocaleDateString('pt-BR')}</div>
+                    ${turnoInfo ? `<div style="color: var(--primary); font-weight: 600; margin-top: 2px;">${turnoInfo}</div>` : ''}
                 </div>
             </div>
 
@@ -325,24 +349,27 @@ SGE_RT.relatorio = {
         `;
 
         const date = new Date().toISOString().split('T')[0];
-        const res = await SGE_RT.api.getRelatorios(SGE_RT.state.user.nome, date);
+        const supervisorId = SGE_RT.auth.currentUser?.supervisor_id;
+        const res = await SGE_RT.api.getRelatorios(supervisorId, date);
 
         if (res.success && res.relatorios && res.relatorios.length > 0) {
+            SGE_RT.state.relatoriosHistorico = res.relatorios;
+
             app.innerHTML = res.relatorios.map(r => `
                 <div class="equipamento-card mb-4" style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
                         <div>
-                            <h3 style="font-weight: 600; font-size: 16px;">Relatório de Turno ${r.letraTurno}</h3>
-                            <p style="color: var(--text-2); font-size: 13px;">${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}</p>
+                            <h3 style="font-weight: 600; font-size: 16px;">Relatório de Turno ${r.letraTurno || '-'}</h3>
+                            <p style="color: var(--text-2); font-size: 13px;">${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')} | Supervisor: ${r.supervisor}</p>
                         </div>
-                        <button class="secondary-btn" style="padding: 6px 12px; font-size: 13px; color: var(--status-green); border-color: var(--status-green);" onclick="SGE_RT.relatorio.copiarWhatsApp('${btoa(JSON.stringify(r))}')">
+                        <button class="secondary-btn" style="padding: 6px 12px; font-size: 13px; color: var(--status-green); border-color: var(--status-green);" onclick="SGE_RT.relatorio.copiarWhatsApp('${btoa(unescape(encodeURIComponent(JSON.stringify(r))))}')">
                             Copiar WhatsApp
                         </button>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:8px;">
                         ${r.equipamentosOperando.map(e => `
                             <div style="border-left: 3px solid var(--primary); padding-left: 12px; font-size: 13px;">
-                                <span style="font-weight: 600; color: var(--text-1);">${e.equipamento}</span>
+                                <span style="font-weight: 600; color: var(--text-1);">${e.equipamento} ${e.tipo ? `(${e.tipo})` : ''}</span>
                                 <span style="color: var(--text-2);"> - ${e.area}</span>
                                 ${e.trocas && e.trocas.length ? `<span style="background: rgba(253, 126, 20, 0.1); color: var(--status-orange); padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px; font-weight: 600;">${e.trocas.length} Ocorrências</span>` : ''}
                             </div>
@@ -367,14 +394,14 @@ SGE_RT.relatorio = {
 
     copiarWhatsApp(encodedData) {
         try {
-            const r = JSON.parse(atob(encodedData));
-            let text = `*RELATÓRIO DE TURNO - ${r.letraTurno}*\n`;
+            const r = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+            let text = `*RELATÓRIO DE TURNO - ${r.letraTurno || '-'}*\n`;
             text += `📅 ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}\n`;
             text += `👤 Sup: ${r.supervisor}\n\n`;
 
             r.equipamentosOperando.forEach(eq => {
-                text += `🚛 *${eq.equipamento}*\n`;
-                text += `📍 ${eq.area} | ${eq.vaga}\n`;
+                text += `🚛 *${eq.equipamento}* ${eq.tipo ? `(${eq.tipo})` : ''}\n`;
+                text += `📍 ${eq.area}\n`;
                 if (eq.motorista) text += `👨‍✈️ ${eq.motorista}\n`;
 
                 if (Array.isArray(eq.operadores) && eq.operadores.length) {
@@ -398,7 +425,7 @@ SGE_RT.relatorio = {
             navigator.clipboard.writeText(text);
             SGE_RT.helpers.toast('Copiado para a área de transferência', 'success');
         } catch (e) {
-            SGE_RT.helpers.toast('Erro ao copiar dados', 'error');
+            SGE_RT.helpers.toast('Erro ao copiar dados. Tente novamente.', 'error');
             console.error(e);
         }
     },
@@ -446,7 +473,7 @@ SGE_RT.relatorio = {
                 </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; @media(max-width: 768px) { grid-template-columns: 1fr; }">
                 <div class="equipamento-card">
                     <h3 style="font-size: 14px; margin-bottom: 16px; color: var(--text-1);">Motivos de Troca</h3>
                     <canvas id="chartMotivos"></canvas>
@@ -460,34 +487,48 @@ SGE_RT.relatorio = {
 
         if (window.Chart) {
             setTimeout(() => {
-                new Chart(document.getElementById('chartMotivos'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Preventiva', 'Corretiva', 'Avaria'],
-                        datasets: [{
-                            data: [
-                                data.trocasMotivos?.['Manutenção Preventiva'] || 0,
-                                data.trocasMotivos?.['Manutenção Corretiva'] || 0,
-                                data.trocasMotivos?.['Avaria'] || 0
-                            ],
-                            backgroundColor: ['#2e9e5a', '#f59f00', '#dc3545']
-                        }]
-                    },
-                    options: { responsive: true, cutout: '70%' }
-                });
+                const motivosKeys = Object.keys(data.trocasMotivos || {});
+                const motivosValues = Object.values(data.trocasMotivos || {});
 
-                new Chart(document.getElementById('chartEquip'), {
-                    type: 'bar',
-                    data: {
-                        labels: Object.keys(data.topEquipamentos || {}).slice(0, 5),
-                        datasets: [{
-                            label: 'Ocorrências',
-                            data: Object.values(data.topEquipamentos || {}).slice(0, 5),
-                            backgroundColor: '#0f3868'
-                        }]
-                    },
-                    options: { responsive: true, scales: { y: { beginAtZero: true, grid: { display: false } } } }
-                });
+                // Define standard colors
+                const colors = {
+                    'Manutenção Preventiva': '#2e9e5a',
+                    'Manutenção Corretiva': '#f59f00',
+                    'Avaria': '#dc3545',
+                    'Sinistro': '#9c27b0',
+                    'Outros': '#6c757d'
+                };
+
+                const bgColors = motivosKeys.map(k => colors[k] || '#0f3868');
+
+                if (document.getElementById('chartMotivos')) {
+                    new Chart(document.getElementById('chartMotivos'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: motivosKeys.length ? motivosKeys : ['Sem Dados'],
+                            datasets: [{
+                                data: motivosValues.length ? motivosValues : [1],
+                                backgroundColor: motivosValues.length ? bgColors : ['#e2e8f0']
+                            }]
+                        },
+                        options: { responsive: true, cutout: '70%' }
+                    });
+                }
+
+                if (document.getElementById('chartEquip')) {
+                    new Chart(document.getElementById('chartEquip'), {
+                        type: 'bar',
+                        data: {
+                            labels: Object.keys(data.topEquipamentos || {}).length ? Object.keys(data.topEquipamentos).slice(0, 5) : ['Nenhum'],
+                            datasets: [{
+                                label: 'Ocorrências',
+                                data: Object.values(data.topEquipamentos || {}).length ? Object.values(data.topEquipamentos).slice(0, 5) : [0],
+                                backgroundColor: '#0f3868'
+                            }]
+                        },
+                        options: { responsive: true, scales: { y: { beginAtZero: true, grid: { display: false } } } }
+                    });
+                }
             }, 100);
         }
     }

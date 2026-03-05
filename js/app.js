@@ -1,6 +1,7 @@
 'use strict';
 
 window.SGE_RT = window.SGE_RT || {};
+
 SGE_RT.app = {
     async start() {
         const loadingScreen = document.getElementById('loading-screen');
@@ -8,7 +9,7 @@ SGE_RT.app = {
         const topbar = document.getElementById('topbar');
         const main = document.getElementById('main');
 
-        // Inicialmente oculta o conteúdo da tela principal para preparar o fade in
+        // Prepare fade in
         if (topbar) topbar.style.opacity = '0';
         if (main) main.style.opacity = '0';
 
@@ -20,38 +21,38 @@ SGE_RT.app = {
             loadingScreen.classList.remove('hide');
         }
 
-        setStatus('Sincronizando banco de dados...');
         SGE_RT.navigation.init();
+        setStatus('Sincronizando banco de dados...');
 
         try {
-            setStatus('Baixando dados... Isso pode levar alguns segundos.');
-
-            // Fetch Efetivo Collaborators and Local Equipment info
-            const [colRes, eqRes] = await Promise.all([
-                SGE_RT.api.fetchColaboradores(),
-                SGE_RT.api.fetchEquipamentos(SGE_RT.state.user.nome)
+            // Load base data from Supabase Gestão de Efetivo schemas
+            const [colsOk, eqOk] = await Promise.all([
+                SGE_RT.api.loadColaboradores(),
+                SGE_RT.api.loadEquipamentos()
             ]);
 
-            if (colRes && colRes.success) {
-                SGE_RT.state.colaboradores = colRes.data || [];
+            if (!colsOk || !eqOk) {
+                console.warn('SGE_RT: Algum erro ocorreu ao carregar dados operacionais.');
             }
-            if (eqRes && eqRes.success) {
-                SGE_RT.state.equipamentos = eqRes.equipamentos || [];
-            }
+
+            // Setup Realtime connections for Relatorios
+            SGE_RT.api.setupRealtime();
 
             if (SGE_RT.relatorio) {
                 SGE_RT.relatorio.init();
             }
 
             setStatus('Montando interface...');
-            // Re-render main view
+
+            // Start default view
+            SGE_RT.state.dataLoaded = true;
             SGE_RT.relatorio.renderNovoRelatorio();
 
         } catch (e) {
             SGE_RT.helpers.toast('Erro ao inicializar o app', 'error');
             console.error(e);
         } finally {
-            // Suaviza a transição de entrada do app
+            // Smooth transition
             await new Promise(r => setTimeout(r, 400));
 
             if (topbar) topbar.style.transition = 'opacity .4s ease';
@@ -62,20 +63,17 @@ SGE_RT.app = {
 
             if (loadingScreen && loadingScreen.parentNode) {
                 loadingScreen.classList.add('hide');
-                // Remove do DOM após a animação de opacidade terminar
                 setTimeout(() => loadingScreen.remove(), 700);
             }
         }
     }
 };
 
-// Bootstrap check
+// Bootstrap check - Initialize Auth. App will be started if Auth passes.
 document.addEventListener('DOMContentLoaded', () => {
-    // If auth module exists, start via auth.checkSession
     if (SGE_RT.auth) {
         SGE_RT.auth.init();
     } else {
-        // Fallback
         SGE_RT.app.start();
     }
 });
