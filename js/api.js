@@ -210,6 +210,7 @@ SGE_RT.api = {
 
             const relatorios = data.map(r => ({
                 id: r.id,
+                id_sequencial: r.id_sequencial,
                 supervisor: r.supervisor_nome,
                 letraTurno: r.letra_turno || '',
                 data: r.data,
@@ -230,6 +231,37 @@ SGE_RT.api = {
             this.updateSyncBar(false);
             console.error('SGE_RT getRelatorios failed:', e);
             return { success: false, relatorios: [] };
+        }
+    },
+
+    // ─── LOAD FROTA ───
+    async loadFrota() {
+        if (!window.supabase) return false;
+        try {
+            this.updateSyncBar(true);
+
+            let query = supabase.schema('gps_mec')
+                .from('efetivo_gps_mec_frota')
+                .select('*')
+                .eq('status', 'ATIVO')
+                .order('placa');
+
+            const { data, error } = await query;
+            this.updateSyncBar(false);
+
+            if (error) return this._handleError(error, 'Carregar Frota');
+
+            SGE_RT.state.frota = data.map(f => ({
+                id: f.id,
+                placa: f.placa,
+                grupo: f.grupo
+            }));
+
+            return true;
+        } catch (e) {
+            this.updateSyncBar(false);
+            console.error('SGE_RT loadFrota failed:', e);
+            return false;
         }
     },
 
