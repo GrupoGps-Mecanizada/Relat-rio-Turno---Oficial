@@ -24,42 +24,19 @@
 </head>
 
 <body>
-    <!-- ==================== LOGIN SCREEN ==================== -->
-    <div id="login-screen" class="hidden">
-        <div class="login-box">
-            <!-- Title Block matching HUB and Controle de Presença -->
-            <div
-                style="display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 30px; text-align: center;">
-                <span
-                    style="font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: #94a3b8;">GRUPO
-                    GPS</span>
-                <span
-                    style="font-family: 'Inter', sans-serif; font-size: 32px; font-weight: 800; letter-spacing: -0.02em; color: #0f3868; line-height: 1.2;">MECANIZADA</span>
-                <div
-                    style="width: 32px; height: 2px; background: #0f3868; border-radius: 2px; opacity: 0.25; margin-top: 6px; margin-bottom: 12px;">
-                </div>
-                <span
-                    style="font-size: 13px; font-weight: 600; color: #475569; letter-spacing: 0.05em; text-transform: uppercase;">Relatório
-                    de Turno</span>
+    <!-- ==================== LOGIN SCREEN / REDIRECT ==================== -->
+    <div id="login-screen" class="hidden"
+        style="display: flex; align-items: center; justify-content: center; height: 100vh;">
+        <div class="login-box" style="text-align: center; border: none; box-shadow: none; background: transparent;">
+            <div style="margin-bottom: 20px;">
+                <svg viewBox="0 0 24 24" width="48" height="48" stroke="var(--primary)" stroke-width="2" fill="none"
+                    class="spin">
+                    <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                    <path d="M12 2a10 10 0 0 1 10 10"></path>
+                </svg>
             </div>
-
-            <form id="login-form">
-                <div class="login-input-group">
-                    <label>E-mail</label>
-                    <input type="email" id="login-user" required autocomplete="username"
-                        placeholder="Seu e-mail do Supabase" />
-                </div>
-                <div class="login-input-group">
-                    <label>Senha</label>
-                    <input type="password" id="login-pass" required autocomplete="current-password"
-                        placeholder="Sua senha" />
-                </div>
-                <button type="submit" class="login-btn" id="login-submit">Entrar</button>
-            </form>
-            <div class="login-error" id="login-error"></div>
-        </div>
-        <div class="login-footer">
-            Desenvolvido por Warlison Abreu | Icaro Bernardo - Grupo GPS
+            <h2 style="color: var(--text-1); font-size: 18px; margin-bottom: 8px;">Acessando o SGE...</h2>
+            <p style="color: var(--text-2); font-size: 14px;">Redirecionando para a autenticação centralizada.</p>
         </div>
     </div>
 
