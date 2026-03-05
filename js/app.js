@@ -23,12 +23,13 @@ SGE_RT.app = {
         setStatus('Sincronizando banco de dados');
 
         try {
-            const [colsOk, eqOk] = await Promise.all([
+            const [colsOk, eqOk, frotaOk] = await Promise.all([
                 SGE_RT.api.loadColaboradores(),
-                SGE_RT.api.loadEquipamentos()
+                SGE_RT.api.loadEquipamentos(),
+                SGE_RT.api.loadFrota()
             ]);
 
-            if (!colsOk || !eqOk) {
+            if (!colsOk || !eqOk || !frotaOk) {
                 console.warn('SGE_RT: Algum erro ocorreu ao carregar dados operacionais.');
             }
 

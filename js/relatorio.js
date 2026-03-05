@@ -72,11 +72,10 @@ SGE_RT.relatorio = {
         if (!eq) return;
         const eqDb = (SGE_RT.state.equipamentos || []).find(e => e.id === equipamentoId);
         if (eqDb) {
-            eq.equipamento = eqDb.placa;
             eq.vaga = eqDb.placa;
             eq.tipo = eqDb.tipo;
         } else {
-            eq.equipamento = eq.vaga = eq.tipo = '';
+            eq.vaga = eq.tipo = '';
         }
         eq.motorista = '';
         eq.operadores = [];
@@ -100,8 +99,8 @@ SGE_RT.relatorio = {
             return SGE_RT.helpers.toast('Adicione ao menos um equipamento', 'info');
 
         for (const eq of rel.equipamentosOperando) {
-            if (!eq.equipamento || !eq.area)
-                return SGE_RT.helpers.toast('Preencha Equipamento e Área em todos os itens (*)', 'error');
+            if (!eq.vaga || !eq.equipamento || !eq.area)
+                return SGE_RT.helpers.toast('Preencha Vaga, Placa e Área em todos os itens (*)', 'error');
         }
 
         if (!confirm('Confirmar o envio do relatório de turno?')) return;
@@ -144,21 +143,21 @@ SGE_RT.relatorio = {
     },
 
     _buildEquipOptionsPlaca(selectedPlaca) {
-        const equipamentos = SGE_RT.state.equipamentos || [];
-        const equipByTipo = equipamentos.reduce((acc, e) => {
-            const t = e.sigla || 'OUTROS';
-            if (!acc[t]) acc[t] = [];
-            acc[t].push(e);
+        const frota = SGE_RT.state.frota || [];
+        const frotaByGrupo = frota.reduce((acc, f) => {
+            const g = f.grupo || 'OUTROS';
+            if (!acc[g]) acc[g] = [];
+            acc[g].push(f);
             return acc;
         }, {});
-        const groups = Object.keys(equipByTipo).sort().map(tipo => {
-            const opts = equipByTipo[tipo]
-                .sort((a, b) => (a.numero || '').localeCompare(b.numero || '', undefined, { numeric: true }))
-                .map(e => `<option value="${e.placa}" ${selectedPlaca === e.placa ? 'selected' : ''}>${e.placa}${e.escala ? ' · ' + e.escala : ''}</option>`)
+        const groups = Object.keys(frotaByGrupo).sort().map(grupo => {
+            const opts = frotaByGrupo[grupo]
+                .sort((a, b) => a.placa.localeCompare(b.placa))
+                .map(f => `<option value="${f.placa}" ${selectedPlaca === f.placa ? 'selected' : ''}>${f.placa}</option>`)
                 .join('');
-            return `<optgroup label="${tipo}">${opts}</optgroup>`;
+            return `<optgroup label="${grupo}">${opts}</optgroup>`;
         });
-        return `<option value="">Selecione…</option>` + groups.join('');
+        return `<option value="">Selecione a placa do veículo…</option>` + groups.join('');
     },
 
     _buildMotivosOptions(selected) {
@@ -272,7 +271,8 @@ SGE_RT.relatorio = {
                                     <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
                                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                                 </svg>
-                                ${eq.equipamento ? `<span style="font-family:var(--font-mono);color:var(--accent);">${eq.equipamento}</span>` : 'Equipamento ' + (idx + 1)}
+                                ${eq.vaga ? `<span style="font-family:var(--font-mono);color:var(--accent);">${eq.vaga}</span>` : 'Equipamento ' + (idx + 1)}
+                                ${eq.equipamento ? `<span style="margin-left:6px;font-size:12px;color:var(--text-3);">(${eq.equipamento})</span>` : ''}
                             </div>
                             ${eq.area ? `<div class="rt-card-subtitle">Área: ${this._esc(eq.area)}</div>` : ''}
                         </div>
@@ -283,17 +283,23 @@ SGE_RT.relatorio = {
                     </button>
                 </div>
                 <div class="rt-card-body">
-                    <!-- Linha 1: Equipamento + Área -->
-                    <div class="rt-grid-2">
+                    <!-- Linha 1: Equipamento + Placa + Área -->
+                    <div class="rt-grid-3">
                         <div class="rt-field">
-                            <label>Equipamento / Alocação *</label>
+                            <label>Vaga / Alocação *</label>
                             <select onchange="SGE_RT.relatorio.handleVagaChange(${idx}, this.value)">
                                 ${this._buildEquipOptions(eqSelectedId)}
                             </select>
                         </div>
                         <div class="rt-field">
+                            <label>Placa do Veículo *</label>
+                            <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio();">
+                                ${this._buildFrotaOptions(eq.equipamento)}
+                            </select>
+                        </div>
+                        <div class="rt-field">
                             <label>Área de Atuação *</label>
-                            <input type="text" value="${this._esc(eq.area)}" placeholder="Ex: Galpão A, Linha 3, Pátio Sul…"
+                            <input type="text" value="${this._esc(eq.area)}" placeholder="Ex: Galpão A, Linha 3…"
                                 onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].area = this.value">
                         </div>
                     </div>
@@ -452,20 +458,23 @@ SGE_RT.relatorio = {
         app.innerHTML = res.relatorios.map(r => {
             const equipRows = r.equipamentosOperando.map(eq => `
                 <div class="rt-historico-equip-row">
-                    <span class="rt-equip-placa-badge">${this._esc(eq.equipamento)}</span>
+                    <span class="rt-equip-placa-badge">${this._esc(eq.vaga || eq.equipamento)}</span>
+                    ${eq.equipamento && eq.vaga ? `<span style="font-size:11px;color:var(--text-3);font-family:var(--font-mono);margin-right:6px;">${this._esc(eq.equipamento)}</span>` : ''}
                     <span class="rt-historico-equip-area">${this._esc(eq.area)}</span>
                     ${eq.motorista ? `<span style="font-size:11px;color:var(--text-3);">🚗 ${this._esc(eq.motorista)}</span>` : ''}
                     ${eq.trocas?.length ? `<span class="rt-trocas-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:9px;height:9px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>${eq.trocas.length} ocorr.</span>` : ''}
                 </div>`).join('');
 
             const encData = btoa(unescape(encodeURIComponent(JSON.stringify(r))));
+            const idBadge = r.id_sequencial ? `#${r.id_sequencial}` : `Turno ${this._esc(r.letraTurno || '—')}`;
+
             return `
             <div class="rt-historico-card">
                 <div class="rt-historico-header">
                     <div>
                         <div class="rt-historico-title">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;color:var(--accent);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                            Relatório — Turno ${this._esc(r.letraTurno || '—')}
+                            Relatório ${idBadge}
                             <span class="rt-turno-chip" style="font-size:10px;padding:2px 8px;">${r.equipamentosOperando.length} equip.</span>
                         </div>
                         <div class="rt-historico-meta">
@@ -488,23 +497,37 @@ SGE_RT.relatorio = {
     copiarWhatsApp(encodedData) {
         try {
             const r = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
-            let text = `*📋 RELATÓRIO DE TURNO — ${r.letraTurno || '—'}*\n`;
-            text += `📅 ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}\n`;
-            text += `👤 Supervisor: ${r.supervisor}\n\n`;
-            r.equipamentosOperando.forEach(eq => {
-                text += `🚛 *${eq.equipamento}*${eq.tipo ? ` (${eq.tipo})` : ''}\n`;
-                text += `📍 ${eq.area}\n`;
-                if (eq.motorista) text += `👨‍✈️ ${eq.motorista}\n`;
-                if (Array.isArray(eq.operadores)) {
-                    eq.operadores.filter(Boolean).forEach(op => { text += `👷 ${op}\n`; });
+
+            let text = `RELATÓRIO: #${r.id_sequencial || 'S/N'}\n`;
+            text += `SUPER: ${r.supervisor} | LETRA: ${r.letraTurno || '—'}\n`;
+            text += `DATA: ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}\n\n`;
+
+            r.equipamentosOperando.forEach((eq, idx) => {
+                text += `EQUIPE ${idx + 1}\n`;
+                text += `VAGA: ${eq.vaga || ''} | EQUIPAMENTO: ${eq.equipamento || ''}\n`;
+                text += `MOTORISTA: ${eq.motorista || ''}\n`;
+
+                if (Array.isArray(eq.operadores) && eq.operadores.length > 0) {
+                    eq.operadores.filter(Boolean).forEach((op, opIdx) => {
+                        text += `OPERADOR ${opIdx + 1}: ${op}\n`;
+                    });
                 }
+
+                text += `AREA DE ATENDIMENTO: ${eq.area || ''}\n`;
+
                 if (eq.trocas?.length) {
-                    eq.trocas.forEach(tr => { text += `⚠️ *${tr.motivo}* → ${tr.equipamentoNovo || 'S/EQ'}\n`; });
+                    eq.trocas.forEach(tr => {
+                        text += `TROCA: ${tr.motivo} -> ${tr.equipamentoNovo || 'S/EQ'}\n`;
+                    });
                 }
                 text += `\n`;
             });
-            if (r.observacoes) text += `📝 *Obs:* ${r.observacoes}\n`;
-            navigator.clipboard.writeText(text);
+
+            if (r.observacoes) {
+                text += `OBS: ${r.observacoes}\n`;
+            }
+
+            navigator.clipboard.writeText(text.trim());
             SGE_RT.helpers.toast('Copiado para a área de transferência!', 'success');
         } catch (e) {
             SGE_RT.helpers.toast('Erro ao copiar. Tente novamente.', 'error');
