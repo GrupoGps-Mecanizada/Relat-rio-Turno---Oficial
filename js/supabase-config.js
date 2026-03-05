@@ -1,17 +1,20 @@
 'use strict';
 
 /**
- * SGE_RT — Supabase Configuration
- * Uses the SAME Supabase project as SGE (Gestão de Efetivo) and SCP (Controle de Presença).
+ * SGE — Supabase Configuration
+ * Initializes the Supabase client for the application.
  */
-window.SGE_RT = window.SGE_RT || {};
+window.SGE = window.SGE || {};
 
-SGE_RT.SUPABASE_URL = 'https://mgcjidryrjqiceielmzp.supabase.co';
-SGE_RT.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nY2ppZHJ5cmpxaWNlaWVsbXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxMjEwNzEsImV4cCI6MjA4NzY5NzA3MX0.UAKkzy5fMIkrlmnqz9E9KknUw9xhoYpa3f1ptRpOuAA';
+// Replace with your actual Supabase credentials
+// URL: Found in Project Settings -> API
+// KEY: Found in Project Settings -> API (anon public kye)
+SGE.SUPABASE_URL = 'https://mgcjidryrjqiceielmzp.supabase.co';
+SGE.SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1nY2ppZHJ5cmpxaWNlaWVsbXpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIxMjEwNzEsImV4cCI6MjA4NzY5NzA3MX0.UAKkzy5fMIkrlmnqz9E9KknUw9xhoYpa3f1ptRpOuAA';
 
-if (typeof supabase !== 'undefined') {
-    window.supabase = supabase.createClient(SGE_RT.SUPABASE_URL, SGE_RT.SUPABASE_KEY);
-    console.info('SGE_RT: Supabase client initialized.');
+if (SGE.SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SGE.SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+    window.supabase = supabase.createClient(SGE.SUPABASE_URL, SGE.SUPABASE_KEY);
+    console.info('SGE: Supabase client initialized.');
 } else {
-    console.warn('SGE_RT: Supabase JS SDK not loaded yet.');
+    console.warn('SGE: Supabase credentials not set. Please update js/supabase-config.js');
 }

@@ -1,16 +1,54 @@
 'use strict';
 
-window.SGE_RT = window.SGE_RT || {};
+/**
+ * SGE — State Management
+ * Centralized application state
+ */
+window.SGE = window.SGE || {};
 
-SGE_RT.state = {
-    view: 'novo',
-    user: null,
-    equipamentos: [],       // From gps_mec.efetivo_gps_mec_equipamentos
-    colaboradores: [],      // From gps_mec.efetivo_gps_mec_colaboradores
-    supervisores: [],       // From gps_mec.efetivo_gps_mec_supervisores
-    currentRelatorio: null,
-    relatoriosHistorico: [],
-    dashboardData: null,
+SGE.state = {
+    colaboradores: [],
+    supervisores: [],
+    setores: [],
+    movimentacoes: [],
+    equipamentos: [],
+    treinamentosCatalogo: [],
+    colaboradorTreinamentos: [],
+    ferias: [],
+    advertencias: [],
+    usuarios: [],
+    filtros: { regime: [], funcao: [], status: [], alocacao: [], equipTurno: [], supervisor: [], categoria: [] },
+    activeView: 'kanban',
+    drawerColaborador: null,
+    pendingMove: null,
+    modalContext: null, // 'move' | 'edit' | 'moveSelector'
     dataLoaded: false,
-    sidebarOpen: false
+
+    // Equipment view state
+    equip: {
+        filtroTipo: 'TODOS',
+        filtroTurno: 'TODOS'
+    },
+
+    // Visualization state
+    viz: {
+        mode: 'table',
+        sortCol: 'nome',
+        sortAsc: true,
+        groupBy: 'regime'
+    },
+
+    // Drag state
+    drag: {
+        cardData: null,
+        colSrcIdx: null
+    },
+
+    // Scroll positions per view — persisted to sessionStorage
+    scrollPositions: {},
+
+    // Background sync state
+    syncLock: false,          // Prevents concurrent background syncs
+    syncDebounceTimer: null,  // Timer for debounced sync calls
+    lastSyncHash: null        // Quick hash comparison to skip re-renders
 };

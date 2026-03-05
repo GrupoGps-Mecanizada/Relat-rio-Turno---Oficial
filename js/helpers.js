@@ -1,91 +1,138 @@
 'use strict';
 
-window.SGE_RT = window.SGE_RT || {};
+/**
+ * SGE — Helper Functions
+ * Utility functions used across the application
+ */
+window.SGE = window.SGE || {};
 
-SGE_RT.helpers = {
-    toast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
+SGE.helpers = {
+    /**
+     * Get CSS class for regime badge
+     */
+    regimeBadgeClass(regime) {
+        if (!regime) return 'badge-SEM';
+        if (regime.startsWith('24HS-A')) return 'badge-24A';
+        if (regime.startsWith('24HS-B')) return 'badge-24B';
+        if (regime.startsWith('24HS-C')) return 'badge-24C';
+        if (regime.startsWith('24HS-D')) return 'badge-24D';
+        if (regime.startsWith('ADM')) return 'badge-ADM';
+        if (regime.startsWith('16HS')) return 'badge-16HS';
+        return 'badge-SEM';
+    },
 
-        const el = document.createElement('div');
-        el.className = `toast toast-${type}`;
+    /**
+     * Check if collaborator has a temporary ID or missing Matricula GPS
+     */
+    isSemId(col) {
+        return col.status === 'SEM_ID' || !col.matricula_gps || String(col.matricula_gps).trim() === '';
+    },
 
-        // Define icone com base no tipo
-        let icon = '<svg viewBox="0 0 24 24" fill="none" class="toast-icon" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4M12 8h.01"/></svg>';
+    /**
+     * Check if collaborator has no assigned position
+     */
+    isSemEquipamento(col) {
+        // If has a valid Setor, considered allocated
+        if (col.setor_id && col.setor && col.setor !== 'SEM SETOR') return false;
+        return !col.equipamento || col.equipamento === 'SEM EQUIPAMENTO' || col.equipamento === 'NÃO INFORMADA';
+    },
 
-        if (type === 'success') {
-            icon = '<svg viewBox="0 0 24 24" fill="none" class="toast-icon" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>';
-        } else if (type === 'error') {
-            icon = '<svg viewBox="0 0 24 24" fill="none" class="toast-icon" stroke="currentColor" stroke-width="2" style="width:20px; height:20px;"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-        }
+    /**
+     * Check if collaborator is on vacation
+     */
+    isFerias(col) {
+        return col.status && col.status.startsWith('FÉRIAS');
+    },
 
-        el.innerHTML = `
-            ${icon}
-            <div class="toast-content">
-                <div class="toast-title">${type === 'success' ? 'Sucesso' : type === 'error' ? 'Erro' : 'Aviso'}</div>
-                <div class="toast-message">${message}</div>
-            </div>
-            <button class="toast-close" aria-label="Fechar">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px;"><path d="M18 6L6 18M6 6l12 12"/></svg>
-            </button>
-        `;
+    /**
+     * Filter collaborators based on active filters
+     */
+    filtrarColaboradores() {
+        const f = SGE.state.filtros;
+        return SGE.state.colaboradores.filter(c => {
+            // Regime filter (multi-select)
+            if (f.regime && f.regime.length > 0 && !f.regime.includes(c.regime)) return false;
+            // Funcao filter (multi-select)
+            if (f.funcao && f.funcao.length > 0 && !f.funcao.includes(c.funcao)) return false;
+            // Status filter (multi-select, with special cases)
+            if (f.status && f.status.length > 0) {
+                const matchesStatus = f.status.some(s => {
+                    if (s === 'FÉRIAS') return SGE.helpers.isFerias(c);
+                    if (s === 'SEM EQUIP') return SGE.helpers.isSemEquipamento(c);
+                    if (s === 'SEM_ID') return SGE.helpers.isSemId(c);
+                    return c.status === s;
+                });
+                if (!matchesStatus) return false;
+            }
+            // Supervisor filter
+            if (f.supervisor && f.supervisor.length > 0 && !f.supervisor.includes(c.supervisor)) return false;
+            // Categoria filter (OPERACIONAL / GESTAO)
+            if (f.categoria && f.categoria.length > 0 && !f.categoria.includes(c.categoria)) return false;
+            // Alocação filter (Equipamento ou Setor)
+            if (f.alocacao && f.alocacao.length > 0) {
+                let colAloc = null;
+                if (c.setor_id && c.setor && c.setor !== 'SEM SETOR') {
+                    colAloc = c.setor;
+                } else if (c.equipamento && c.equipamento !== 'SEM EQUIPAMENTO') {
+                    const parsed = SGE.equip ? SGE.equip.parseEquip(c.equipamento) : null;
+                    const tipos = SGE.CONFIG.equipTipos || {};
+                    colAloc = parsed ? (parsed.sigla + ' — ' + (tipos[parsed.sigla]?.nome || '')) : null;
+                }
 
-        container.appendChild(el);
-
-        // Animate in
-        requestAnimationFrame(() => {
-            el.style.transform = 'translateY(0) scale(1)';
-            el.style.opacity = '1';
+                if (!colAloc || !f.alocacao.includes(colAloc)) return false;
+            }
+            // EquipTurno filter
+            if (f.equipTurno && f.equipTurno.length > 0) {
+                const turno = SGE.equip ? SGE.equip.getTurno(c.regime) : null;
+                if (!turno || !f.equipTurno.includes(turno)) return false;
+            }
+            return true;
         });
+    },
 
-        // Close logic
-        const closeBtn = el.querySelector('.toast-close');
-        let hideTimeoutId = null;
-
-        const hide = () => {
-            el.style.transform = 'translateY(100%) scale(0.95)';
-            el.style.opacity = '0';
-            setTimeout(() => {
-                if (el.parentNode) el.parentNode.removeChild(el);
-            }, 300);
+    /**
+     * Show toast notification
+     */
+    toast(msg, type = 'success') {
+        const icons = {
+            success: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="2 8 6 12 14 4"/></svg>',
+            error: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 2l12 12M14 2L2 14"/></svg>',
+            info: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="8" r="7"/><path d="M8 5v4M8 11v1"/></svg>',
         };
-
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                if (hideTimeoutId) clearTimeout(hideTimeoutId);
-                hide();
-            });
-        }
-
-        // Auto close
-        if (type !== 'error') {
-            hideTimeoutId = setTimeout(hide, SGE_RT.CONFIG.toastDuration || 3000);
-        }
+        const el = document.createElement('div');
+        el.className = `toast ${type}`;
+        el.innerHTML = (icons[type] || '') + msg;
+        document.getElementById('toast-container').appendChild(el);
+        setTimeout(() => el.remove(), SGE.CONFIG.toastDuration);
     },
 
-    showLoadingScreen(show, status = 'Inicializando...') {
-        const el = document.getElementById('loading-screen');
-        const st = document.getElementById('loading-status');
-        if (!el) return;
-
-        if (st) st.textContent = status;
-
-        if (show) {
-            el.style.display = 'flex';
-        } else {
-            el.style.opacity = '0';
-            setTimeout(() => { el.style.display = 'none'; el.style.opacity = '1'; }, 300);
-        }
+    /**
+     * Format ISO date to pt-BR locale string
+     */
+    formatDate(iso) {
+        if (!iso) return '—';
+        try { return new Date(iso).toLocaleString('pt-BR'); } catch { return iso; }
     },
 
-    formatDateBR(dateStr) {
-        if (!dateStr) return '';
-        // Fix timezone issue when parsing simple YYYY-MM-DD
-        const date = new Date(dateStr + 'T12:00:00');
-        return date.toLocaleDateString('pt-BR');
+    /**
+     * Update statistics in the topbar
+     */
+    updateStats() {
+        const total = SGE.state.colaboradores.length;
+        const ativos = SGE.state.colaboradores.filter(c => c.status === 'ATIVO').length;
+        const semId = SGE.state.colaboradores.filter(c => SGE.helpers.isSemId(c)).length;
+
+        // Menu stats (primary)
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
+        setVal('stat-total-menu', total);
+        setVal('stat-ativos-menu', ativos);
+        setVal('stat-semid-menu', semId);
     },
 
-    generateId() {
-        return Math.random().toString(36).substring(2, 10);
+    /**
+     * Get the equipamento icon SVG
+     */
+    equipamentoIconSvg() {
+        return '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="10" height="7" rx="1"/><path d="M4 4V3a2 2 0 014 0v1"/></svg>';
     }
 };
