@@ -24,16 +24,4 @@
   --radius: 12px;
   --shadow: 0 2px 12px #0000000a;
   --shadow-lg: 0 6px 28px #00000010;
-
-  /* Missing variables used by Relatório View + Premium Polish */
-  --primary: var(--accent);
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --bg-body: #f4f6f8;
-  /* Softer, cooler background than f8f9fa */
-  --bg-table-hover: #eef1f5;
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-elevated: 0 10px 30px rgba(0, 0, 0, 0.06), 0 4px 10px rgba(0, 0, 0, 0.04);
-  --border-subtle: #eaedf2;
 }
