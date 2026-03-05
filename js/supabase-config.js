@@ -4,7 +4,7 @@
  * SGE — Supabase Configuration
  * Initializes the Supabase client for the application.
  */
-window.SGE_RT = window.SGE || {};
+window.SGE_RT = window.SGE_RT || window.SGE || {};
 
 // Replace with your actual Supabase credentials
 // URL: Found in Project Settings -> API

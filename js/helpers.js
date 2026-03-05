@@ -4,7 +4,7 @@
  * SGE — Helper Functions
  * Utility functions used across the application
  */
-window.SGE_RT = window.SGE || {};
+window.SGE_RT = window.SGE_RT || window.SGE || {};
 
 SGE_RT.helpers = {
     /**

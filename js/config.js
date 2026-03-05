@@ -4,7 +4,7 @@
  * SGE — Configuration
  * Central configuration for the application
  */
-window.SGE_RT = window.SGE || {};
+window.SGE_RT = window.SGE_RT || window.SGE || {};
 
 SGE_RT.CONFIG = {
   // Supabase is now used instead of Google Apps Script

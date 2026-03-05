@@ -4,7 +4,7 @@
  * SGE — State Management
  * Centralized application state
  */
-window.SGE_RT = window.SGE || {};
+window.SGE_RT = window.SGE_RT || window.SGE || {};
 
 SGE_RT.state = {
     colaboradores: [],
