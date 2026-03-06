@@ -152,7 +152,7 @@ SGE_RT.relatorio = {
         }, {});
         const groups = Object.keys(frotaByGrupo).sort().map(grupo => {
             const opts = frotaByGrupo[grupo]
-                .sort((a, b) => a.placa.localeCompare(b.placa))
+                .sort((a, b) => String(a.placa || '').localeCompare(String(b.placa || '')))
                 .map(f => `<option value="${f.placa}" ${selectedPlaca === f.placa ? 'selected' : ''}>${f.placa}</option>`)
                 .join('');
             return `<optgroup label="${grupo}">${opts}</optgroup>`;
