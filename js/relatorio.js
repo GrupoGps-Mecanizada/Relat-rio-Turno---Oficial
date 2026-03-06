@@ -294,7 +294,7 @@ SGE_RT.relatorio = {
                         <div class="rt-field">
                             <label>Placa do Veículo *</label>
                             <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio();">
-                                ${this._buildFrotaOptions(eq.equipamento)}
+                                ${this._buildEquipOptionsPlaca(eq.equipamento)}
                             </select>
                         </div>
                         <div class="rt-field">
