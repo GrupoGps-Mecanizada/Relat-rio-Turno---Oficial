@@ -290,7 +290,7 @@ SGE_RT.relatorio = {
                             <label>Vaga / Alocação *</label>
                             ${eq.vagaManual ? `
                                 <div style="display:flex; gap: 8px;">
-                                    <input type="text" value="${this._esc(eq.vaga)}" placeholder="Digite a Vaga..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = this.value; SGE_RT.relatorio.renderNovoRelatorio();" style="flex:1;">
+                                    <input type="text" value="${this._esc(eq.vaga)}" placeholder="Digite a Vaga..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = this.value;" style="flex:1;">
                                     <button class="rt-btn-cancel" style="padding: 0 10px;" onclick="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vagaManual = false; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = ''; SGE_RT.relatorio.renderNovoRelatorio();">𝖷</button>
                                 </div>
                             ` : `
@@ -303,7 +303,7 @@ SGE_RT.relatorio = {
                             <label>Placa do Veículo *</label>
                             ${eq.placaManual ? `
                                 <div style="display:flex; gap: 8px;">
-                                    <input type="text" value="${this._esc(eq.equipamento)}" placeholder="Digite a Placa..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio();" style="flex:1;">
+                                    <input type="text" value="${this._esc(eq.equipamento)}" placeholder="Digite a Placa..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value;" style="flex:1;">
                                     <button class="rt-btn-cancel" style="padding: 0 10px;" onclick="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].placaManual = false; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = ''; SGE_RT.relatorio.renderNovoRelatorio();">𝖷</button>
                                 </div>
                             ` : `
