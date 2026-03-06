@@ -22,6 +22,7 @@ SGE_RT.relatorio = {
         SGE_RT.state.currentRelatorio = {
             supervisor: u?.nome || '',
             letraTurno: u?.letraTurno || '',
+            horario: '',
             data: new Date().toISOString().split('T')[0],
             equipamentosOperando: [],
             observacoes: ''
@@ -135,11 +136,11 @@ SGE_RT.relatorio = {
         const groups = Object.keys(equipByTipo).sort().map(tipo => {
             const opts = equipByTipo[tipo]
                 .sort((a, b) => (a.numero || '').localeCompare(b.numero || '', undefined, { numeric: true }))
-                .map(e => `<option value="${e.id}" ${selectedId === e.id ? 'selected' : ''}>${e.placa}${e.escala ? ' · ' + e.escala : ''}</option>`)
+                .map(e => `<option value="${e.id}" ${selectedId === e.id ? 'selected' : ''}>${e.placa}</option>`)
                 .join('');
             return `<optgroup label="${tipo}">${opts}</optgroup>`;
         });
-        return `<option value="">Selecione o equipamento…</option>` + groups.join('');
+        return `<option value="">Selecione o equipamento…</option>` + groups.join('') + `<optgroup label="Outros"><option value="MANUAL">Digitar Outra Vaga...</option></optgroup>`;
     },
 
     _buildEquipOptionsPlaca(selectedPlaca) {
@@ -157,7 +158,7 @@ SGE_RT.relatorio = {
                 .join('');
             return `<optgroup label="${grupo}">${opts}</optgroup>`;
         });
-        return `<option value="">Selecione a placa do veículo…</option>` + groups.join('');
+        return `<option value="">Selecione a placa do veículo…</option>` + groups.join('') + `<optgroup label="Outros"><option value="MANUAL">Digitar Outra Placa...</option></optgroup>`;
     },
 
     _buildMotivosOptions(selected) {
@@ -287,15 +288,29 @@ SGE_RT.relatorio = {
                     <div class="rt-grid-3">
                         <div class="rt-field">
                             <label>Vaga / Alocação *</label>
-                            <select onchange="SGE_RT.relatorio.handleVagaChange(${idx}, this.value)">
-                                ${this._buildEquipOptions(eqSelectedId)}
-                            </select>
+                            ${eq.vagaManual ? `
+                                <div style="display:flex; gap: 8px;">
+                                    <input type="text" value="${this._esc(eq.vaga)}" placeholder="Digite a Vaga..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = this.value; SGE_RT.relatorio.renderNovoRelatorio();" style="flex:1;">
+                                    <button class="rt-btn-cancel" style="padding: 0 10px;" onclick="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vagaManual = false; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = ''; SGE_RT.relatorio.renderNovoRelatorio();">𝖷</button>
+                                </div>
+                            ` : `
+                                <select onchange="if(this.value === 'MANUAL') { SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vagaManual = true; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].vaga = ''; SGE_RT.relatorio.renderNovoRelatorio(); } else { SGE_RT.relatorio.handleVagaChange(${idx}, this.value) }">
+                                    ${this._buildEquipOptions(eqSelectedId)}
+                                </select>
+                            `}
                         </div>
                         <div class="rt-field">
                             <label>Placa do Veículo *</label>
-                            <select onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio();">
-                                ${this._buildEquipOptionsPlaca(eq.equipamento)}
-                            </select>
+                            ${eq.placaManual ? `
+                                <div style="display:flex; gap: 8px;">
+                                    <input type="text" value="${this._esc(eq.equipamento)}" placeholder="Digite a Placa..." onchange="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio();" style="flex:1;">
+                                    <button class="rt-btn-cancel" style="padding: 0 10px;" onclick="SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].placaManual = false; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = ''; SGE_RT.relatorio.renderNovoRelatorio();">𝖷</button>
+                                </div>
+                            ` : `
+                                <select onchange="if(this.value === 'MANUAL'){ SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].placaManual = true; SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = ''; SGE_RT.relatorio.renderNovoRelatorio(); } else { SGE_RT.state.currentRelatorio.equipamentosOperando[${idx}].equipamento = this.value; SGE_RT.relatorio.renderNovoRelatorio(); }">
+                                    ${this._buildEquipOptionsPlaca(eq.equipamento)}
+                                </select>
+                            `}
                         </div>
                         <div class="rt-field">
                             <label>Área de Atuação *</label>
@@ -371,6 +386,14 @@ SGE_RT.relatorio = {
                         <div class="rt-field">
                             <label>Data do Turno</label>
                             <input type="date" value="${r.data}" onchange="SGE_RT.state.currentRelatorio.data = this.value">
+                        </div>
+                        <div class="rt-field">
+                            <label>Horário do Turno *</label>
+                            <select onchange="SGE_RT.state.currentRelatorio.horario = this.value">
+                                <option value="">Selecione...</option>
+                                <option value="07:00 as 19:00" ${r.horario === '07:00 as 19:00' ? 'selected' : ''}>07:00 as 19:00</option>
+                                <option value="19:00 as 07:00" ${r.horario === '19:00 as 07:00' ? 'selected' : ''}>19:00 as 07:00</option>
+                            </select>
                         </div>
                         <div class="rt-field">
                             <label>Letra do Turno</label>
@@ -500,6 +523,7 @@ SGE_RT.relatorio = {
 
             let text = `RELATÓRIO: #${r.id_sequencial || 'S/N'}\n`;
             text += `SUPER: ${r.supervisor} | LETRA: ${r.letraTurno || '—'}\n`;
+            if (r.horario) text += `HORÁRIO: ${r.horario}\n`;
             text += `DATA: ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}\n\n`;
 
             r.equipamentosOperando.forEach((eq, idx) => {

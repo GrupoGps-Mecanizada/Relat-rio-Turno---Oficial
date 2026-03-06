@@ -149,6 +149,7 @@ SGE_RT.api = {
                     supervisor_id: SGE_RT.auth.currentUser?.supervisor_id || null,
                     supervisor_nome: relatorio.supervisor,
                     letra_turno: relatorio.letraTurno || null,
+                    horario: relatorio.horario || null,
                     data: relatorio.data,
                     observacoes: relatorio.observacoes || null
                 })
@@ -213,6 +214,7 @@ SGE_RT.api = {
                 id_sequencial: r.id_sequencial,
                 supervisor: r.supervisor_nome,
                 letraTurno: r.letra_turno || '',
+                horario: r.horario || '',
                 data: r.data,
                 observacoes: r.observacoes || '',
                 equipamentosOperando: (r.equipamentos || []).map(eq => ({
