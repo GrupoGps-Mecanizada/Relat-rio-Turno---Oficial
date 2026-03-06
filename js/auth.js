@@ -222,6 +222,17 @@ SGE_RT.auth = {
 
         // ── Boot app ──────────────────────────────────────────────────────
         if (SGE_RT.app?.start) SGE_RT.app.start();
+
+        // ── Salvar chaves para sge-session-ping.js (Radar de Presença) ───
+        try {
+            localStorage.setItem('sge_session_user_id', u?.id || '');
+            localStorage.setItem('sge_session_user_name', u?.nome || 'Usuário SGE');
+            localStorage.setItem('sge_session_user_email', u?.email || '');
+            localStorage.setItem('sge_session_app_slug', 'relatorio_turno');
+            localStorage.setItem('sge_session_app_name', 'Relatório de Turno');
+        } catch (_) { }
+        // Inicia presença no canal (resolve race condition com DOMContentLoaded)
+        if (window.SGE_SESSION_PING) window.SGE_SESSION_PING.start();
     },
 
     _parseSSOToken(token) {
