@@ -4,25 +4,39 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
-    <title>RELATORIO TURNO - GPS -MECANIZADA</title>
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <!-- Content Security Policy — restringe fontes de scripts, estilos e conexões -->
+    <meta http-equiv="Content-Security-Policy" content="
+      default-src 'self' https:;
+      script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://grupogps-mecanizada.github.io;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com;
+      font-src 'self' https://fonts.gstatic.com;
+      img-src 'self' data: blob:;
+      connect-src 'self' https://*.supabase.co wss://*.supabase.co https://grupogps-mecanizada.github.io https://cdn.jsdelivr.net;
+      object-src 'none';
+      base-uri 'self';
+    " />
+    <title>RELATÓRIO DE TURNO - GPS - MECANIZADA</title>
     <meta name="theme-color" content="#0f3868" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet" />
 
     <!-- CSS Modules — mesma base do SGE Efetivo -->
-    <link rel="stylesheet" href="css/variables.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/base.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/auth.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/topbar.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/filterbar.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/history.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/dashboard.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/drawer.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/modal.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/toast.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/hub.css?v=1.0.1" />
-    <link rel="stylesheet" href="css/relatorio.css?v=1.0.1" />
+    <link rel="stylesheet" href="css/variables.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/base.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/auth.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/topbar.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/filterbar.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/history.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/dashboard.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/drawer.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/modal.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/toast.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/hub.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/relatorio.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/dark-mode.css?v=1.1.0" />
+    <link rel="stylesheet" href="css/print.css?v=1.1.0" media="print" />
 </head>
 
 <body>
@@ -98,14 +112,6 @@
                     </svg>
                     <span style="font-size:13px;font-weight:600;letter-spacing:0.05em;">Ecossistema</span>
                 </button>
-            </div>
-
-            <!-- CENTER: Logo (mesmo padrão do Efetivo) -->
-            <div class="logo">
-                <span class="logo-gps">GPS</span>
-                <span class="logo-mecanizada">Mecanizada</span>
-                <div class="logo-divider"></div>
-                <span class="logo-gestao">Relatório de Turno</span>
             </div>
 
             <!-- SGE HUB Dropdown -->
@@ -241,14 +247,28 @@
                 </div>
             </div>
 
-            <!-- RIGHT: User + Export -->
+            <!-- RIGHT: Dark Mode + Export -->
             <div id="topbar-right">
-                <!-- User info chip -->
-                <div id="topbar-user"></div>
+                <!-- Dark Mode Toggle -->
+                <button id="dark-mode-btn" class="topbar-icon-btn" title="Modo Noturno" aria-label="Alternar Modo Noturno">
+                    <svg id="dark-mode-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <svg id="dark-mode-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                </button>
 
                 <!-- Export -->
-                <button id="topbar-export-btn" class="topbar-icon-btn" title="Exportar Dados"
-                    aria-label="Exportar Dados">
+                <button id="topbar-export-btn" class="topbar-icon-btn" title="Exportar Dados" aria-label="Exportar Dados">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -379,140 +399,25 @@
     <script src="https://grupogps-mecanizada.github.io/SGE_GRUPOGPS/js/auth/sso_client.js?v=5"></script>
 
     <!-- JS Modules -->
-    <script src="js/config.js?v=1.0.1"></script>
-    <script src="js/supabase-config.js?v=1.0.1"></script>
-    <script src="js/state.js?v=1.0.1"></script>
-    <script src="js/sge-session-ping.js?v=1.0.1"></script>
-    <script src="js/helpers.js?v=1.0.1"></script>
-    <script src="js/api.js?v=1.0.1"></script>
-    <script src="js/auth.js?v=1.0.1"></script>
-    <script src="js/navigation.js?v=1.0.1"></script>
-    <script src="js/relatorio.js?v=1.0.1"></script>
-    <script src="js/particles.js?v=1.0.1"></script>
-    <script src="js/hub.js?v=1.0.1"></script>
-    <script src="js/app.js?v=1.0.1"></script>
-    <script src="js/dev-mode.js?v=1.0.0"></script>
+    <script src="js/config.js?v=1.1.0"></script>
+    <script src="js/supabase-config.js?v=1.1.0"></script>
+    <script src="js/state.js?v=1.1.0"></script>
+    <script src="js/sge-session-ping.js?v=1.1.0"></script>
+    <script src="js/helpers.js?v=1.1.0"></script>
+    <script src="js/api.js?v=1.1.0"></script>
+    <script src="js/auth.js?v=1.1.0"></script>
+    <script src="js/navigation.js?v=1.1.0"></script>
+    <script src="js/relatorio.js?v=1.1.0"></script>
+    <script src="js/particles.js?v=1.1.0"></script>
+    <script src="js/hub.js?v=1.1.0"></script>
+    <script src="js/dark-mode.js?v=1.1.0"></script>
+    <script src="js/app.js?v=1.1.0"></script>
+    <script src="js/dev-mode.js?v=1.1.0"></script>
+    <!-- Push Notifications: notifica novos relatórios quando a aba está em segundo plano -->
+    <script src="js/notifications.js?v=1.1.0"></script>
+    <!-- Auto-Update: detecta novas versões e atualiza todos os navegadores automaticamente -->
+    <script src="js/updater.js?v=1.1.0"></script>
 
-    <!-- Hub & Nav behavior (inline, mesma lógica do Efetivo) -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // ── Hub overlay ──────────────────────────────────────────────────────
-            const hubBtn = document.getElementById('hub-menu-btn');
-            const hubOverlay = document.getElementById('hub-dropdown-overlay');
-            const hubClose = document.getElementById('hub-close-btn');
-
-            if (hubBtn && hubOverlay) {
-                hubBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    hubOverlay.classList.toggle('hidden');
-                    hubOverlay.classList.toggle('show');
-                });
-            }
-            if (hubClose && hubOverlay) {
-                hubClose.addEventListener('click', () => {
-                    hubOverlay.classList.add('hidden');
-                    hubOverlay.classList.remove('show');
-                });
-            }
-            if (hubOverlay) {
-                hubOverlay.addEventListener('click', (e) => {
-                    if (e.target === hubOverlay) {
-                        hubOverlay.classList.add('hidden');
-                        hubOverlay.classList.remove('show');
-                    }
-                });
-            }
-
-            // ── Nav menu ─────────────────────────────────────────────────────────
-            const navBtn = document.getElementById('nav-menu-btn');
-            const navOverlay = document.getElementById('nav-menu-overlay');
-
-            if (navBtn && navOverlay) {
-                navBtn.addEventListener('click', () => {
-                    navOverlay.classList.toggle('hidden');
-                });
-                navOverlay.addEventListener('click', (e) => {
-                    if (e.target === navOverlay) navOverlay.classList.add('hidden');
-                });
-            }
-
-            // ── Accordion sections ────────────────────────────────────────────────
-            document.querySelectorAll('.accordion-trigger').forEach(trigger => {
-                trigger.addEventListener('click', () => {
-                    const section = trigger.closest('.accordion-section');
-                    const isActive = section.classList.contains('active');
-                    section.classList.toggle('active', !isActive);
-                    const content = section.querySelector('.accordion-content');
-                    if (content) {
-                        content.style.maxHeight = !isActive ? content.scrollHeight + 'px' : '0';
-                    }
-                });
-                // Set initial max-height for active sections
-                const section = trigger.closest('.accordion-section');
-                const content = section.querySelector('.accordion-content');
-                if (content && section.classList.contains('active')) {
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    content.style.opacity = '1';
-                }
-            });
-
-            // ── Logo home click ───────────────────────────────────────────────────
-            const logoHome = document.getElementById('logo-home');
-            if (logoHome) {
-                logoHome.addEventListener('click', () => {
-                    document.querySelector('[data-view="novo"]')?.click();
-                    navOverlay?.classList.add('hidden');
-                });
-            }
-
-            // ── Tab navigation (tabs + nav items) ────────────────────────────────
-            const allNavItems = document.querySelectorAll('[data-view]');
-            const views = { novo: 'novo-view', historico: 'historico-view', dashboard: 'dashboard-view' };
-            const tabBtns = document.querySelectorAll('#relatorio-tabs .dash-tab-btn');
-            const navMenuItems = document.querySelectorAll('.nav-menu-item[data-view]');
-
-            function navigateTo(viewKey) {
-                // Hide all views
-                Object.values(views).forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.classList.remove('active');
-                });
-                // Show target
-                const target = document.getElementById(views[viewKey]);
-                if (target) target.classList.add('active');
-
-                // Update tab active state
-                tabBtns.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === viewKey);
-                });
-                navMenuItems.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === viewKey);
-                });
-
-                // Close nav menu
-                if (navOverlay) navOverlay.classList.add('hidden');
-
-                // Trigger view logic
-                if (window.SGE_RT && SGE_RT.relatorio) {
-                    if (viewKey === 'novo') SGE_RT.relatorio.renderNovoRelatorio();
-                    else if (viewKey === 'historico') SGE_RT.relatorio.renderHistorico();
-                    else if (viewKey === 'dashboard') SGE_RT.relatorio.renderDashboard();
-                }
-            }
-
-            allNavItems.forEach(btn => {
-                btn.addEventListener('click', () => navigateTo(btn.dataset.view));
-            });
-
-            // ── Historico refresh ─────────────────────────────────────────────────
-            const refreshBtn = document.getElementById('historico-refresh-btn');
-            if (refreshBtn) {
-                refreshBtn.addEventListener('click', () => {
-                    if (window.SGE_RT && SGE_RT.relatorio) SGE_RT.relatorio.renderHistorico();
-                });
-            }
-        });
-    </script>
 
 </body>
 

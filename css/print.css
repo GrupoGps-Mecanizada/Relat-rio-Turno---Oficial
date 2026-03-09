@@ -1,0 +1,141 @@
+/* ===================== PRINT / PDF EXPORT =====================
+   Ativado via window.print() ou Ctrl+P.
+   Exibe apenas o conteúdo da view ativa em layout limpo.
+   ============================================================= */
+
+@media print {
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box !important; }
+
+    body {
+        background: #fff !important;
+        color: #000 !important;
+        font-family: 'Inter', Arial, sans-serif !important;
+        font-size: 11pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* ── Ocultar UI não essencial ── */
+    #login-screen,
+    #loading-screen,
+    #topbar,
+    #filterbar,
+    #modal-overlay,
+    #toast-container,
+    #nav-menu-overlay,
+    #hub-dropdown-overlay,
+    #global-sync-bar,
+    #relatorio-tabs,
+    .no-print,
+    .rt-remove-btn,
+    #historico-refresh-btn,
+    #topbar-export-btn {
+        display: none !important;
+    }
+
+    /* ── Layout de página ── */
+    #app, #main {
+        display: block !important;
+        height: auto !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .rt-scroll-wrap {
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    /* ── Cabeçalho de impressão ── */
+    body::before {
+        content: 'GPS Mecanizada — Relatório de Turno';
+        display: block;
+        font-size: 14pt;
+        font-weight: 700;
+        color: #0f3868;
+        padding: 10px 20px 4px;
+        border-bottom: 2px solid #0f3868;
+        margin-bottom: 12px;
+    }
+
+    body::after {
+        content: 'Impresso em: ' attr(data-print-date);
+        display: block;
+        font-size: 8pt;
+        color: #666;
+        padding: 10px 20px;
+        border-top: 1px solid #ddd;
+        margin-top: 16px;
+        text-align: right;
+    }
+
+    /* ── Containers ── */
+    .rt-container {
+        padding: 8px 20px !important;
+        max-width: 100% !important;
+        gap: 12px !important;
+    }
+
+    /* ── Cards ── */
+    .rt-card {
+        page-break-inside: avoid;
+        break-inside: avoid;
+        border: 1px solid #ccc !important;
+        box-shadow: none !important;
+        margin-bottom: 10px !important;
+    }
+
+    .rt-card-header {
+        background: #f0f4f8 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .rt-card-title {
+        color: #0f3868 !important;
+    }
+
+    /* ── Form fields ── */
+    .rt-field input,
+    .rt-field select,
+    .rt-field textarea {
+        border: 1px solid #ccc !important;
+        background: #fff !important;
+        color: #000 !important;
+    }
+
+    .rt-field label {
+        color: #555 !important;
+    }
+
+    /* ── Tabelas ── */
+    table {
+        border-collapse: collapse !important;
+        width: 100% !important;
+    }
+
+    th, td {
+        border: 1px solid #ccc !important;
+        padding: 4px 8px !important;
+        font-size: 9pt !important;
+    }
+
+    th {
+        background: #0f3868 !important;
+        color: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    /* ── Links ── */
+    a { text-decoration: none !important; color: inherit !important; }
+
+    /* ── Quebras de página ── */
+    h2, h3, .rt-card-header, .page-title { page-break-after: avoid; break-after: avoid; }
+
+    /* ── Views ocultas ── */
+    .view { display: none !important; }
+    .view.active { display: block !important; }
+}

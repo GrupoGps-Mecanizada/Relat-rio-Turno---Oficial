@@ -73,9 +73,11 @@ SGE_RT.relatorio = {
         if (!eq) return;
         const eqDb = (SGE_RT.state.equipamentos || []).find(e => e.id === equipamentoId);
         if (eqDb) {
+            eq.equipamentoId = equipamentoId; // persiste o id para restaurar o select após re-render
             eq.vaga = eqDb.placa;
             eq.tipo = eqDb.tipo;
         } else {
+            eq.equipamentoId = '';
             eq.vaga = eq.tipo = '';
         }
         eq.motorista = '';
@@ -220,7 +222,7 @@ SGE_RT.relatorio = {
             : '';
 
         const equipamentosHTML = r.equipamentosOperando.map((eq, idx) => {
-            const eqSelectedId = (SGE_RT.state.equipamentos || []).find(e => e.placa === eq.equipamento)?.id || '';
+            const eqSelectedId = eq.equipamentoId || '';
 
             const operadoresHTML = (Array.isArray(eq.operadores) ? eq.operadores : []).map((nome, opIdx) => `
                 <div class="rt-operador-row">

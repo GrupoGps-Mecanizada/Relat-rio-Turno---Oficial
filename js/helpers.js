@@ -1,12 +1,35 @@
 'use strict';
 
 /**
- * SGE — Helper Functions
+ * SGE RT — Helper Functions
  * Utility functions used across the application
  */
 window.SGE_RT = window.SGE_RT || window.SGE || {};
 
 SGE_RT.helpers = {
+    /**
+     * Escapes HTML special characters to prevent XSS
+     */
+    escapeHtml(str) {
+        if (str == null) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    },
+
+    /**
+     * Returns a debounced version of fn that delays execution by `wait` ms
+     */
+    debounce(fn, wait = 250) {
+        let timer;
+        return function (...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => fn.apply(this, args), wait);
+        };
+    },
     /**
      * Get CSS class for regime badge
      */
