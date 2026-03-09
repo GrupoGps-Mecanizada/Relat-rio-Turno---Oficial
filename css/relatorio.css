@@ -973,3 +973,127 @@
 .accordion-section.active .accordion-content {
     opacity: 1;
 }
+
+/* =====================================================================
+   MOBILE & RESPONSIVE FIXES (v1.1.0)
+   ===================================================================== */
+
+/* ── Tap highlight removal for all interactive elements ───────────────── */
+button, select, input, textarea, a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* ── iOS input zoom prevention — mínimo 16px em mobile ───────────────── */
+@media (max-width: 768px) {
+    .rt-field input,
+    .rt-field select,
+    .rt-field textarea,
+    .rt-operador-row input {
+        font-size: 16px;
+    }
+}
+
+/* ── rt-grid-3: 3 colunas → 2 em tablet, 1 em mobile ─────────────────── */
+@media (max-width: 768px) {
+    .rt-grid-3 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .rt-grid-2,
+    .rt-grid-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ── Touch targets mínimos (44px) em mobile ───────────────────────────── */
+@media (max-width: 768px) {
+    .rt-operador-del,
+    .rt-troca-del-btn {
+        width: 44px;
+        height: 44px;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+
+    .rt-operador-del svg,
+    .rt-troca-del-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .rt-remove-btn {
+        padding: 8px 14px;
+        min-height: 40px;
+    }
+
+    .rt-add-small-btn,
+    .rt-add-troca-btn {
+        padding: 10px 14px;
+        min-height: 40px;
+        font-size: 13px;
+    }
+
+    .rt-add-equip-btn {
+        padding: 20px 16px;
+        min-height: 60px;
+    }
+
+    .rt-btn-save,
+    .rt-btn-cancel {
+        padding: 14px 20px;
+        font-size: 15px;
+        min-height: 50px;
+    }
+}
+
+/* ── Histórico equip row — wrap em telas pequenas ─────────────────────── */
+@media (max-width: 640px) {
+    .rt-historico-equip-row {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .rt-historico-equip-area {
+        width: 100%;
+        flex: unset;
+    }
+}
+
+/* ── Trocas item: colapsa em mobile ───────────────────────────────────── */
+@media (max-width: 480px) {
+    .rt-troca-item {
+        grid-template-columns: 1fr;
+    }
+
+    .rt-troca-item .rt-troca-del-col {
+        grid-column: 1;
+        display: flex;
+        justify-content: flex-end;
+    }
+}
+
+/* ── Container extra-pequeno (320–360px phones) ───────────────────────── */
+@media (max-width: 360px) {
+    .rt-container {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .rt-card-body {
+        padding: 10px;
+    }
+
+    .rt-card-header {
+        padding: 10px 12px;
+    }
+
+    .rt-historico-header {
+        padding: 10px 12px;
+    }
+
+    .rt-historico-body {
+        padding: 10px 12px;
+    }
+}
