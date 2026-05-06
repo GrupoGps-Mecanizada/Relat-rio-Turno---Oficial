@@ -109,10 +109,14 @@
             return;
         }
 
-        // Cria client dedicado para o canal de presença (anon key)
-        _supabase = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
-            realtime: { params: { eventsPerSecond: 5 } }
-        });
+        // Reutiliza o cliente já inicializado ou cria um novo se a biblioteca estiver disponível
+        if (typeof window.supabase?.createClient === 'function') {
+            _supabase = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
+                realtime: { params: { eventsPerSecond: 5 } }
+            });
+        } else {
+            _supabase = window.supabase;
+        }
 
         _payload = buildPayload(data, 'online');
 
