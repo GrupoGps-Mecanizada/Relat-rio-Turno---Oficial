@@ -531,8 +531,8 @@ SGE_RT.relatorio = {
             text += `[Dia: ${dateFmt} - Horario: ${horario} | Supervisor: ${r.supervisor || '—'}${letraSuffix}]`;
 
             r.equipamentosOperando.forEach((eq, idx) => {
-                const vagaLabel = eq.equipamento ? ` (Vaga: ${eq.equipamento})` : '';
-                text += `\n\n> *${eq.vaga || '—'}${vagaLabel}*\n`;
+                const vagaLabel = eq.vaga ? ` (Vaga: ${eq.vaga})` : '';
+                text += `\n\n> *${eq.equipamento || eq.vaga || '—'}${vagaLabel}*\n`;
                 text += `Equipe ${idx + 1} | Área: ${eq.area || '—'}\n`;
 
                 if (eq.motorista) text += `MOT: ${eq.motorista}\n`;
