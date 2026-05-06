@@ -62,16 +62,34 @@ SGE_RT.api = {
 
             if (error) return this._handleError(error, 'Carregar Colaboradores');
 
-            SGE_RT.state.colaboradores = data.map(e => ({
-                id: e.id,
-                nome: e.name,
-                funcao: e.function || '',
-                regime: e.regime || '',
-                status: e.status,
-                supervisor_id: e.supervisor_id,
-                equipment_id: e.equipment_id,
-                equipamento: e.equipment ? `${e.equipment.sigla}${e.equipment.numero ? '-' + e.equipment.numero : ''}` : ''
-            }));
+            const user = SGE_RT.auth.currentUser;
+            const escalaJornada = user?.escalaJornada || '';
+            const isGestao = user?.accessLevel === 'gestao';
+
+            const norm = r => (r || '').toUpperCase().replace(/\s+/g, '').replace(/-/g, '');
+
+            const escalaCompativel = (regime) => {
+                if (!regime) return true;
+                const r = norm(regime);
+                if (escalaJornada === '4x4') return r.startsWith('4X4');
+                if (escalaJornada === 'ADM') return r === 'ADM';
+                if (escalaJornada === '16H') return r.startsWith('16H');
+                if (escalaJornada === '24HS') return r.includes('12X36') || r.includes('24HS');
+                return true;
+            };
+
+            SGE_RT.state.colaboradores = data
+                .filter(e => isGestao || !escalaJornada || escalaCompativel(e.regime))
+                .map(e => ({
+                    id: e.id,
+                    nome: e.name,
+                    funcao: e.function || '',
+                    regime: e.regime || '',
+                    status: e.status,
+                    supervisor_id: e.supervisor_id,
+                    equipment_id: e.equipment_id,
+                    equipamento: e.equipment ? `${e.equipment.sigla}${e.equipment.numero ? '-' + e.equipment.numero : ''}` : ''
+                }));
 
             return true;
         } catch (e) {
