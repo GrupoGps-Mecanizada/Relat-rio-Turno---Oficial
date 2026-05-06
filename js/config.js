@@ -14,7 +14,7 @@ SGE_RT.CONFIG = {
   usuario: 'admin',
 
   // Available regimes
-  regimes: ['24HS-A', '24HS-B', '24HS-C', '24HS-D', 'ADM', '16HS-5X2', '16HS-6X3', 'SEM REGISTRO'],
+  regimes: ['4X4 - A', '4X4 - B', '4X4 - C', '4X4 - D', '24HS-A', '24HS-B', '24HS-C', '24HS-D', 'ADM', '16HS-5X2', '16HS-6X3', 'SEM REGISTRO'],
 
   // Available functions
   funcoes: [
@@ -104,6 +104,10 @@ SGE_RT.CONFIG = {
 
   // Regime → Turno mapping
   turnoMap: {
+    '4X4 - A': 'A',
+    '4X4 - B': 'B',
+    '4X4 - C': 'C',
+    '4X4 - D': 'D',
     '24HS-A': 'A',
     '24HS-B': 'B',
     '24HS-C': 'C',
