@@ -523,34 +523,32 @@ SGE_RT.relatorio = {
         try {
             const r = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
 
-            let text = `RELATÓRIO: #${r.id_sequencial || 'S/N'}\n`;
-            text += `SUPER: ${r.supervisor} | LETRA: ${r.letraTurno || '—'}\n`;
-            if (r.horario) text += `HORÁRIO: ${r.horario}\n`;
-            text += `DATA: ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')}\n\n`;
+            const dateFmt = new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR');
+            const horario = (r.horario || '').replace(' as ', ' às ');
+            const letraSuffix = r.letraTurno ? ` (${r.letraTurno})` : '';
+
+            let text = `*RELATÓRIO DE TURNO #${r.id_sequencial || 'S/N'}*\n`;
+            text += `[Dia: ${dateFmt} - Horario: ${horario} | Supervisor: ${r.supervisor || '—'}${letraSuffix}]`;
 
             r.equipamentosOperando.forEach((eq, idx) => {
-                text += `EQUIPE ${idx + 1}\n`;
-                text += `VAGA: ${eq.vaga || ''} | EQUIPAMENTO: ${eq.equipamento || ''}\n`;
-                text += `MOTORISTA: ${eq.motorista || ''}\n`;
+                const vagaLabel = eq.equipamento ? ` (Vaga: ${eq.equipamento})` : '';
+                text += `\n\n> *${eq.vaga || '—'}${vagaLabel}*\n`;
+                text += `Equipe ${idx + 1} | Área: ${eq.area || '—'}\n`;
 
-                if (Array.isArray(eq.operadores) && eq.operadores.length > 0) {
-                    eq.operadores.filter(Boolean).forEach((op, opIdx) => {
-                        text += `OPERADOR ${opIdx + 1}: ${op}\n`;
-                    });
-                }
+                if (eq.motorista) text += `MOT: ${eq.motorista}\n`;
 
-                text += `AREA DE ATENDIMENTO: ${eq.area || ''}\n`;
+                const ops = Array.isArray(eq.operadores) ? eq.operadores.filter(Boolean) : [];
+                if (ops.length) text += `OP: ${ops.join(', ')}\n`;
 
                 if (eq.trocas?.length) {
                     eq.trocas.forEach(tr => {
-                        text += `TROCA: ${tr.motivo} -> ${tr.equipamentoNovo || 'S/EQ'}\n`;
+                        text += `⚠ Troca: ${tr.motivo}${tr.equipamentoNovo ? ' → ' + tr.equipamentoNovo : ''}\n`;
                     });
                 }
-                text += `\n`;
             });
 
             if (r.observacoes) {
-                text += `OBS: ${r.observacoes}\n`;
+                text += `\n\nObs: ${r.observacoes}`;
             }
 
             navigator.clipboard.writeText(text.trim());
