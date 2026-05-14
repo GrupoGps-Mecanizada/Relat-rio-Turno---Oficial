@@ -210,40 +210,59 @@ SGE_RT.api = {
         if (!window.supabase) return { success: false, relatorios: [] };
         this.updateSyncBar(true);
 
-        try {
-            let query = supabase.schema('gps_mec')
-                .from('relatorio_gps_mec_relatorios_turno')
-                .select('*, equipamentos:relatorio_gps_mec_relatorio_equipamentos(*)')
-                .eq('data', date)
-                .order('created_at', { ascending: false });
+        const isGestao = SGE_RT.auth.currentUser?.accessLevel === 'gestao';
+        const supervisorNome = SGE_RT.auth.currentUser?.nome;
 
-            // All authenticated users can see all reports for the day
+        const _mapRelatorios = (data) => data.map(r => ({
+            id: r.id,
+            id_sequencial: r.id_sequencial,
+            supervisor: r.supervisor_nome,
+            letraTurno: r.letra_turno || '',
+            horario: r.horario || '',
+            data: r.data,
+            observacoes: r.observacoes || '',
+            equipamentosOperando: (r.equipamentos || []).map(eq => ({
+                equipamento: eq.equipamento_placa,
+                tipo: eq.equipamento_tipo,
+                vaga: eq.vaga,
+                area: eq.area,
+                motorista: eq.motorista,
+                operadores: eq.operadores || [],
+                trocas: eq.trocas || []
+            }))
+        }));
+
+        const _baseQuery = () => supabase.schema('gps_mec')
+            .from('relatorio_gps_mec_relatorios_turno')
+            .select('*, equipamentos:relatorio_gps_mec_relatorio_equipamentos(*)')
+            .eq('data', date)
+            .order('created_at', { ascending: false });
+
+        try {
+            // Supervisors only see their own reports
+            let query = _baseQuery();
+            if (!isGestao && supervisorId) {
+                query = query.eq('supervisor_id', supervisorId);
+            }
 
             const { data, error } = await query;
             this.updateSyncBar(false);
 
             if (error) return this._handleError(error, 'Carregar Histórico') || { success: false, relatorios: [] };
 
-            const relatorios = data.map(r => ({
-                id: r.id,
-                id_sequencial: r.id_sequencial,
-                supervisor: r.supervisor_nome,
-                letraTurno: r.letra_turno || '',
-                horario: r.horario || '',
-                data: r.data,
-                observacoes: r.observacoes || '',
-                equipamentosOperando: (r.equipamentos || []).map(eq => ({
-                    equipamento: eq.equipamento_placa,
-                    tipo: eq.equipamento_tipo,
-                    vaga: eq.vaga,
-                    area: eq.area,
-                    motorista: eq.motorista,
-                    operadores: eq.operadores || [],
-                    trocas: eq.trocas || []
-                }))
-            }));
+            // Fallback: if supervisor_id filter returned empty, retry by supervisor_nome.
+            // This handles cases where old reports were saved with supervisor_id = null
+            // before the supervisor record existed in efetivo_gps_mec_supervisores.
+            if (data.length === 0 && !isGestao && supervisorId && supervisorNome) {
+                this.updateSyncBar(true);
+                const { data: data2, error: e2 } = await _baseQuery().eq('supervisor_nome', supervisorNome);
+                this.updateSyncBar(false);
+                if (!e2 && data2?.length > 0) {
+                    return { success: true, relatorios: _mapRelatorios(data2) };
+                }
+            }
 
-            return { success: true, relatorios };
+            return { success: true, relatorios: _mapRelatorios(data) };
         } catch (e) {
             this.updateSyncBar(false);
             console.error('SGE_RT getRelatorios failed:', e);

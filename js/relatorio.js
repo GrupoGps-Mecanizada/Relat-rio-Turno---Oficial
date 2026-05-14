@@ -468,7 +468,18 @@ SGE_RT.relatorio = {
         const supervisorId = SGE_RT.auth.currentUser?.supervisor_id;
         const res = await SGE_RT.api.getRelatorios(supervisorId, date);
 
-        if (!res?.success || !res.relatorios?.length) {
+        if (!res?.success) {
+            app.innerHTML = `
+                <div class="rt-empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <h3>Erro ao Carregar Histórico</h3>
+                    <p>Não foi possível buscar seus relatórios. Verifique sua conexão e tente novamente.</p>
+                    <button class="rt-btn rt-btn-secondary" style="margin-top:12px;" onclick="SGE_RT.relatorio.renderHistorico()">Tentar Novamente</button>
+                </div>`;
+            return;
+        }
+
+        if (!res.relatorios?.length) {
             app.innerHTML = `
                 <div class="rt-empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
