@@ -213,15 +213,14 @@ SGE_RT.api = {
         const isGestao = SGE_RT.auth.currentUser?.accessLevel === 'gestao';
         const supervisorNome = SGE_RT.auth.currentUser?.nome;
 
-        // Build array of last 4 dates (local time) starting from `date`
-        const _localDate = (offsetDays) => {
+        // Last 4 days in local time
+        const dates = Array.from({ length: 4 }, (_, i) => {
             const d = new Date();
-            d.setDate(d.getDate() - offsetDays);
+            d.setDate(d.getDate() - i);
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        };
-        const dates = [_localDate(0), _localDate(1), _localDate(2), _localDate(3)];
+        });
 
-        const _mapRelatorios = (data) => data.map(r => ({
+        const _mapRelatorios = (rows) => rows.map(r => ({
             id: r.id,
             id_sequencial: r.id_sequencial,
             supervisor: r.supervisor_nome,
@@ -240,42 +239,33 @@ SGE_RT.api = {
             }))
         }));
 
-        const _queryForDate = (d) => {
-            let q = supabase.schema('gps_mec')
+        try {
+            // Single query for all 4 dates using .in()
+            let query = supabase.schema('gps_mec')
                 .from('relatorio_gps_mec_relatorios_turno')
                 .select('*, equipamentos:relatorio_gps_mec_relatorio_equipamentos(*)')
-                .eq('data', d)
+                .in('data', dates)
+                .order('data', { ascending: false })
                 .order('created_at', { ascending: false });
-            if (!isGestao && supervisorId) q = q.eq('supervisor_id', supervisorId);
-            return q;
-        };
 
-        try {
-            const results = await Promise.all(dates.map(d => _queryForDate(d)));
-            this.updateSyncBar(false);
-
-            const firstError = results.find(r => r.error)?.error;
-            if (firstError) return this._handleError(firstError, 'Carregar Histórico') || { success: false, relatorios: [] };
-
-            let allData = results.flatMap(r => r.data || []);
-
-            // Fallback: if supervisor_id filter returned nothing across all days, retry by supervisor_nome
-            if (allData.length === 0 && !isGestao && supervisorId && supervisorNome) {
-                this.updateSyncBar(true);
-                const fallbackResults = await Promise.all(dates.map(d =>
-                    supabase.schema('gps_mec')
-                        .from('relatorio_gps_mec_relatorios_turno')
-                        .select('*, equipamentos:relatorio_gps_mec_relatorio_equipamentos(*)')
-                        .eq('data', d)
-                        .eq('supervisor_nome', supervisorNome)
-                        .order('created_at', { ascending: false })
-                ));
-                this.updateSyncBar(false);
-                const fallbackData = fallbackResults.flatMap(r => r.data || []);
-                if (fallbackData.length > 0) allData = fallbackData;
+            // Non-gestao: filter by supervisor_id OR supervisor_nome to catch
+            // both reports saved with an id and older ones saved with null id.
+            if (!isGestao) {
+                if (supervisorId && supervisorNome) {
+                    query = query.or(`supervisor_id.eq.${supervisorId},supervisor_nome.eq."${supervisorNome.replace(/"/g, '\\"')}"`);
+                } else if (supervisorId) {
+                    query = query.eq('supervisor_id', supervisorId);
+                } else if (supervisorNome) {
+                    query = query.eq('supervisor_nome', supervisorNome);
+                }
             }
 
-            return { success: true, relatorios: _mapRelatorios(allData) };
+            const { data, error } = await query;
+            this.updateSyncBar(false);
+
+            if (error) return this._handleError(error, 'Carregar Histórico') || { success: false, relatorios: [] };
+
+            return { success: true, relatorios: _mapRelatorios(data || []) };
         } catch (e) {
             this.updateSyncBar(false);
             console.error('SGE_RT getRelatorios failed:', e);
