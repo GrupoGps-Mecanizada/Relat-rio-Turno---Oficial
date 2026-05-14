@@ -612,11 +612,13 @@ SGE_RT.relatorio = {
             const r = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
 
             const dateFmt = new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR');
-            const horario = (r.horario || '').replace(' as ', ' às ');
-            const letraSuffix = r.letraTurno ? ` (${r.letraTurno})` : '';
+            const horario = r.horario ? r.horario.replace(' as ', ' às ') : '—';
+            const turno = r.letraTurno ? `Turno ${r.letraTurno}` : '';
 
             let text = `*RELATÓRIO DE TURNO #${r.id_sequencial || 'S/N'}*\n`;
-            text += `[Dia: ${dateFmt} - Horario: ${horario} | Supervisor: ${r.supervisor || '—'}${letraSuffix}]`;
+            text += `Data: ${dateFmt}\n`;
+            text += `Horário: ${horario}\n`;
+            text += `Supervisor: ${r.supervisor || '—'}${turno ? ' | ' + turno : ''}`;
 
             r.equipamentosOperando.forEach((eq, idx) => {
                 const vagaLabel = eq.vaga ? ` (Vaga: ${eq.vaga})` : '';
@@ -630,7 +632,8 @@ SGE_RT.relatorio = {
 
                 if (eq.trocas?.length) {
                     eq.trocas.forEach(tr => {
-                        text += `⚠ Troca: ${tr.motivo}${tr.equipamentoNovo ? ' → ' + tr.equipamentoNovo : ''}\n`;
+                        const trocaHora = tr.dataHora ? tr.dataHora.slice(11, 16) : '';
+                        text += `⚠ Troca: ${tr.motivo}${trocaHora ? ' às ' + trocaHora : ''}${tr.equipamentoNovo ? ' → ' + tr.equipamentoNovo : ''}\n`;
                     });
                 }
             });
