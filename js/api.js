@@ -217,10 +217,7 @@ SGE_RT.api = {
                 .eq('data', date)
                 .order('created_at', { ascending: false });
 
-            // Supervisors only see their own reports
-            if (supervisorId && SGE_RT.auth.currentUser?.accessLevel !== 'gestao') {
-                query = query.eq('supervisor_id', supervisorId);
-            }
+            // All authenticated users can see all reports for the day
 
             const { data, error } = await query;
             this.updateSyncBar(false);
