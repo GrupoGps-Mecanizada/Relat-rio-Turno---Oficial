@@ -727,6 +727,62 @@
     flex-shrink: 0;
 }
 
+/* ── Date separator between history groups ──────────────────────────── */
+.rt-date-separator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 4px;
+    margin-top: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.rt-date-separator span:first-child {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+/* ── Edit mode banner ────────────────────────────────────────────────── */
+.rt-edit-mode-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: rgba(var(--accent-rgb, 59,130,246), 0.08);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+}
+
+/* ── Edit button on history card ─────────────────────────────────────── */
+.rt-edit-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 7px;
+    border: 1px solid var(--border-bright);
+    background: var(--bg-2);
+    color: var(--text-2);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    flex-shrink: 0;
+}
+
+.rt-edit-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+}
+
 /* ── Whatsapp action button ─────────────────────────────────────────── */
 .rt-whatsapp-btn {
     display: inline-flex;

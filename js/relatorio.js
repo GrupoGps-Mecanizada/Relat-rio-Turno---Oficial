@@ -106,22 +106,28 @@ SGE_RT.relatorio = {
                 return SGE_RT.helpers.toast('Preencha Vaga, Placa e Área em todos os itens (*)', 'error');
         }
 
-        if (!confirm('Confirmar o envio do relatório de turno?')) return;
+        const isEdicao = !!rel._editId;
+        const confirmMsg = isEdicao
+            ? `Confirmar as alterações no Relatório #${rel._editSeq || ''}?`
+            : 'Confirmar o envio do relatório de turno?';
+        if (!confirm(confirmMsg)) return;
 
         const saveBtn = document.getElementById('rt-save-btn');
         if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Salvando…'; }
 
-        const res = await SGE_RT.api.salvarRelatorio(rel);
+        const res = isEdicao
+            ? await SGE_RT.api.atualizarRelatorio(rel._editId, rel)
+            : await SGE_RT.api.salvarRelatorio(rel);
 
         if (saveBtn) { saveBtn.disabled = false; }
 
         if (res?.success) {
-            SGE_RT.helpers.toast('Relatório salvo com sucesso!', 'success');
+            SGE_RT.helpers.toast(isEdicao ? 'Relatório atualizado com sucesso!' : 'Relatório salvo com sucesso!', 'success');
             SGE_RT.state.currentRelatorio = null;
             SGE_RT.navigation.navigateTo('historico');
         } else {
             SGE_RT.helpers.toast('Erro ao salvar. Verifique sua conexão.', 'error');
-            if (saveBtn) saveBtn.textContent = 'Salvar Relatório';
+            if (saveBtn) saveBtn.textContent = isEdicao ? 'Salvar Alterações' : 'Salvar Relatório';
         }
     },
 
@@ -360,7 +366,16 @@ SGE_RT.relatorio = {
             `;
         }).join('');
 
+        const isEdicao = !!r._editId;
+
         app.innerHTML = `
+            ${isEdicao ? `
+            <div class="rt-edit-mode-banner">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:15px;height:15px;flex-shrink:0;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                Editando Relatório ${r._editSeq ? '#' + r._editSeq : ''}
+                <button class="rt-btn-cancel" style="margin-left:auto;padding:3px 10px;font-size:11px;" onclick="if(confirm('Cancelar edição e descartar alterações?')){ SGE_RT.state.currentRelatorio=null; SGE_RT.navigation.navigateTo('historico'); }">Cancelar Edição</button>
+            </div>` : ''}
+
             <!-- Info bar -->
             ${turnoInfo ? `
             <div class="rt-info-bar">
@@ -442,7 +457,7 @@ SGE_RT.relatorio = {
                 </button>
                 <button class="rt-btn-save" id="rt-save-btn" onclick="SGE_RT.relatorio.salvarRelatorio()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                    Salvar Relatório
+                    ${isEdicao ? 'Salvar Alterações' : 'Salvar Relatório'}
                 </button>
             </div>
         `;
@@ -454,9 +469,8 @@ SGE_RT.relatorio = {
         const app = this.els.historicoView;
         if (!app) return;
 
-        const date = new Date().toISOString().split('T')[0];
         const subEl = document.getElementById('historico-date-sub');
-        if (subEl) subEl.textContent = `Relatórios registrados em ${new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`;
+        if (subEl) subEl.textContent = 'Últimos 4 dias de relatórios';
 
         app.innerHTML = `
             <div class="rt-skeleton-cards">
@@ -466,7 +480,8 @@ SGE_RT.relatorio = {
             </div>`;
 
         const supervisorId = SGE_RT.auth.currentUser?.supervisor_id;
-        const res = await SGE_RT.api.getRelatorios(supervisorId, date);
+        const todayStr = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+        const res = await SGE_RT.api.getRelatorios(supervisorId, todayStr);
 
         if (!res?.success) {
             app.innerHTML = `
@@ -483,15 +498,32 @@ SGE_RT.relatorio = {
             app.innerHTML = `
                 <div class="rt-empty-state">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
-                    <h3>Sem Relatórios Hoje</h3>
-                    <p>Não há relatórios registrados para hoje. Inicie um novo turno na aba <strong>Novo Relatório</strong>.</p>
+                    <h3>Sem Relatórios</h3>
+                    <p>Não há relatórios registrados nos últimos 4 dias. Inicie um novo turno na aba <strong>Novo Relatório</strong>.</p>
                 </div>`;
             return;
         }
 
         SGE_RT.state.relatoriosHistorico = res.relatorios;
 
-        app.innerHTML = res.relatorios.map(r => {
+        // Group reports by date
+        const byDate = {};
+        res.relatorios.forEach(r => {
+            if (!byDate[r.data]) byDate[r.data] = [];
+            byDate[r.data].push(r);
+        });
+
+        const _dateLabel = (dateStr) => {
+            const d = new Date();
+            const today = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+            const yd = new Date(d); yd.setDate(d.getDate() - 1);
+            const yesterday = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+            if (dateStr === today) return 'Hoje';
+            if (dateStr === yesterday) return 'Ontem';
+            return new Date(dateStr + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
+        };
+
+        const _renderCard = (r) => {
             const equipRows = r.equipamentosOperando.map(eq => `
                 <div class="rt-historico-equip-row">
                     <span class="rt-equip-placa-badge">${this._esc(eq.vaga || eq.equipamento)}</span>
@@ -517,17 +549,62 @@ SGE_RT.relatorio = {
                             ${new Date(r.data + 'T12:00:00').toLocaleDateString('pt-BR')} · Supervisor: ${this._esc(r.supervisor)}
                         </div>
                     </div>
-                    <button class="rt-whatsapp-btn" onclick="SGE_RT.relatorio.copiarWhatsApp('${encData}')">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        Copiar
-                    </button>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button class="rt-edit-btn" onclick="SGE_RT.relatorio.carregarEdicao('${encData}')" title="Editar relatório">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Editar
+                        </button>
+                        <button class="rt-whatsapp-btn" onclick="SGE_RT.relatorio.copiarWhatsApp('${encData}')">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                            Copiar
+                        </button>
+                    </div>
                 </div>
                 <div class="rt-historico-body">
                     ${equipRows}
                     ${r.observacoes ? `<div style="margin-top:4px;padding:8px 12px;background:var(--bg-2);border-radius:6px;font-size:12px;color:var(--text-2);border-left:3px solid var(--accent);"><strong>Obs:</strong> ${this._esc(r.observacoes)}</div>` : ''}
                 </div>
             </div>`;
-        }).join('');
+        };
+
+        // Render grouped by date, most recent first
+        const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+        app.innerHTML = sortedDates.map(dateStr => `
+            <div class="rt-date-separator">
+                <span>${_dateLabel(dateStr)}</span>
+                <span style="font-size:11px;color:var(--text-3);">${byDate[dateStr].length} relatório${byDate[dateStr].length !== 1 ? 's' : ''}</span>
+            </div>
+            ${byDate[dateStr].map(r => _renderCard(r)).join('')}
+        `).join('');
+    },
+
+    carregarEdicao(encodedData) {
+        try {
+            const r = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+            SGE_RT.state.currentRelatorio = {
+                _editId: r.id,
+                _editSeq: r.id_sequencial,
+                supervisor: r.supervisor,
+                letraTurno: r.letraTurno,
+                horario: r.horario,
+                data: r.data,
+                observacoes: r.observacoes,
+                equipamentosOperando: r.equipamentosOperando.map(eq => ({
+                    _tempId: Date.now() + Math.random(),
+                    equipamento: eq.equipamento,
+                    tipo: eq.tipo,
+                    vaga: eq.vaga,
+                    area: eq.area,
+                    motorista: eq.motorista,
+                    operadores: Array.isArray(eq.operadores) ? [...eq.operadores] : [],
+                    trocas: Array.isArray(eq.trocas) ? [...eq.trocas] : []
+                }))
+            };
+            SGE_RT.navigation.navigateTo('novo');
+        } catch (e) {
+            SGE_RT.helpers.toast('Erro ao carregar relatório para edição', 'error');
+            console.error('carregarEdicao failed:', e);
+        }
     },
 
     copiarWhatsApp(encodedData) {
