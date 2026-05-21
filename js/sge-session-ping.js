@@ -91,6 +91,18 @@
         });
     }
 
+    // ── Atualiza badge de usuários online no topbar ──────────
+    function _updateOnlineBadge(presenceState) {
+        const badge = document.getElementById('online-users-badge');
+        const countEl = document.getElementById('online-users-count');
+        if (!badge || !countEl) return;
+
+        // presenceState is { key: [payload, ...], ... }
+        const count = Object.values(presenceState).reduce((n, arr) => n + arr.length, 0);
+        countEl.textContent = count;
+        badge.style.display = count > 0 ? 'flex' : 'none';
+    }
+
     // ── Início ───────────────────────────────────────────────
     let _retryCount = 0;
     const MAX_RETRIES = 3;
@@ -109,13 +121,12 @@
             return;
         }
 
-        // Reutiliza o cliente já inicializado ou cria um novo se a biblioteca estiver disponível
-        if (typeof window.supabase?.createClient === 'function') {
-            _supabase = window.supabase.createClient(SUPABASE_URL, ANON_KEY, {
-                realtime: { params: { eventsPerSecond: 5 } }
-            });
-        } else {
-            _supabase = window.supabase;
+        // Reutiliza o client Supabase já inicializado pelo supabase-config.js
+        // (window.supabase é a instância do client, não a library — não usar .createClient())
+        _supabase = window.supabase;
+        if (!_supabase || typeof _supabase.channel !== 'function') {
+            console.warn('[SGE Presence] Supabase client não disponível — abortando presença.');
+            return;
         }
 
         _payload = buildPayload(data, 'online');
@@ -123,6 +134,17 @@
         _channel = _supabase.channel(CHANNEL_NAME, {
             config: { presence: { key: data.sessionId } }
         });
+
+        _channel
+            .on('presence', { event: 'sync' }, () => {
+                _updateOnlineBadge(_channel.presenceState());
+            })
+            .on('presence', { event: 'join' }, () => {
+                _updateOnlineBadge(_channel.presenceState());
+            })
+            .on('presence', { event: 'leave' }, () => {
+                _updateOnlineBadge(_channel.presenceState());
+            });
 
         await _channel.subscribe(async (channelStatus) => {
             if (channelStatus === 'SUBSCRIBED') {
