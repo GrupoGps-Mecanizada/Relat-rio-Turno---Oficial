@@ -5,7 +5,7 @@
  */
 window.SGE_RT = window.SGE_RT || {};
 
-const SSO_APP_SLUG = 'relatorio_turno';
+const SSO_APP_SLUG = 'relatorio_turno_mec';
 const SSO_LOGIN_URL = 'https://grupogps-mecanizada.github.io/SGE-CENTRAL/sso_login.html';
 const SSO_REDIRECT_URL = () => window.location.origin + window.location.pathname;
 
@@ -228,7 +228,7 @@ SGE_RT.auth = {
             localStorage.setItem('sge_session_user_id', u?.id || '');
             localStorage.setItem('sge_session_user_name', u?.nome || 'Usuário SGE');
             localStorage.setItem('sge_session_user_email', u?.email || '');
-            localStorage.setItem('sge_session_app_slug', 'relatorio_turno');
+            localStorage.setItem('sge_session_app_slug', 'relatorio_turno_mec');
             localStorage.setItem('sge_session_app_name', 'Relatório de Turno');
         } catch (_) { }
         // Inicia presença no canal (resolve race condition com DOMContentLoaded)
