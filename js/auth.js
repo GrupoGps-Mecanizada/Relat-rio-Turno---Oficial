@@ -1,13 +1,16 @@
 'use strict';
 
 /**
- * SGE_RT — Authentication Module v2 (SSO Centralizado)
+ * SGE_RT — Login (via SGE.acesso do sge-core)
+ * Usa a sessão real do login da Central (Supabase Auth). Sem sessão, vai para o login da Central.
+ * Na dúvida (erro, rede), não entra.
  */
 window.SGE_RT = window.SGE_RT || {};
 
 const SSO_APP_SLUG = 'relatorio_turno_mec';
-const SSO_LOGIN_URL = 'https://grupogps-mecanizada.github.io/SGE-CENTRAL/sso_login.html';
-const SSO_REDIRECT_URL = () => window.location.origin + window.location.pathname;
+
+// Régua única → nomes antigos (ver "Régua única de acesso - especificação" no cofre).
+const PERFIL_POR_PAPEL = { ADMIN: 'ADM', GESTOR: 'GESTAO' };
 
 SGE_RT.auth = {
     currentUser: null,
@@ -27,66 +30,21 @@ SGE_RT.auth = {
     },
 
     async checkSession() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const ssoToken = urlParams.get('sso_token');
-
-        if (ssoToken) {
-            const parsed = this._parseSSOToken(ssoToken);
-            if (parsed) {
-                this._saveSSOSession(parsed, ssoToken);
-                history.replaceState(null, '', window.location.pathname);
-                await this._initFromSSOPayload(parsed);
-                return;
-            }
+        const core = window.SGECore;
+        if (!core || !core.acesso) {
+            // Sem o sge-core (falha ao baixar) não dá para conferir o login: não entra.
+            const statusEl = document.getElementById('loading-status');
+            if (statusEl) statusEl.textContent = 'Não consegui carregar o login. Confira a internet e recarregue a página.';
+            return;
         }
 
-        const storedToken = this._getStoredToken();
-        if (storedToken) {
-            const parsed = this._parseSSOToken(storedToken);
-            if (parsed && this._isTokenValid(parsed)) {
-                await this._initFromSSOPayload(parsed);
-                return;
-            }
-        }
-
-        if (window.supabase) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                await this._initFromSupabaseSession(session.user);
-                return;
-            }
-        }
-
-        this._redirectToSSO();
-    },
-
-    async _initFromSSOPayload(payload) {
-        const user = payload.user || {};
-        const accessToken = localStorage.getItem('sge_session_token');
-        if (accessToken && window.supabase) {
-            try {
-                await supabase.auth.setSession({
-                    access_token: accessToken,
-                    refresh_token: localStorage.getItem('sge_session_refresh_token') || accessToken
-                });
-            } catch (e) {
-                console.warn('SGE_RT Auth: Não foi possível setar sessão Supabase via SSO token:', e.message);
-            }
-        }
+        // Só continua se a pessoa estiver logada e tiver acesso a este sistema.
+        const r = await core.acesso.entrar(SSO_APP_SLUG);
         await this._buildCurrentUser({
-            id: user.id || '',
-            email: user.email || '',
-            nome: user.nome || user.email?.split('@')[0] || 'Usuário',
-            perfil: user.perfil || 'SUPERVISOR'
-        });
-    },
-
-    async _initFromSupabaseSession(supaUser) {
-        await this._buildCurrentUser({
-            id: supaUser.id,
-            email: supaUser.email || '',
-            nome: supaUser.user_metadata?.full_name || supaUser.email?.split('@')[0] || 'Usuário',
-            perfil: supaUser.user_metadata?.perfil || 'SUPERVISOR'
+            id: r.usuario.id,
+            email: r.usuario.email || '',
+            nome: r.usuario.nome,
+            perfil: PERFIL_POR_PAPEL[r.papel] || 'SUPERVISOR'
         });
     },
 
@@ -149,15 +107,9 @@ SGE_RT.auth = {
     },
 
     async logout() {
-        ['sge_session_token', 'sge_session_refresh_token', 'sge_session_id',
-            'sge_session_user_id', 'sge_session_user_name', 'sge_session_user_email',
-            'sge_session_app_slug', 'sge_session_app_name', 'sge_sso_token'].forEach(k => {
-                try { localStorage.removeItem(k); } catch (_) { }
-            });
-        if (window.supabase) { try { await supabase.auth.signOut(); } catch (_) { } }
         this.currentUser = null;
         if (SGE_RT.state) { SGE_RT.state.user = null; SGE_RT.state.dataLoaded = false; }
-        this._redirectToSSO();
+        window.SGECore.acesso.sair(SSO_APP_SLUG);
     },
 
     showApp() {
@@ -221,50 +173,7 @@ SGE_RT.auth = {
         }
 
         // ── Boot app ──────────────────────────────────────────────────────
+        // (o radar de presença da Central agora vem do sge-core)
         if (SGE_RT.app?.start) SGE_RT.app.start();
-
-        // ── Salvar chaves para sge-session-ping.js (Radar de Presença) ───
-        try {
-            localStorage.setItem('sge_session_user_id', u?.id || '');
-            localStorage.setItem('sge_session_user_name', u?.nome || 'Usuário SGE');
-            localStorage.setItem('sge_session_user_email', u?.email || '');
-            localStorage.setItem('sge_session_app_slug', 'relatorio_turno_mec');
-            localStorage.setItem('sge_session_app_name', 'Relatório de Turno');
-        } catch (_) { }
-        // Inicia presença no canal (resolve race condition com DOMContentLoaded)
-        if (window.SGE_SESSION_PING) window.SGE_SESSION_PING.start();
-    },
-
-    _parseSSOToken(token) {
-        try {
-            const parts = token.split('.');
-            if (parts.length < 2) return null;
-            return JSON.parse(atob(parts[1]));
-        } catch (e) { return null; }
-    },
-
-    _isTokenValid(payload) {
-        if (!payload?.exp) return false;
-        return payload.exp > Math.floor(Date.now() / 1000);
-    },
-
-    _saveSSOSession(payload, rawToken) {
-        try { localStorage.setItem('sge_sso_token', rawToken); } catch (_) { }
-    },
-
-    _getStoredToken() {
-        try { return localStorage.getItem('sge_sso_token') || null; } catch (_) { return null; }
-    },
-
-    _redirectToSSO() {
-        const redirectBack = encodeURIComponent(SSO_REDIRECT_URL());
-        const loginUrl = `${SSO_LOGIN_URL}?app_slug=${SSO_APP_SLUG}&redirect=${redirectBack}`;
-        const loadingEl = document.getElementById('loading-screen');
-        if (loadingEl) {
-            loadingEl.style.display = 'flex';
-            const statusEl = document.getElementById('loading-status');
-            if (statusEl) statusEl.textContent = 'Redirecionando para autenticação...';
-        }
-        setTimeout(() => { window.location.href = loginUrl; }, 400);
     }
 };
